@@ -1,0 +1,36 @@
+@host = https://localhost:7422
+@householdId = 3c57de8f-4221-4fa3-8157-a86d4448db3d
+@householdName = "My Household"
+@choreDisplayName = "Clean Eriks Room"
+@choreDescription = "Every Week"
+
+### Create Household
+post {{host}}/api/households
+Content-Type: application/json
+
+{
+    "householdId": "{{householdId}}",
+    "name": {{householdName}}
+}
+
+
+### Get Household Name
+get {{host}}/api/households/{{householdId}}
+
+
+### Add Chore
+post {{host}}/api/households/{{householdId}}/chores
+Content-Type: application/json
+
+{
+    "displayName": {{choreDisplayName}},
+    "description": {{choreDescription}}
+}
+
+### Get Chores 
+
+Get {{host}}/api/households/{{householdId}}/chores
+
+### Generate Invite
+post {{host}}/api/households/{{householdId}}/invite
+Content-Type: application/json

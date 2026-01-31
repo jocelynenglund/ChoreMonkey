@@ -1,0 +1,12 @@
+{
+  "streamVersion": 1,
+  "streamId": "household-3c57de8f-4221-4fa3-8157-a86d4448db3a",
+  "streamType": null,
+  "eventType": "HouseholdCreated",
+  "clrType": "ChoreMonkey.Events.HouseholdCreated, ChoreMonkey.Events, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+  "timestamp": "2026-01-31T11:29:46.7163479+00:00",
+  "data": {
+    "householdId": "3c57de8f-4221-4fa3-8157-a86d4448db3a",
+    "name": "My Household"
+  }
+}
