@@ -9,6 +9,7 @@ using ChoreMonkey.Core.Feature.AddChore;
 using ChoreMonkey.Core.Feature.ChoreList;
 using ChoreMonkey.Core.Feature.GenerateInvite;
 using ChoreMonkey.Core.Feature.InviteLink;
+using ChoreMonkey.Core.Feature.AccessHousehold;
 namespace ChoreMonkey.Core;
 
 public static class Initialization
@@ -27,6 +28,7 @@ public static class Initialization
         services.AddScoped<Feature.ChoreList.Handler>();
         services.AddScoped<Feature.GenerateInvite.Handler>();
         services.AddScoped<Feature.InviteLink.Handler>();
+        services.AddScoped<Feature.AccessHousehold.Handler>();
         return services;
     }
     public static  IEndpointRouteBuilder MapChoreMonkeyEndpoints(this IEndpointRouteBuilder app)
@@ -40,7 +42,8 @@ public static class Initialization
         ChoreListEndpoint.Map(householdEndpoints);
         GenerateInviteEndpoint.Map(householdEndpoints);
         InviteLinkEndpoint.Map(householdEndpoints);
-    
+        AccessHouseholdEndpoint.Map(householdEndpoints);
+
         return app;
     }
 

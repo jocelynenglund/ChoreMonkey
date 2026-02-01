@@ -10,7 +10,7 @@ using System.Text;
 namespace ChoreMonkey.Core.Feature.HouseholdName;
 
 public record HouseholdNameQuery(Guid HouseholdId);
-public record HouseholdNameResponse(Guid HouseholdId, string HousholdName);
+public record HouseholdNameResponse(Guid HouseholdId, string HouseholdName);
 
 internal class Handler(IEventStore store)
 {

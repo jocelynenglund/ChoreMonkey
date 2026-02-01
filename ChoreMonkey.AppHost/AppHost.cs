@@ -3,10 +3,7 @@ var builder = DistributedApplication.CreateBuilder(args);
 var apiService = builder.AddProject<Projects.ChoreMonkey_ApiService>("apiservice")
     .WithHttpHealthCheck("/health");
 
-builder.AddProject<Projects.ChoreMonkey_Web>("webfrontend")
-    .WithExternalHttpEndpoints()
-    .WithHttpHealthCheck("/health")
-    .WithReference(apiService)
-    .WaitFor(apiService);
+var webApp = builder.AddNpmApp("web", "../nestle-together", "dev")
+    .WithEnvironment("VITE_API_URL", apiService.GetEndpoint("http"));
 
 builder.Build().Run();

@@ -1,4 +1,5 @@
 ﻿using ChoreMonkey.Core.Domain;
+using ChoreMonkey.Core.Security;
 using ChoreMonkey.Events;
 using FileEventStore;
 using Microsoft.AspNetCore.Routing;
@@ -8,14 +9,15 @@ using Microsoft.AspNetCore.Http;
 namespace ChoreMonkey.Core.Feature.CreateHousehold;
 
 
-public record CreateHouseholdCommand(Guid HouseholdId, string Name);
+public record CreateHouseholdCommand(Guid HouseholdId, string Name, int PinCode);
 
 internal class Handler(IEventStore store)
 {
 
     public async Task HandleAsync(CreateHouseholdCommand request)
     {
-        await store.AppendAsync(HouseholdAggregate.StreamId(request.HouseholdId), new HouseholdCreated(request.HouseholdId, request.Name), ExpectedVersion.None);
+        var pinHash = PinHasher.HashPin(request.PinCode);
+        await store.AppendAsync(HouseholdAggregate.StreamId(request.HouseholdId), new HouseholdCreated(request.HouseholdId, request.Name, pinHash), ExpectedVersion.None);
     }
 }
 internal static class CreateHouseholdEndpoint

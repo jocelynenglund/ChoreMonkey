@@ -12,11 +12,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ChoreMonkey.ApiService\ChoreMonkey.ApiService.csproj" />
-    <ProjectReference Include="..\ChoreMonkey.Web\ChoreMonkey.Web.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.AppHost" Version="9.5.0" />
+	<PackageReference Include="Aspire.Hosting.NodeJs" Version="9.5.2" />
   </ItemGroup>
 
 </Project>

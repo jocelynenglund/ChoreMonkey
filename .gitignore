@@ -37,6 +37,9 @@ TestResults/
 # Sample app data (runtime files)
 /samples/SampleApp/data/
 
+# API service data (event store files)
+**/data/streams/
+
 # Ignore all claude.md files
 **/claude.md
 claude.md
