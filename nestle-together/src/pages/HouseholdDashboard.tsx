@@ -95,10 +95,10 @@ export default function HouseholdDashboard() {
   
   // Split pending: my chores vs others
   const myChores = pendingChores.filter(
-    (c) => c.assignedTo?.includes(currentMemberId || '') && !c.assignedToAll
+    (c) => c.assignedToAll || c.assignedTo?.includes(currentMemberId || '')
   );
   const otherChores = pendingChores.filter(
-    (c) => !c.assignedTo?.includes(currentMemberId || '') || c.assignedToAll
+    (c) => !c.assignedToAll && !c.assignedTo?.includes(currentMemberId || '')
   );
 
   const handleAddChore = async (displayName: string, description: string, frequency?: ChoreFrequency, isOptional?: boolean) => {
