@@ -3,11 +3,12 @@ import { cn } from '@/lib/utils';
 interface MemberAvatarProps {
   nickname: string;
   color: string;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'xs' | 'sm' | 'md' | 'lg';
   className?: string;
 }
 
 const sizeClasses = {
+  xs: 'w-5 h-5 text-[8px]',
   sm: 'w-8 h-8 text-xs',
   md: 'w-10 h-10 text-sm',
   lg: 'w-14 h-14 text-lg',

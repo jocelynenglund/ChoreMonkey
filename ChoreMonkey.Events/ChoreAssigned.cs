@@ -3,5 +3,6 @@ namespace ChoreMonkey.Events;
 public record ChoreAssigned(
     Guid ChoreId,
     Guid HouseholdId,
-    Guid? AssignedToMemberId
+    Guid[]? AssignedToMemberIds = null,
+    bool AssignToAll = false
 ) : EventBase;

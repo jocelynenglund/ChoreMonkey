@@ -19,17 +19,25 @@ export interface ChoreFrequency {
   intervalDays?: number; // For interval: every X days
 }
 
+export interface MemberCompletion {
+  memberId: string;
+  completedToday: boolean;
+  lastCompletedAt?: Date;
+}
+
 export interface Chore {
   id: string;
   householdId: string;
   displayName: string;
   description: string;
-  assignedTo?: string;
+  assignedTo?: string[];
+  assignedToAll?: boolean;
   completed: boolean;
   createdAt: Date;
   frequency?: ChoreFrequency;
   lastCompletedAt?: Date;
   lastCompletedBy?: string;
+  memberCompletions?: MemberCompletion[];
 }
 
 export interface Invite {
