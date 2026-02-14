@@ -11,6 +11,7 @@ import { MemberAvatar } from '@/components/MemberAvatar';
 import { OverdueAccordion } from '@/components/OverdueAccordion';
 import { CompletionTimeline } from '@/components/CompletionTimeline';
 import { SettingsDialog } from '@/components/SettingsDialog';
+import { MyChoresSection } from '@/components/MyChoresSection';
 import type { Household, Chore, ChoreFrequency } from '@/types/household';
 
 export default function HouseholdDashboard() {
@@ -19,6 +20,7 @@ export default function HouseholdDashboard() {
   const [chores, setChores] = useState<Chore[]>([]);
   const [isDataLoading, setIsDataLoading] = useState(true);
   const [completingChore, setCompletingChore] = useState<Chore | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const {
     isAuthenticated,
@@ -52,7 +54,6 @@ export default function HouseholdDashboard() {
       ]);
 
       setHousehold(fetchedHousehold);
-      console.log('Fetched chores:', fetchedChores);
       setChores(fetchedChores);
       setIsDataLoading(false);
     };
@@ -82,43 +83,22 @@ export default function HouseholdDashboard() {
     return <Navigate to="/" replace />;
   }
 
-  // Helper: check if I've completed this chore in the current period
-  const isCompletedByMe = (chore: Chore): boolean => {
-    if (chore.completed) return true; // One-time chore done
-    const myCompletion = chore.memberCompletions?.find(mc => mc.memberId === currentMemberId);
-    if (!myCompletion) return false;
-    
-    const freqType = chore.frequency?.type || 'once';
-    const hasNoDays = !chore.frequency?.days?.length;
-    
-    // Weekly with no specific days = weekly-anyday
-    if (freqType === 'weekly' && hasNoDays) {
-      return myCompletion.completedThisWeek;
-    }
-    // Daily or weekly with specific days: check today
-    return myCompletion.completedToday;
-  };
-
   // Is this chore assigned to me?
   const isAssignedToMe = (chore: Chore): boolean => {
     return chore.assignedToAll || (chore.assignedTo?.includes(currentMemberId || '') ?? false);
   };
 
-  // My chores: assigned to me, split by completion status
-  const allMyChores = chores.filter((c) => !c.isOptional && isAssignedToMe(c));
-  const myPendingChores = allMyChores.filter((c) => !isCompletedByMe(c));
-  const myCompletedChores = allMyChores.filter((c) => isCompletedByMe(c));
-
-  // Other chores: not assigned to me (excluding bonus/optional)
+  // Other chores: not assigned to me, not optional, not completed
   const otherChores = chores.filter((c) => !c.isOptional && !isAssignedToMe(c) && !c.completed);
   
-  // Bonus chores
+  // Bonus chores: optional and not completed
   const bonusChores = chores.filter((c) => c.isOptional && !c.completed);
 
   const handleAddChore = async (displayName: string, description: string, frequency?: ChoreFrequency, isOptional?: boolean, startDate?: Date) => {
     const newChore = await addChore(household.id, displayName, description, frequency, isOptional, startDate);
     if (newChore) {
       setChores((prev) => [...prev, newChore]);
+      setRefreshKey((k) => k + 1); // Refresh MyChoresSection
     }
   };
 
@@ -128,10 +108,16 @@ export default function HouseholdDashboard() {
     // Refresh chores to get updated lastCompletedAt
     const updatedChores = await getHouseholdChores(household.id);
     setChores(updatedChores);
+    setRefreshKey((k) => k + 1); // Refresh MyChoresSection
   };
 
-  const openCompleteDialog = (chore: Chore) => {
-    setCompletingChore(chore);
+  const openCompleteDialog = (choreOrId: Chore | string) => {
+    if (typeof choreOrId === 'string') {
+      const chore = chores.find((c) => c.id === choreOrId);
+      if (chore) setCompletingChore(chore);
+    } else {
+      setCompletingChore(choreOrId);
+    }
   };
 
   const handleAssignChore = async (choreId: string, memberIds?: string[], assignToAll?: boolean) => {
@@ -140,6 +126,7 @@ export default function HouseholdDashboard() {
     setChores((prev) =>
       prev.map((c) => (c.id === choreId ? { ...c, assignedTo: memberIds, assignedToAll: assignToAll } : c))
     );
+    setRefreshKey((k) => k + 1); // Refresh MyChoresSection
   };
 
   const handleDeleteChore = async (choreId: string) => {
@@ -147,6 +134,7 @@ export default function HouseholdDashboard() {
     const success = await deleteChore(household.id, choreId);
     if (success) {
       setChores((prev) => prev.filter((c) => c.id !== choreId));
+      setRefreshKey((k) => k + 1); // Refresh MyChoresSection
     }
   };
 
@@ -226,136 +214,83 @@ export default function HouseholdDashboard() {
           </div>
         </div>
 
-        {/* Overdue Chores Accordion */}
+        {/* Admin: Overdue Chores (all members) */}
         <div className="mb-6">
           <OverdueAccordion householdId={household.id} />
         </div>
 
-        {/* Chores Section */}
+        {/* My Chores Section Header */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <ClipboardList className="w-5 h-5 text-primary" />
-            <h2 className="font-bold text-lg">Chores</h2>
-            <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-sm font-medium">
-              {myPendingChores.length}
-            </span>
+            <h2 className="font-bold text-lg">My Chores</h2>
           </div>
           <AddChoreDialog onAdd={handleAddChore} />
         </div>
 
-        {/* Chores List */}
-        {chores.length === 0 ? (
-          <div className="card-elevated p-12 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
-              <ClipboardList className="w-8 h-8 text-muted-foreground" />
+        {/* My Chores - Personal Read Model */}
+        {currentMemberId && (
+          <MyChoresSection
+            key={refreshKey}
+            householdId={household.id}
+            memberId={currentMemberId}
+            onCompleteChore={openCompleteDialog}
+          />
+        )}
+
+        {/* Other Chores (not assigned to me) */}
+        {otherChores.length > 0 && (
+          <div className="mt-8">
+            <div className="flex items-center gap-2 mb-3">
+              <h3 className="font-semibold text-muted-foreground">📋 Other Chores</h3>
+              <span className="px-2 py-0.5 rounded-full bg-muted text-muted-foreground text-xs font-medium">
+                {otherChores.length}
+              </span>
             </div>
-            <h3 className="font-semibold text-lg mb-2">No chores yet!</h3>
-            <p className="text-muted-foreground mb-6">
-              Add your first chore to get started.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {/* My Pending Chores */}
-            {myPendingChores.length > 0 && (
-              <>
-                <div className="flex items-center gap-2 mb-2">
-                  <h3 className="font-semibold text-primary">📌 My Chores</h3>
-                  <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium">
-                    {myPendingChores.length}
-                  </span>
-                </div>
-                {myPendingChores.map((chore) => (
-                  <ChoreCard
-                    key={chore.id}
-                    chore={chore}
-                    members={members}
-                    currentMemberId={currentMemberId || undefined}
-                    isAdmin={isAdmin}
-                    onComplete={() => openCompleteDialog(chore)}
-                    onAssign={(memberIds, assignToAll) => handleAssignChore(chore.id, memberIds, assignToAll)}
-                    onDelete={() => handleDeleteChore(chore.id)}
-                  />
-                ))}
-              </>
-            )}
-
-            {/* My Completed Chores */}
-            {myCompletedChores.length > 0 && (
-              <>
-                <div className="flex items-center gap-2 mt-4 mb-2">
-                  <h3 className="font-semibold text-success">✅ My Completed</h3>
-                  <span className="px-2 py-0.5 rounded-full bg-success/10 text-success text-xs font-medium">
-                    {myCompletedChores.length}
-                  </span>
-                </div>
-                {myCompletedChores.map((chore) => (
-                  <ChoreCard
-                    key={chore.id}
-                    chore={chore}
-                    members={members}
-                    currentMemberId={currentMemberId || undefined}
-                    isAdmin={isAdmin}
-                    onComplete={() => openCompleteDialog(chore)}
-                    onAssign={(memberIds, assignToAll) => handleAssignChore(chore.id, memberIds, assignToAll)}
-                    onDelete={() => handleDeleteChore(chore.id)}
-                  />
-                ))}
-              </>
-            )}
-
-            {/* Other Chores */}
-            {otherChores.length > 0 && (
-              <>
-                <div className="flex items-center gap-2 mt-6 mb-2">
-                  <h3 className="font-semibold text-muted-foreground">📋 Other Chores</h3>
-                  <span className="px-2 py-0.5 rounded-full bg-muted text-muted-foreground text-xs font-medium">
-                    {otherChores.length}
-                  </span>
-                </div>
-                {otherChores.map((chore) => (
-                  <ChoreCard
-                    key={chore.id}
-                    chore={chore}
-                    members={members}
-                    currentMemberId={currentMemberId || undefined}
-                    isAdmin={isAdmin}
-                    onComplete={() => openCompleteDialog(chore)}
-                    onAssign={(memberIds, assignToAll) => handleAssignChore(chore.id, memberIds, assignToAll)}
-                    onDelete={() => handleDeleteChore(chore.id)}
-                  />
-                ))}
-              </>
-            )}
-
-            {/* Bonus Chores */}
-            {bonusChores.length > 0 && (
-              <>
-                <div className="flex items-center gap-2 mt-6 mb-3">
-                  <h3 className="font-semibold text-amber-600">🌟 Bonus Chores</h3>
-                  <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-xs font-medium">
-                    {bonusChores.length}
-                  </span>
-                </div>
-                {bonusChores.map((chore) => (
-                  <ChoreCard
-                    key={chore.id}
-                    chore={chore}
-                    members={members}
-                    currentMemberId={currentMemberId || undefined}
-                    isAdmin={isAdmin}
-                    onComplete={() => openCompleteDialog(chore)}
-                    onAssign={(memberIds, assignToAll) => handleAssignChore(chore.id, memberIds, assignToAll)}
-                    onDelete={() => handleDeleteChore(chore.id)}
-                  />
-                ))}
-              </>
-            )}
-
+            <div className="space-y-3">
+              {otherChores.map((chore) => (
+                <ChoreCard
+                  key={chore.id}
+                  chore={chore}
+                  members={members}
+                  currentMemberId={currentMemberId || undefined}
+                  isAdmin={isAdmin}
+                  onComplete={() => openCompleteDialog(chore)}
+                  onAssign={(memberIds, assignToAll) => handleAssignChore(chore.id, memberIds, assignToAll)}
+                  onDelete={() => handleDeleteChore(chore.id)}
+                />
+              ))}
+            </div>
           </div>
         )}
 
-        {/* Recent Activity Timeline - moved to bottom */}
+        {/* Bonus Chores */}
+        {bonusChores.length > 0 && (
+          <div className="mt-8">
+            <div className="flex items-center gap-2 mb-3">
+              <h3 className="font-semibold text-amber-600">🌟 Bonus Chores</h3>
+              <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-xs font-medium">
+                {bonusChores.length}
+              </span>
+            </div>
+            <div className="space-y-3">
+              {bonusChores.map((chore) => (
+                <ChoreCard
+                  key={chore.id}
+                  chore={chore}
+                  members={members}
+                  currentMemberId={currentMemberId || undefined}
+                  isAdmin={isAdmin}
+                  onComplete={() => openCompleteDialog(chore)}
+                  onAssign={(memberIds, assignToAll) => handleAssignChore(chore.id, memberIds, assignToAll)}
+                  onDelete={() => handleDeleteChore(chore.id)}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Recent Activity Timeline */}
         <div className="mt-8">
           <CompletionTimeline householdId={household.id} />
         </div>
