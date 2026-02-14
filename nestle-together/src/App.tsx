@@ -22,7 +22,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/create" element={<CreateHousehold />} />
           <Route path="/join" element={<JoinHousehold />} />
-          <Route path="/join/:inviteCode" element={<JoinHousehold />} />
+          <Route path="/join/:householdId/:inviteId" element={<JoinHousehold />} />
           <Route path="/access/:id" element={<AccessHousehold />} />
           <Route path="/household/:id" element={<HouseholdDashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

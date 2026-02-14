@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FileEventStore" Version="1.0.6" />
+    <ProjectReference Include="..\..\FileBasedEventStore\src\FileEventStore\FileEventStore.csproj" />
   </ItemGroup>
 
 </Project>

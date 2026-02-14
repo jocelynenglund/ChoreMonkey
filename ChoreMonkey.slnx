@@ -5,4 +5,5 @@
   <Project Path="ChoreMonkey.Events/ChoreMonkey.Events.csproj" />
   <Project Path="ChoreMonkey.ServiceDefaults/ChoreMonkey.ServiceDefaults.csproj" />
   <Project Path="ChoreMonkey.Tests/ChoreMonkey.Tests.csproj" />
+  <Project Path="ChoreMonkey.IntegrationTests/ChoreMonkey.IntegrationTests.csproj" />
 </Solution>

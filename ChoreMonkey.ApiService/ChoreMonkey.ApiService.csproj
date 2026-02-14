@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="ChoreMonkey.IntegrationTests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\ChoreMonkey.Core\ChoreMonkey.Core.csproj" />
     <ProjectReference Include="..\ChoreMonkey.ServiceDefaults\ChoreMonkey.ServiceDefaults.csproj" />
   </ItemGroup>

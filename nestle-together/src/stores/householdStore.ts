@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Household, Member, Chore, Invite } from '@/types/household';
+import type { Household, Member, Chore, Invite, ChoreFrequency } from '@/types/household';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7422';
 
@@ -16,13 +16,14 @@ interface HouseholdState {
   error: string | null;
 
   // Commands (now async)
-  createHousehold: (name: string, pinCode: string) => Promise<Household | null>;
-  addChore: (householdId: string, displayName: string, description: string) => Promise<Chore | null>;
+  createHousehold: (name: string, pinCode: string, ownerNickname?: string) => Promise<Household | null>;
+  addChore: (householdId: string, displayName: string, description: string, frequency?: ChoreFrequency) => Promise<Chore | null>;
   generateInvite: (householdId: string) => Promise<Invite | null>;
-  joinHousehold: (inviteId: string, nickname: string) => Member | null;
+  joinHousehold: (householdId: string, inviteId: string, nickname: string) => Promise<Member | null>;
   accessHousehold: (householdId: string, pinCode: string) => Promise<boolean>;
   toggleChoreComplete: (choreId: string) => void;
-  assignChore: (choreId: string, memberId: string | undefined) => void;
+  completeChore: (householdId: string, choreId: string, memberId: string, completedAt?: Date) => Promise<void>;
+  assignChore: (householdId: string, choreId: string, memberId: string | undefined) => Promise<void>;
   deleteChore: (choreId: string) => void;
   setCurrentMember: (memberId: string) => void;
   logout: () => void;
@@ -35,6 +36,7 @@ interface HouseholdState {
   // Queries (fetch from API)
   getHousehold: (id: string) => Promise<Household | null>;
   getHouseholdChores: (householdId: string) => Promise<Chore[]>;
+  fetchHouseholdMembers: (householdId: string) => Promise<Member[]>;
 
   // Local getters (for cached data)
   getHouseholdMembers: (householdId: string) => Member[];
@@ -63,20 +65,24 @@ export const useHouseholdStore = create<HouseholdState>()(
       isLoading: false,
       error: null,
 
-      createHousehold: async (name, pinCode) => {
-        const householdId = crypto.randomUUID();
+      createHousehold: async (name, pinCode, ownerNickname = 'Admin') => {
         set({ isLoading: true, error: null });
 
         try {
           const response = await fetch(`${API_BASE_URL}/api/households`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ householdId, name, pinCode: parseInt(pinCode, 10) }),
+            body: JSON.stringify({ name, pinCode: parseInt(pinCode, 10), ownerNickname }),
           });
 
           if (!response.ok) {
             throw new Error('Failed to create household');
           }
+
+          const data = await response.json();
+          // API returns { householdId, memberId, name }
+          const householdId = data.householdId;
+          const memberId = data.memberId;
 
           const household: Household = {
             id: householdId,
@@ -86,9 +92,9 @@ export const useHouseholdStore = create<HouseholdState>()(
           };
 
           const member: Member = {
-            id: crypto.randomUUID(),
+            id: memberId,
             householdId: household.id,
-            nickname: 'Admin',
+            nickname: ownerNickname,
             avatarColor: AVATAR_COLORS[0],
             joinedAt: new Date(),
           };
@@ -109,14 +115,23 @@ export const useHouseholdStore = create<HouseholdState>()(
         }
       },
 
-      addChore: async (householdId, displayName, description) => {
+      addChore: async (householdId, displayName, description, frequency) => {
         set({ isLoading: true, error: null });
 
         try {
+          const body: Record<string, unknown> = { displayName, description };
+          if (frequency) {
+            body.frequency = {
+              type: frequency.type,
+              days: frequency.days,
+              intervalDays: frequency.intervalDays,
+            };
+          }
+
           const response = await fetch(`${API_BASE_URL}/api/households/${householdId}/chores`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ displayName, description }),
+            body: JSON.stringify(body),
           });
 
           if (!response.ok) {
@@ -130,6 +145,7 @@ export const useHouseholdStore = create<HouseholdState>()(
             description,
             completed: false,
             createdAt: new Date(),
+            frequency: frequency || { type: 'once' },
           };
 
           set((state) => ({
@@ -156,11 +172,17 @@ export const useHouseholdStore = create<HouseholdState>()(
             throw new Error('Failed to generate invite');
           }
 
-          const inviteId = Math.random().toString(36).substring(2, 8).toUpperCase();
+          const data = await response.json();
+          // API returns { householdId, inviteId, link }
+          // Link from API is relative path like /join/{householdId}/{inviteId}
+          const fullLink = data.link?.startsWith('http') 
+            ? data.link 
+            : `${window.location.origin}${data.link || `/join/${data.householdId}/${data.inviteId}`}`;
+          
           const invite: Invite = {
-            id: inviteId,
-            householdId,
-            link: `${window.location.origin}/join/${inviteId}`,
+            id: data.inviteId,
+            householdId: data.householdId || householdId,
+            link: fullLink,
             createdAt: new Date(),
             expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
           };
@@ -177,30 +199,47 @@ export const useHouseholdStore = create<HouseholdState>()(
         }
       },
 
-      joinHousehold: (inviteId, nickname) => {
-        const invite = get().invites.find((i) => i.id === inviteId);
-        if (!invite) return null;
+      joinHousehold: async (householdId, inviteId, nickname) => {
+        set({ isLoading: true, error: null });
 
-        const existingMembers = get().members.filter(
-          (m) => m.householdId === invite.householdId
-        );
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/households/${householdId}/join`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ inviteId, nickname }),
+          });
 
-        const member: Member = {
-          id: crypto.randomUUID(),
-          householdId: invite.householdId,
-          nickname,
-          avatarColor: AVATAR_COLORS[existingMembers.length % AVATAR_COLORS.length],
-          joinedAt: new Date(),
-        };
+          if (!response.ok) {
+            throw new Error('Failed to join household');
+          }
 
-        set((state) => ({
-          members: [...state.members, member],
-          currentHouseholdId: invite.householdId,
-          currentMemberId: member.id,
-          isAuthenticated: true,
-        }));
+          const data = await response.json();
+          // API returns { memberId, householdId, nickname }
+          const existingMembers = get().members.filter(
+            (m) => m.householdId === householdId
+          );
 
-        return member;
+          const member: Member = {
+            id: data.memberId,
+            householdId: householdId,
+            nickname: data.nickname || nickname,
+            avatarColor: AVATAR_COLORS[existingMembers.length % AVATAR_COLORS.length],
+            joinedAt: new Date(),
+          };
+
+          set((state) => ({
+            members: [...state.members, member],
+            currentHouseholdId: householdId,
+            currentMemberId: member.id,
+            isAuthenticated: true,
+            isLoading: false,
+          }));
+
+          return member;
+        } catch (error) {
+          set({ isLoading: false, error: (error as Error).message });
+          return null;
+        }
       },
 
       accessHousehold: async (householdId, pinCode) => {
@@ -241,12 +280,60 @@ export const useHouseholdStore = create<HouseholdState>()(
         }));
       },
 
-      assignChore: (choreId, memberId) => {
-        set((state) => ({
-          chores: state.chores.map((c) =>
-            c.id === choreId ? { ...c, assignedTo: memberId } : c
-          ),
-        }));
+      completeChore: async (householdId, choreId, memberId, completedAt) => {
+        try {
+          const body: Record<string, unknown> = { memberId };
+          if (completedAt) {
+            body.completedAt = completedAt.toISOString();
+          }
+
+          const response = await fetch(
+            `${API_BASE_URL}/api/households/${householdId}/chores/${choreId}/complete`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(body),
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error('Failed to complete chore');
+          }
+
+          const data = await response.json();
+          
+          set((state) => ({
+            chores: state.chores.map((c) =>
+              c.id === choreId
+                ? {
+                    ...c,
+                    lastCompletedAt: new Date(data.completedAt),
+                    lastCompletedBy: data.completedBy,
+                  }
+                : c
+            ),
+          }));
+        } catch (error) {
+          console.error('Failed to complete chore', error);
+        }
+      },
+
+      assignChore: async (householdId, choreId, memberId) => {
+        try {
+          await fetch(`${API_BASE_URL}/api/households/${householdId}/chores/${choreId}/assign`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ memberId: memberId || null }),
+          });
+
+          set((state) => ({
+            chores: state.chores.map((c) =>
+              c.id === choreId ? { ...c, assignedTo: memberId } : c
+            ),
+          }));
+        } catch (error) {
+          console.error('Failed to assign chore', error);
+        }
       },
 
       deleteChore: (choreId) => {
@@ -324,6 +411,9 @@ export const useHouseholdStore = create<HouseholdState>()(
             assignedTo: c.assignedTo as string | undefined,
             completed: (c.completed ?? false) as boolean,
             createdAt: c.createdAt ? new Date(c.createdAt as string) : new Date(),
+            frequency: c.frequency as ChoreFrequency | undefined,
+            lastCompletedAt: c.lastCompletedAt ? new Date(c.lastCompletedAt as string) : undefined,
+            lastCompletedBy: c.lastCompletedBy as string | undefined,
           }));
           set((state) => ({
             chores: [
@@ -369,6 +459,43 @@ export const useHouseholdStore = create<HouseholdState>()(
       getHousehold: (id) => get().fetchHousehold(id),
 
       getHouseholdChores: (householdId) => get().fetchHouseholdChores(householdId),
+
+      fetchHouseholdMembers: async (householdId) => {
+        set({ isLoading: true, error: null });
+
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/households/${householdId}/members`);
+
+          if (!response.ok) {
+            throw new Error('Failed to fetch members');
+          }
+
+          const data = await response.json();
+          // API returns { members: [...] } or direct array
+          const memberArray = Array.isArray(data) ? data : (data.members ?? []);
+          // Map API response to frontend type
+          const members: Member[] = memberArray.map((m: Record<string, unknown>, index: number) => ({
+            id: (m.memberId ?? m.id) as string,
+            householdId: householdId,
+            nickname: m.nickname as string,
+            avatarColor: AVATAR_COLORS[index % AVATAR_COLORS.length],
+            joinedAt: m.joinedAt ? new Date(m.joinedAt as string) : new Date(),
+          }));
+
+          set((state) => ({
+            members: [
+              ...state.members.filter((m) => m.householdId !== householdId),
+              ...members,
+            ],
+            isLoading: false,
+          }));
+
+          return members;
+        } catch (error) {
+          set({ isLoading: false, error: (error as Error).message });
+          return [];
+        }
+      },
 
       getHouseholdMembers: (householdId) =>
         get().members.filter((m) => m.householdId === householdId),
