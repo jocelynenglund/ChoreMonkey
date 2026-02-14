@@ -138,7 +138,7 @@ public class ChoreCompletionTests(ApiFixture fixture)
         Guid ChoreId, 
         string DisplayName, 
         string Description, 
-        Guid? AssignedTo,
+        Guid[]? AssignedTo,
         DateTime? LastCompletedAt,
         Guid? LastCompletedBy);
     private record CompleteChoreResponse(Guid ChoreId, Guid CompletedBy, DateTime CompletedAt);
