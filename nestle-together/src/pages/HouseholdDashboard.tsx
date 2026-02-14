@@ -80,22 +80,8 @@ export default function HouseholdDashboard() {
   }
 
   const completedChores = chores.filter((c) => c.completed);
-  const pendingChores = chores.filter((c) => !c.completed);
-  
-  // Split pending chores into sections
-  const myChores = pendingChores.filter(
-    (c) => !c.isOptional && c.assignedTo?.includes(currentMemberId || '') && !c.assignedToAll
-  );
-  const everyoneChores = pendingChores.filter(
-    (c) => !c.isOptional && c.assignedToAll
-  );
-  const othersChores = pendingChores.filter(
-    (c) => !c.isOptional && c.assignedTo?.length && !c.assignedTo.includes(currentMemberId || '') && !c.assignedToAll
-  );
-  const unassignedChores = pendingChores.filter(
-    (c) => !c.isOptional && !c.assignedTo?.length && !c.assignedToAll
-  );
-  const bonusChores = pendingChores.filter((c) => c.isOptional);
+  const pendingChores = chores.filter((c) => !c.completed && !c.isOptional);
+  const bonusChores = chores.filter((c) => !c.completed && c.isOptional);
 
   const handleAddChore = async (displayName: string, description: string, frequency?: ChoreFrequency, isOptional?: boolean) => {
     const newChore = await addChore(household.id, displayName, description, frequency, isOptional);
@@ -220,7 +206,7 @@ export default function HouseholdDashboard() {
           <AddChoreDialog onAdd={handleAddChore} />
         </div>
 
-        {/* Chores by Section */}
+        {/* Chores List */}
         {chores.length === 0 ? (
           <div className="card-elevated p-12 text-center">
             <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
@@ -232,111 +218,29 @@ export default function HouseholdDashboard() {
             </p>
           </div>
         ) : (
-          <div className="space-y-6">
-            {/* My Chores */}
-            {myChores.length > 0 && (
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-semibold text-muted-foreground">✅ My Chores</h3>
-                  <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium">
-                    {myChores.length}
-                  </span>
-                </div>
-                {myChores.map((chore) => (
-                  <ChoreCard
-                    key={chore.id}
-                    chore={chore}
-                    members={members}
-                    currentMemberId={currentMemberId || undefined}
-                    onComplete={() => openCompleteDialog(chore)}
-                    onAssign={(memberIds, assignToAll) => handleAssignChore(chore.id, memberIds, assignToAll)}
-                    onDelete={() => handleDeleteChore(chore.id)}
-                  />
-                ))}
-              </div>
-            )}
-
-            {/* Everyone's Chores */}
-            {everyoneChores.length > 0 && (
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-semibold text-muted-foreground">👥 Everyone's Chores</h3>
-                  <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs font-medium">
-                    {everyoneChores.length}
-                  </span>
-                </div>
-                {everyoneChores.map((chore) => (
-                  <ChoreCard
-                    key={chore.id}
-                    chore={chore}
-                    members={members}
-                    currentMemberId={currentMemberId || undefined}
-                    onComplete={() => openCompleteDialog(chore)}
-                    onAssign={(memberIds, assignToAll) => handleAssignChore(chore.id, memberIds, assignToAll)}
-                    onDelete={() => handleDeleteChore(chore.id)}
-                  />
-                ))}
-              </div>
-            )}
-
-            {/* Others' Chores */}
-            {othersChores.length > 0 && (
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-semibold text-muted-foreground">👤 Others' Chores</h3>
-                  <span className="px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 text-xs font-medium">
-                    {othersChores.length}
-                  </span>
-                </div>
-                {othersChores.map((chore) => (
-                  <ChoreCard
-                    key={chore.id}
-                    chore={chore}
-                    members={members}
-                    currentMemberId={currentMemberId || undefined}
-                    onComplete={() => openCompleteDialog(chore)}
-                    onAssign={(memberIds, assignToAll) => handleAssignChore(chore.id, memberIds, assignToAll)}
-                    onDelete={() => handleDeleteChore(chore.id)}
-                  />
-                ))}
-              </div>
-            )}
-
-            {/* Unassigned Chores */}
-            {unassignedChores.length > 0 && (
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-semibold text-muted-foreground">📋 Unassigned</h3>
-                  <span className="px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 text-xs font-medium">
-                    {unassignedChores.length}
-                  </span>
-                </div>
-                {unassignedChores.map((chore) => (
-                  <ChoreCard
-                    key={chore.id}
-                    chore={chore}
-                    members={members}
-                    currentMemberId={currentMemberId || undefined}
-                    onComplete={() => openCompleteDialog(chore)}
-                    onAssign={(memberIds, assignToAll) => handleAssignChore(chore.id, memberIds, assignToAll)}
-                    onDelete={() => handleDeleteChore(chore.id)}
-                  />
-                ))}
-              </div>
-            )}
+          <div className="space-y-3">
+            {/* All Pending Chores */}
+            {pendingChores.map((chore) => (
+              <ChoreCard
+                key={chore.id}
+                chore={chore}
+                members={members}
+                currentMemberId={currentMemberId || undefined}
+                onComplete={() => openCompleteDialog(chore)}
+                onAssign={(memberIds, assignToAll) => handleAssignChore(chore.id, memberIds, assignToAll)}
+                onDelete={() => handleDeleteChore(chore.id)}
+              />
+            ))}
 
             {/* Bonus Chores */}
             {bonusChores.length > 0 && (
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
+              <>
+                <div className="flex items-center gap-2 mt-6 mb-3">
                   <h3 className="font-semibold text-amber-600">🌟 Bonus Chores</h3>
                   <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-xs font-medium">
                     {bonusChores.length}
                   </span>
                 </div>
-                <p className="text-xs text-muted-foreground -mt-1 mb-2">
-                  Anyone can do these for extra credit!
-                </p>
                 {bonusChores.map((chore) => (
                   <ChoreCard
                     key={chore.id}
@@ -348,15 +252,15 @@ export default function HouseholdDashboard() {
                     onDelete={() => handleDeleteChore(chore.id)}
                   />
                 ))}
-              </div>
+              </>
             )}
 
             {/* Completed Section */}
             {completedChores.length > 0 && (
               <>
-                <div className="flex items-center gap-2 mt-8 mb-3">
+                <div className="flex items-center gap-2 mt-6 mb-3">
                   <h3 className="font-semibold text-muted-foreground">
-                    Completed
+                    ✅ Completed
                   </h3>
                   <span className="px-2 py-0.5 rounded-full bg-success/10 text-success text-sm font-medium">
                     {completedChores.length}
