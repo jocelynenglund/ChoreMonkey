@@ -89,6 +89,9 @@ export default function HouseholdDashboard() {
   const everyoneChores = pendingChores.filter(
     (c) => !c.isOptional && c.assignedToAll
   );
+  const othersChores = pendingChores.filter(
+    (c) => !c.isOptional && c.assignedTo?.length && !c.assignedTo.includes(currentMemberId || '') && !c.assignedToAll
+  );
   const unassignedChores = pendingChores.filter(
     (c) => !c.isOptional && !c.assignedTo?.length && !c.assignedToAll
   );
@@ -263,6 +266,29 @@ export default function HouseholdDashboard() {
                   </span>
                 </div>
                 {everyoneChores.map((chore) => (
+                  <ChoreCard
+                    key={chore.id}
+                    chore={chore}
+                    members={members}
+                    currentMemberId={currentMemberId || undefined}
+                    onComplete={() => openCompleteDialog(chore)}
+                    onAssign={(memberIds, assignToAll) => handleAssignChore(chore.id, memberIds, assignToAll)}
+                    onDelete={() => handleDeleteChore(chore.id)}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Others' Chores */}
+            {othersChores.length > 0 && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <h3 className="font-semibold text-muted-foreground">👤 Others' Chores</h3>
+                  <span className="px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 text-xs font-medium">
+                    {othersChores.length}
+                  </span>
+                </div>
+                {othersChores.map((chore) => (
                   <ChoreCard
                     key={chore.id}
                     chore={chore}
