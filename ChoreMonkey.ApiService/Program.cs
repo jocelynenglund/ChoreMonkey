@@ -46,6 +46,17 @@ app.MapDefaultEndpoints();
 
 app.MapChoreMonkeyEndpoints();
 
+// Debug endpoint to check data path
+app.MapGet("/api/debug/config", () => {
+    var dataPath = Environment.GetEnvironmentVariable("EVENTSTORE_PATH") 
+        ?? Path.Combine(Directory.GetCurrentDirectory(), "data");
+    return Results.Ok(new { 
+        dataPath,
+        exists = Directory.Exists(dataPath),
+        currentDirectory = Directory.GetCurrentDirectory()
+    });
+});
+
 app.Run();
 
 record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
