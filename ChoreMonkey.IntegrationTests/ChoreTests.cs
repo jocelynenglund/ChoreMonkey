@@ -59,8 +59,8 @@ public class ChoreTests(ApiFixture fixture)
         var chores = await choresResponse.Content.ReadFromJsonAsync<GetChoresResponse>();
         var choreId = chores!.Chores[0].ChoreId;
 
-        // Act
-        var assignRequest = new { MemberId = kid.MemberId };
+        // Act - assign to single member using new API
+        var assignRequest = new { MemberIds = new[] { kid.MemberId }, AssignToAll = false };
         var response = await _client.PostAsJsonAsync(
             $"/api/households/{household.HouseholdId}/chores/{choreId}/assign",
             assignRequest);
@@ -71,7 +71,7 @@ public class ChoreTests(ApiFixture fixture)
         // Verify assignment persisted
         var updatedChores = await _client.GetFromJsonAsync<GetChoresResponse>(
             $"/api/households/{household.HouseholdId}/chores");
-        updatedChores!.Chores[0].AssignedTo.Should().Be(kid.MemberId);
+        updatedChores!.Chores[0].AssignedTo.Should().Contain(kid.MemberId);
     }
 
     [Fact]
@@ -145,7 +145,7 @@ public class ChoreTests(ApiFixture fixture)
     private record GenerateInviteResponse(Guid HouseholdId, Guid InviteId, string Link);
     private record JoinHouseholdResponse(Guid MemberId, Guid HouseholdId, string Nickname);
     private record GetChoresResponse(List<ChoreDto> Chores);
-    private record ChoreDto(Guid ChoreId, string DisplayName, string Description, Guid? AssignedTo);
+    private record ChoreDto(Guid ChoreId, string DisplayName, string Description, Guid[]? AssignedTo);
 
     #endregion
 }
