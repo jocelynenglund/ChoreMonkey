@@ -7,8 +7,16 @@ using Microsoft.AspNetCore.Routing;
 
 namespace ChoreMonkey.Core.Feature.AssignChore;
 
-public record AssignChoreCommand(Guid HouseholdId, Guid ChoreId, Guid? MemberId);
-public record AssignChoreResponse(Guid ChoreId, Guid? AssignedTo);
+public record AssignChoreCommand(
+    Guid HouseholdId, 
+    Guid ChoreId, 
+    Guid[]? MemberIds = null,
+    bool AssignToAll = false);
+    
+public record AssignChoreResponse(
+    Guid ChoreId, 
+    Guid[]? AssignedTo,
+    bool AssignedToAll);
 
 internal class Handler(IEventStore store)
 {
@@ -16,10 +24,15 @@ internal class Handler(IEventStore store)
     {
         var streamId = ChoreAggregate.StreamId(request.HouseholdId);
         
-        var assignedEvent = new ChoreAssigned(request.ChoreId, request.HouseholdId, request.MemberId);
+        var assignedEvent = new ChoreAssigned(
+            request.ChoreId, 
+            request.HouseholdId, 
+            request.MemberIds,
+            request.AssignToAll);
+            
         await store.AppendToStreamAsync(streamId, assignedEvent, ExpectedVersion.Any);
         
-        return new AssignChoreResponse(request.ChoreId, request.MemberId);
+        return new AssignChoreResponse(request.ChoreId, request.MemberIds, request.AssignToAll);
     }
 }
 
@@ -33,11 +46,17 @@ internal static class AssignChoreEndpoint
             AssignChoreRequest request,
             Handler handler) =>
         {
-            var command = new AssignChoreCommand(householdId, choreId, request.MemberId);
+            var command = new AssignChoreCommand(
+                householdId, 
+                choreId, 
+                request.MemberIds,
+                request.AssignToAll);
             var result = await handler.HandleAsync(command);
             return Results.Ok(result);
         });
     }
 }
 
-public record AssignChoreRequest(Guid? MemberId);
+public record AssignChoreRequest(
+    Guid[]? MemberIds = null,
+    bool AssignToAll = false);

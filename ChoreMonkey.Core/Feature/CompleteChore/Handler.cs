@@ -27,9 +27,34 @@ internal class Handler(IEventStore store)
     public async Task<CompleteChoreResponse> HandleAsync(CompleteChoreCommand request)
     {
         var streamId = ChoreAggregate.StreamId(request.HouseholdId);
-        
         var completedAt = request.CompletedAt ?? DateTime.UtcNow;
         
+        // Check current assignments
+        var events = await store.FetchEventsAsync(streamId);
+        var currentAssignment = events
+            .OfType<ChoreAssigned>()
+            .Where(e => e.ChoreId == request.ChoreId)
+            .LastOrDefault();
+        
+        var isAssigned = currentAssignment?.AssignToAll == true ||
+            (currentAssignment?.AssignedToMemberIds?.Contains(request.MemberId) ?? false);
+        
+        // If not assigned, auto-assign this member first
+        if (!isAssigned)
+        {
+            var newAssignees = currentAssignment?.AssignedToMemberIds?.ToList() ?? new List<Guid>();
+            newAssignees.Add(request.MemberId);
+            
+            var assignEvent = new ChoreAssigned(
+                request.ChoreId,
+                request.HouseholdId,
+                newAssignees.ToArray(),
+                currentAssignment?.AssignToAll ?? false);
+                
+            await store.AppendToStreamAsync(streamId, assignEvent, ExpectedVersion.Any);
+        }
+        
+        // Now complete the chore
         var completedEvent = new ChoreCompleted(
             request.ChoreId,
             request.HouseholdId,

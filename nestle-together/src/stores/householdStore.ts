@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Household, Member, Chore, Invite, ChoreFrequency } from '@/types/household';
+import type { Household, Member, Chore, Invite, ChoreFrequency, MemberCompletion } from '@/types/household';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7422';
 
@@ -23,7 +23,7 @@ interface HouseholdState {
   accessHousehold: (householdId: string, pinCode: string) => Promise<boolean>;
   toggleChoreComplete: (choreId: string) => void;
   completeChore: (householdId: string, choreId: string, memberId: string, completedAt?: Date) => Promise<void>;
-  assignChore: (householdId: string, choreId: string, memberId: string | undefined) => Promise<void>;
+  assignChore: (householdId: string, choreId: string, memberIds?: string[], assignToAll?: boolean) => Promise<void>;
   deleteChore: (choreId: string) => void;
   setCurrentMember: (memberId: string) => void;
   logout: () => void;
@@ -318,17 +318,17 @@ export const useHouseholdStore = create<HouseholdState>()(
         }
       },
 
-      assignChore: async (householdId, choreId, memberId) => {
+      assignChore: async (householdId, choreId, memberIds, assignToAll = false) => {
         try {
           await fetch(`${API_BASE_URL}/api/households/${householdId}/chores/${choreId}/assign`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ memberId: memberId || null }),
+            body: JSON.stringify({ memberIds: memberIds || null, assignToAll }),
           });
 
           set((state) => ({
             chores: state.chores.map((c) =>
-              c.id === choreId ? { ...c, assignedTo: memberId } : c
+              c.id === choreId ? { ...c, assignedTo: memberIds, assignedToAll: assignToAll } : c
             ),
           }));
         } catch (error) {
@@ -403,18 +403,28 @@ export const useHouseholdStore = create<HouseholdState>()(
           // API returns { chores: [...] } or direct array
           const choreArray = Array.isArray(data) ? data : (data.chores ?? []);
           // Map API response to frontend type
-          const chores: Chore[] = choreArray.map((c: Record<string, unknown>) => ({
-            id: (c.choreId ?? c.id) as string,
-            householdId: (c.householdId ?? householdId) as string,
-            displayName: c.displayName as string,
-            description: c.description as string,
-            assignedTo: c.assignedTo as string | undefined,
-            completed: (c.completed ?? false) as boolean,
-            createdAt: c.createdAt ? new Date(c.createdAt as string) : new Date(),
-            frequency: c.frequency as ChoreFrequency | undefined,
-            lastCompletedAt: c.lastCompletedAt ? new Date(c.lastCompletedAt as string) : undefined,
-            lastCompletedBy: c.lastCompletedBy as string | undefined,
-          }));
+          const chores: Chore[] = choreArray.map((c: Record<string, unknown>) => {
+            const frequency = c.frequency as ChoreFrequency | undefined;
+            const lastCompletedAt = c.lastCompletedAt ? new Date(c.lastCompletedAt as string) : undefined;
+            // One-time chores are "completed" once they have any completion
+            const isOneTime = !frequency || frequency.type === 'once';
+            const completed = isOneTime && lastCompletedAt != null;
+            
+            return {
+              id: (c.choreId ?? c.id) as string,
+              householdId: (c.householdId ?? householdId) as string,
+              displayName: c.displayName as string,
+              description: c.description as string,
+              assignedTo: c.assignedTo as string[] | undefined,
+              assignedToAll: c.assignedToAll as boolean | undefined,
+              completed,
+              createdAt: c.createdAt ? new Date(c.createdAt as string) : new Date(),
+              frequency,
+              lastCompletedAt,
+              lastCompletedBy: c.lastCompletedBy as string | undefined,
+              memberCompletions: c.memberCompletions as MemberCompletion[] | undefined,
+            };
+          });
           set((state) => ({
             chores: [
               ...state.chores.filter((c) => c.householdId !== householdId),

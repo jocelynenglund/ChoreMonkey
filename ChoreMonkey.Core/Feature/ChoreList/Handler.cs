@@ -15,10 +15,17 @@ public record ChoreDto(
     Guid ChoreId, 
     string DisplayName, 
     string Description, 
-    Guid? AssignedTo,
+    Guid[]? AssignedTo = null,
+    bool AssignedToAll = false,
     FrequencyDto? Frequency = null,
     DateTime? LastCompletedAt = null,
-    Guid? LastCompletedBy = null);
+    Guid? LastCompletedBy = null,
+    List<MemberCompletionDto>? MemberCompletions = null);
+
+public record MemberCompletionDto(
+    Guid MemberId,
+    bool CompletedToday,
+    DateTime? LastCompletedAt);
 
 public record FrequencyDto(
     string Type,
@@ -33,6 +40,7 @@ internal class Handler(IEventStore store)
     {
         var streamId = ChoreAggregate.StreamId(request.HouseholdId);
         var events = await store.FetchEventsAsync(streamId);
+        var today = DateTime.UtcNow.Date;
 
         // Get all created chores
         var createdChores = events.OfType<ChoreCreated>().ToList();
@@ -40,28 +48,51 @@ internal class Handler(IEventStore store)
         // Get latest assignment for each chore
         var assignments = events.OfType<ChoreAssigned>()
             .GroupBy(e => e.ChoreId)
-            .ToDictionary(g => g.Key, g => g.Last().AssignedToMemberId);
+            .ToDictionary(g => g.Key, g => g.Last());
 
-        // Get latest completion for each chore
-        var lastCompletions = events.OfType<ChoreCompleted>()
+        // Get all completions grouped by chore
+        var completionsByChore = events.OfType<ChoreCompleted>()
             .GroupBy(e => e.ChoreId)
-            .ToDictionary(g => g.Key, g => g.OrderByDescending(c => c.CompletedAt).First());
+            .ToDictionary(g => g.Key, g => g.ToList());
 
         var chores = createdChores
             .Select(e => {
-                var lastCompletion = lastCompletions.GetValueOrDefault(e.ChoreId);
+                var assignment = assignments.GetValueOrDefault(e.ChoreId);
+                var choreCompletions = completionsByChore.GetValueOrDefault(e.ChoreId) ?? new List<ChoreCompleted>();
+                var lastCompletion = choreCompletions.OrderByDescending(c => c.CompletedAt).FirstOrDefault();
+                
                 var frequency = e.Frequency != null 
                     ? new FrequencyDto(e.Frequency.Type, e.Frequency.Days, e.Frequency.IntervalDays)
                     : new FrequencyDto("once");
+                
+                // Build per-member completion status
+                List<MemberCompletionDto>? memberCompletions = null;
+                if (assignment?.AssignedToMemberIds != null || assignment?.AssignToAll == true)
+                {
+                    var assignedMembers = assignment.AssignedToMemberIds ?? Array.Empty<Guid>();
+                    memberCompletions = assignedMembers.Select(memberId => {
+                        var memberLastCompletion = choreCompletions
+                            .Where(c => c.CompletedByMemberId == memberId)
+                            .OrderByDescending(c => c.CompletedAt)
+                            .FirstOrDefault();
+                        var completedToday = memberLastCompletion?.CompletedAt.Date == today;
+                        return new MemberCompletionDto(
+                            memberId,
+                            completedToday,
+                            memberLastCompletion?.CompletedAt);
+                    }).ToList();
+                }
                     
                 return new ChoreDto(
                     e.ChoreId, 
                     e.DisplayName, 
                     e.Description,
-                    assignments.GetValueOrDefault(e.ChoreId),
+                    assignment?.AssignedToMemberIds,
+                    assignment?.AssignToAll ?? false,
                     frequency,
                     lastCompletion?.CompletedAt,
-                    lastCompletion?.CompletedByMemberId);
+                    lastCompletion?.CompletedByMemberId,
+                    memberCompletions);
             })
             .ToList();
 
