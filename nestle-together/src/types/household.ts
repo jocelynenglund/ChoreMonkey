@@ -38,6 +38,7 @@ export interface Chore {
   lastCompletedAt?: Date;
   lastCompletedBy?: string;
   memberCompletions?: MemberCompletion[];
+  isOptional?: boolean;
 }
 
 export interface Invite {

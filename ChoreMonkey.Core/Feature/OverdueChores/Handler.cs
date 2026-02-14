@@ -63,6 +63,9 @@ internal class Handler(IEventStore store)
             
             foreach (var (choreId, chore) in chores)
             {
+                // Skip optional/bonus chores - they can never be overdue
+                if (chore.IsOptional) continue;
+                
                 // Check if this member is assigned to this chore
                 var assignment = assignments.GetValueOrDefault(choreId);
                 var isAssigned = assignment?.AssignToAll == true ||

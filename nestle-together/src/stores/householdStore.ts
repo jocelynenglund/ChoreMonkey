@@ -17,7 +17,7 @@ interface HouseholdState {
 
   // Commands (now async)
   createHousehold: (name: string, pinCode: string, ownerNickname?: string) => Promise<Household | null>;
-  addChore: (householdId: string, displayName: string, description: string, frequency?: ChoreFrequency) => Promise<Chore | null>;
+  addChore: (householdId: string, displayName: string, description: string, frequency?: ChoreFrequency, isOptional?: boolean) => Promise<Chore | null>;
   generateInvite: (householdId: string) => Promise<Invite | null>;
   joinHousehold: (householdId: string, inviteId: string, nickname: string) => Promise<Member | null>;
   accessHousehold: (householdId: string, pinCode: string) => Promise<boolean>;
@@ -117,11 +117,11 @@ export const useHouseholdStore = create<HouseholdState>()(
         }
       },
 
-      addChore: async (householdId, displayName, description, frequency) => {
+      addChore: async (householdId, displayName, description, frequency, isOptional = false) => {
         set({ isLoading: true, error: null });
 
         try {
-          const body: Record<string, unknown> = { displayName, description };
+          const body: Record<string, unknown> = { displayName, description, isOptional };
           if (frequency) {
             body.frequency = {
               type: frequency.type,
@@ -148,6 +148,7 @@ export const useHouseholdStore = create<HouseholdState>()(
             completed: false,
             createdAt: new Date(),
             frequency: frequency || { type: 'once' },
+            isOptional,
           };
 
           set((state) => ({
@@ -425,6 +426,7 @@ export const useHouseholdStore = create<HouseholdState>()(
               lastCompletedAt,
               lastCompletedBy: c.lastCompletedBy as string | undefined,
               memberCompletions: c.memberCompletions as MemberCompletion[] | undefined,
+              isOptional: c.isOptional as boolean | undefined,
             };
           });
           set((state) => ({

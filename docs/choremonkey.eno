@@ -21,7 +21,10 @@
 ## Chore Management
 
 [Add Chore]
-    ⏹️(name, frequency, assignedTo[]) -> 🟦AddChore(householdId, *choreId, name, frequency, assignedTo[], assignToAll) -> 🟧ChoreCreated(householdId, choreId, name, frequency, assignedTo[], assignToAll)
+    ⏹️(name, frequency, assignedTo[], isOptional) -> 🟦AddChore(householdId, *choreId, name, frequency, assignedTo[], assignToAll, isOptional) -> 🟧ChoreCreated(householdId, choreId, name, frequency, assignedTo[], assignToAll, isOptional)
+
+[Add Bonus Chore]
+    ⏹️(name, isOptional=true) -> 🟦AddChore(householdId, *choreId, name, isOptional=true) -> 🟧ChoreCreated(householdId, choreId, name, isOptional=true)
 
 [Assign Chore]
     ⏹️(choreId, assignedTo[]) -> 🟦AssignChore(householdId, choreId, assignedTo[], assignToAll) -> 🟧ChoreAssigned(householdId, choreId, assignedTo[], assignToAll)
@@ -43,6 +46,12 @@
 
 [View Chore History]
     🟧ChoreCompleted -> 📗ChoreHistory*(choreId, completions[]) -> ⏹️(choreId, completions[])
+
+[View Overdue Chores]
+    🟧ChoreCreated -> 📗MemberOverdue*(memberId, nickname, overdueCount, chores[]) -> ⏹️(memberOverdue[])
+    🟧ChoreAssigned ->
+    🟧ChoreCompleted ->
+    # Note: Optional chores (isOptional=true) are excluded from overdue calculation
 
 ## Future: Automations
 

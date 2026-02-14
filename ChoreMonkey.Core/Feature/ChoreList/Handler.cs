@@ -20,7 +20,8 @@ public record ChoreDto(
     FrequencyDto? Frequency = null,
     DateTime? LastCompletedAt = null,
     Guid? LastCompletedBy = null,
-    List<MemberCompletionDto>? MemberCompletions = null);
+    List<MemberCompletionDto>? MemberCompletions = null,
+    bool IsOptional = false);
 
 public record MemberCompletionDto(
     Guid MemberId,
@@ -92,7 +93,8 @@ internal class Handler(IEventStore store)
                     frequency,
                     lastCompletion?.CompletedAt,
                     lastCompletion?.CompletedByMemberId,
-                    memberCompletions);
+                    memberCompletions,
+                    e.IsOptional);
             })
             .ToList();
 

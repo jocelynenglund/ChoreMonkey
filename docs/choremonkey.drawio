@@ -1,219 +1,253 @@
 <mxfile host="eno-dio" agent="Event Model Notation Converter" version="1.0.0">
-  <diagram name="Event Model" id="eno-c0a7647f73f5">
-    <mxGraphModel dx="922" dy="690" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2950" pageHeight="1100" math="0" shadow="0">
+  <diagram name="Event Model" id="eno-62304e77b3ae">
+    <mxGraphModel dx="922" dy="690" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="3330" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="eno-d8edc0ab8b9f" parent="1" style="swimlane;whiteSpace=wrap;html=1;align=right;spacingRight=4;" value="Create Household" vertex="1">
+        <mxCell id="eno-60adf323c7c6" parent="1" style="swimlane;whiteSpace=wrap;html=1;align=right;spacingRight=4;" value="Create Household" vertex="1">
           <mxGeometry height="296" width="170" x="100" y="150" as="geometry">
             <mxRectangle height="30" width="170" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="eno-c9028566286f" parent="eno-d8edc0ab8b9f" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=3;spacingRight=3;fontColor=#000000;" value="&lt;b&gt;screen&lt;/b&gt;&lt;div&gt;name&lt;/div&gt;" vertex="1">
+        <mxCell id="eno-58873303971b" parent="eno-60adf323c7c6" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=3;spacingRight=3;fontColor=#000000;" value="&lt;b&gt;screen&lt;/b&gt;&lt;div&gt;name&lt;/div&gt;" vertex="1">
           <mxGeometry height="50" width="135" x="17" y="40" as="geometry" />
         </mxCell>
-        <mxCell id="eno-a8a25825e50e" parent="eno-d8edc0ab8b9f" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0050ef;strokeColor=#001DBC;align=left;spacingLeft=3;spacingRight=3;fontColor=#ffffff;" value="&lt;b&gt;Create Household&lt;/b&gt;&lt;div&gt;householdId*&lt;/div&gt;&lt;div&gt;name&lt;/div&gt;&lt;div&gt;accessCode*&lt;/div&gt;" vertex="1">
+        <mxCell id="eno-c0b4e9867dad" parent="eno-60adf323c7c6" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0050ef;strokeColor=#001DBC;align=left;spacingLeft=3;spacingRight=3;fontColor=#ffffff;" value="&lt;b&gt;Create Household&lt;/b&gt;&lt;div&gt;householdId*&lt;/div&gt;&lt;div&gt;name&lt;/div&gt;&lt;div&gt;accessCode*&lt;/div&gt;" vertex="1">
           <mxGeometry height="78" width="135" x="17" y="100" as="geometry" />
         </mxCell>
-        <mxCell id="eno-3e722e80df84" parent="eno-d8edc0ab8b9f" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Household Created&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;name&lt;/div&gt;&lt;div&gt;accessCode&lt;/div&gt;" vertex="1">
+        <mxCell id="eno-7518fa990ee3" parent="eno-60adf323c7c6" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Household Created&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;name&lt;/div&gt;&lt;div&gt;accessCode&lt;/div&gt;" vertex="1">
           <mxGeometry height="78" width="135" x="17" y="188" as="geometry" />
         </mxCell>
-        <mxCell id="eno-a2e1667ac796" parent="1" style="swimlane;whiteSpace=wrap;html=1;align=right;spacingRight=4;" value="Add First Member" vertex="1">
+        <mxCell id="eno-2f859f73183c" parent="1" style="swimlane;whiteSpace=wrap;html=1;align=right;spacingRight=4;" value="Add First Member" vertex="1">
           <mxGeometry height="356" width="170" x="290" y="150" as="geometry">
             <mxRectangle height="30" width="170" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="eno-115b1d8713b8" parent="eno-a2e1667ac796" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0050ef;strokeColor=#001DBC;align=left;spacingLeft=3;spacingRight=3;fontColor=#ffffff;" value="&lt;b&gt;Add Member&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;memberId*&lt;/div&gt;&lt;div&gt;memberName&lt;/div&gt;&lt;div&gt;color&lt;/div&gt;" vertex="1">
+        <mxCell id="eno-7151133f21ff" parent="eno-2f859f73183c" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0050ef;strokeColor=#001DBC;align=left;spacingLeft=3;spacingRight=3;fontColor=#ffffff;" value="&lt;b&gt;Add Member&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;memberId*&lt;/div&gt;&lt;div&gt;memberName&lt;/div&gt;&lt;div&gt;color&lt;/div&gt;" vertex="1">
           <mxGeometry height="94" width="135" x="17" y="40" as="geometry" />
         </mxCell>
-        <mxCell id="eno-c2c5625f3c5e" parent="eno-a2e1667ac796" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Household Created&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;name&lt;/div&gt;&lt;div&gt;accessCode&lt;/div&gt;" vertex="1">
+        <mxCell id="eno-3e44d0ae5d2f" parent="eno-2f859f73183c" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Household Created&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;name&lt;/div&gt;&lt;div&gt;accessCode&lt;/div&gt;" vertex="1">
           <mxGeometry height="78" width="135" x="17" y="144" as="geometry" />
         </mxCell>
-        <mxCell id="eno-cfa56bb7e1cc" parent="eno-a2e1667ac796" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Member Added&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;memberId&lt;/div&gt;&lt;div&gt;memberName&lt;/div&gt;&lt;div&gt;color&lt;/div&gt;" vertex="1">
+        <mxCell id="eno-fc3daf6100db" parent="eno-2f859f73183c" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Member Added&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;memberId&lt;/div&gt;&lt;div&gt;memberName&lt;/div&gt;&lt;div&gt;color&lt;/div&gt;" vertex="1">
           <mxGeometry height="94" width="135" x="17" y="232" as="geometry" />
         </mxCell>
-        <mxCell id="eno-8e3806cd421d" parent="1" style="swimlane;whiteSpace=wrap;html=1;align=right;spacingRight=4;" value="Generate Invite" vertex="1">
+        <mxCell id="eno-51aa92480405" parent="1" style="swimlane;whiteSpace=wrap;html=1;align=right;spacingRight=4;" value="Generate Invite" vertex="1">
           <mxGeometry height="264" width="170" x="480" y="150" as="geometry">
             <mxRectangle height="30" width="170" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="eno-f5f20ea81327" parent="eno-8e3806cd421d" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=3;spacingRight=3;fontColor=#000000;" value="&lt;b&gt;screen&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;" vertex="1">
+        <mxCell id="eno-3b8a241029b1" parent="eno-51aa92480405" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=3;spacingRight=3;fontColor=#000000;" value="&lt;b&gt;screen&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;" vertex="1">
           <mxGeometry height="50" width="135" x="17" y="40" as="geometry" />
         </mxCell>
-        <mxCell id="eno-30557910aa22" parent="eno-8e3806cd421d" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0050ef;strokeColor=#001DBC;align=left;spacingLeft=3;spacingRight=3;fontColor=#ffffff;" value="&lt;b&gt;Generate Invite&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;inviteCode*&lt;/div&gt;" vertex="1">
+        <mxCell id="eno-44a30b0630b7" parent="eno-51aa92480405" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0050ef;strokeColor=#001DBC;align=left;spacingLeft=3;spacingRight=3;fontColor=#ffffff;" value="&lt;b&gt;Generate Invite&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;inviteCode*&lt;/div&gt;" vertex="1">
           <mxGeometry height="62" width="135" x="17" y="100" as="geometry" />
         </mxCell>
-        <mxCell id="eno-df021ce83d3f" parent="eno-8e3806cd421d" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Invite Generated&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;inviteCode&lt;/div&gt;" vertex="1">
+        <mxCell id="eno-d35b5cd97099" parent="eno-51aa92480405" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Invite Generated&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;inviteCode&lt;/div&gt;" vertex="1">
           <mxGeometry height="62" width="135" x="17" y="172" as="geometry" />
         </mxCell>
-        <mxCell id="eno-2debe1cbe7ab" parent="1" style="swimlane;whiteSpace=wrap;html=1;align=right;spacingRight=4;" value="Join Household" vertex="1">
+        <mxCell id="eno-50cd7497c8b9" parent="1" style="swimlane;whiteSpace=wrap;html=1;align=right;spacingRight=4;" value="Join Household" vertex="1">
           <mxGeometry height="356" width="170" x="670" y="150" as="geometry">
             <mxRectangle height="30" width="170" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="eno-0c11466fa3a7" parent="eno-2debe1cbe7ab" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=3;spacingRight=3;fontColor=#000000;" value="&lt;b&gt;screen&lt;/b&gt;&lt;div&gt;inviteCode&lt;/div&gt;&lt;div&gt;memberName&lt;/div&gt;&lt;div&gt;color&lt;/div&gt;" vertex="1">
+        <mxCell id="eno-f888554dacf1" parent="eno-50cd7497c8b9" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=3;spacingRight=3;fontColor=#000000;" value="&lt;b&gt;screen&lt;/b&gt;&lt;div&gt;inviteCode&lt;/div&gt;&lt;div&gt;memberName&lt;/div&gt;&lt;div&gt;color&lt;/div&gt;" vertex="1">
           <mxGeometry height="78" width="135" x="17" y="40" as="geometry" />
         </mxCell>
-        <mxCell id="eno-3b2a52b43180" parent="eno-2debe1cbe7ab" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0050ef;strokeColor=#001DBC;align=left;spacingLeft=3;spacingRight=3;fontColor=#ffffff;" value="&lt;b&gt;Join Household&lt;/b&gt;&lt;div&gt;inviteCode&lt;/div&gt;&lt;div&gt;memberId*&lt;/div&gt;&lt;div&gt;memberName&lt;/div&gt;&lt;div&gt;color&lt;/div&gt;" vertex="1">
+        <mxCell id="eno-855a1e76a073" parent="eno-50cd7497c8b9" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0050ef;strokeColor=#001DBC;align=left;spacingLeft=3;spacingRight=3;fontColor=#ffffff;" value="&lt;b&gt;Join Household&lt;/b&gt;&lt;div&gt;inviteCode&lt;/div&gt;&lt;div&gt;memberId*&lt;/div&gt;&lt;div&gt;memberName&lt;/div&gt;&lt;div&gt;color&lt;/div&gt;" vertex="1">
           <mxGeometry height="94" width="135" x="17" y="128" as="geometry" />
         </mxCell>
-        <mxCell id="eno-d9afe446dec5" parent="eno-2debe1cbe7ab" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Member Joined Household&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;memberId&lt;/div&gt;&lt;div&gt;memberName&lt;/div&gt;&lt;div&gt;color&lt;/div&gt;" vertex="1">
+        <mxCell id="eno-fc84a39a249d" parent="eno-50cd7497c8b9" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Member Joined Household&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;memberId&lt;/div&gt;&lt;div&gt;memberName&lt;/div&gt;&lt;div&gt;color&lt;/div&gt;" vertex="1">
           <mxGeometry height="94" width="135" x="17" y="232" as="geometry" />
         </mxCell>
-        <mxCell id="eno-429985daa171" parent="1" style="swimlane;whiteSpace=wrap;html=1;align=right;spacingRight=4;" value="Access Household" vertex="1">
+        <mxCell id="eno-d9309f5bb782" parent="1" style="swimlane;whiteSpace=wrap;html=1;align=right;spacingRight=4;" value="Access Household" vertex="1">
           <mxGeometry height="276" width="170" x="860" y="150" as="geometry">
             <mxRectangle height="30" width="170" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="eno-958a8e4b86e9" parent="eno-429985daa171" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=3;spacingRight=3;fontColor=#000000;" value="&lt;b&gt;screen&lt;/b&gt;&lt;div&gt;accessCode&lt;/div&gt;&lt;div&gt;memberId&lt;/div&gt;" vertex="1">
+        <mxCell id="eno-8012cf6ab429" parent="eno-d9309f5bb782" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=3;spacingRight=3;fontColor=#000000;" value="&lt;b&gt;screen&lt;/b&gt;&lt;div&gt;accessCode&lt;/div&gt;&lt;div&gt;memberId&lt;/div&gt;" vertex="1">
           <mxGeometry height="62" width="135" x="17" y="40" as="geometry" />
         </mxCell>
-        <mxCell id="eno-d3770cc2e738" parent="eno-429985daa171" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0050ef;strokeColor=#001DBC;align=left;spacingLeft=3;spacingRight=3;fontColor=#ffffff;" value="&lt;b&gt;Access Household&lt;/b&gt;&lt;div&gt;accessCode&lt;/div&gt;&lt;div&gt;memberId&lt;/div&gt;" vertex="1">
+        <mxCell id="eno-1ff47fc12058" parent="eno-d9309f5bb782" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0050ef;strokeColor=#001DBC;align=left;spacingLeft=3;spacingRight=3;fontColor=#ffffff;" value="&lt;b&gt;Access Household&lt;/b&gt;&lt;div&gt;accessCode&lt;/div&gt;&lt;div&gt;memberId&lt;/div&gt;" vertex="1">
           <mxGeometry height="62" width="135" x="17" y="112" as="geometry" />
         </mxCell>
-        <mxCell id="eno-168934446b3f" parent="eno-429985daa171" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Access Granted&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;memberId&lt;/div&gt;" vertex="1">
+        <mxCell id="eno-c167ac0e0e9e" parent="eno-d9309f5bb782" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Access Granted&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;memberId&lt;/div&gt;" vertex="1">
           <mxGeometry height="62" width="135" x="17" y="184" as="geometry" />
         </mxCell>
-        <mxCell id="eno-396e8072d3c4" parent="1" style="swimlane;whiteSpace=wrap;html=1;align=right;spacingRight=4;" value="Add Chore" vertex="1">
-          <mxGeometry height="420" width="170" x="1050" y="150" as="geometry">
+        <mxCell id="eno-b0cdf168bb4b" parent="1" style="swimlane;whiteSpace=wrap;html=1;align=right;spacingRight=4;" value="Add Chore" vertex="1">
+          <mxGeometry height="468" width="170" x="1050" y="150" as="geometry">
             <mxRectangle height="30" width="170" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="eno-2c93ac036bf6" parent="eno-396e8072d3c4" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=3;spacingRight=3;fontColor=#000000;" value="&lt;b&gt;screen&lt;/b&gt;&lt;div&gt;name&lt;/div&gt;&lt;div&gt;frequency&lt;/div&gt;&lt;div&gt;assignedTo[]&lt;/div&gt;" vertex="1">
-          <mxGeometry height="78" width="135" x="17" y="40" as="geometry" />
+        <mxCell id="eno-1b1c9a76a1de" parent="eno-b0cdf168bb4b" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=3;spacingRight=3;fontColor=#000000;" value="&lt;b&gt;screen&lt;/b&gt;&lt;div&gt;name&lt;/div&gt;&lt;div&gt;frequency&lt;/div&gt;&lt;div&gt;assignedTo[]&lt;/div&gt;&lt;div&gt;isOptional&lt;/div&gt;" vertex="1">
+          <mxGeometry height="94" width="135" x="17" y="40" as="geometry" />
         </mxCell>
-        <mxCell id="eno-9c3cc7b2775b" parent="eno-396e8072d3c4" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0050ef;strokeColor=#001DBC;align=left;spacingLeft=3;spacingRight=3;fontColor=#ffffff;" value="&lt;b&gt;Add Chore&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;choreId*&lt;/div&gt;&lt;div&gt;name&lt;/div&gt;&lt;div&gt;frequency&lt;/div&gt;&lt;div&gt;assignedTo[]&lt;/div&gt;&lt;div&gt;assignToAll&lt;/div&gt;" vertex="1">
-          <mxGeometry height="126" width="135" x="17" y="128" as="geometry" />
+        <mxCell id="eno-b25c2d79bbc2" parent="eno-b0cdf168bb4b" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0050ef;strokeColor=#001DBC;align=left;spacingLeft=3;spacingRight=3;fontColor=#ffffff;" value="&lt;b&gt;Add Chore&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;choreId*&lt;/div&gt;&lt;div&gt;name&lt;/div&gt;&lt;div&gt;frequency&lt;/div&gt;&lt;div&gt;assignedTo[]&lt;/div&gt;&lt;div&gt;assignToAll&lt;/div&gt;&lt;div&gt;isOptional&lt;/div&gt;" vertex="1">
+          <mxGeometry height="142" width="135" x="17" y="144" as="geometry" />
         </mxCell>
-        <mxCell id="eno-ac2c00e3db72" parent="eno-396e8072d3c4" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Chore Created&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;name&lt;/div&gt;&lt;div&gt;frequency&lt;/div&gt;&lt;div&gt;assignedTo[]&lt;/div&gt;&lt;div&gt;assignToAll&lt;/div&gt;" vertex="1">
-          <mxGeometry height="126" width="135" x="17" y="264" as="geometry" />
+        <mxCell id="eno-100a8059a272" parent="eno-b0cdf168bb4b" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Chore Created&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;name&lt;/div&gt;&lt;div&gt;frequency&lt;/div&gt;&lt;div&gt;assignedTo[]&lt;/div&gt;&lt;div&gt;assignToAll&lt;/div&gt;&lt;div&gt;isOptional&lt;/div&gt;" vertex="1">
+          <mxGeometry height="142" width="135" x="17" y="296" as="geometry" />
         </mxCell>
-        <mxCell id="eno-ad81558878a5" parent="1" style="swimlane;whiteSpace=wrap;html=1;align=right;spacingRight=4;" value="Assign Chore" vertex="1">
+        <mxCell id="eno-e59518703091" parent="1" style="swimlane;whiteSpace=wrap;html=1;align=right;spacingRight=4;" value="Add Bonus Chore" vertex="1">
           <mxGeometry height="340" width="170" x="1240" y="150" as="geometry">
             <mxRectangle height="30" width="170" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="eno-177d3cfee838" parent="eno-ad81558878a5" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=3;spacingRight=3;fontColor=#000000;" value="&lt;b&gt;screen&lt;/b&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;assignedTo[]&lt;/div&gt;" vertex="1">
+        <mxCell id="eno-b47d6407413e" parent="eno-e59518703091" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=3;spacingRight=3;fontColor=#000000;" value="&lt;b&gt;screen&lt;/b&gt;&lt;div&gt;name&lt;/div&gt;&lt;div&gt;isOptional=true&lt;/div&gt;" vertex="1">
           <mxGeometry height="62" width="135" x="17" y="40" as="geometry" />
         </mxCell>
-        <mxCell id="eno-e7a5282b6f34" parent="eno-ad81558878a5" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0050ef;strokeColor=#001DBC;align=left;spacingLeft=3;spacingRight=3;fontColor=#ffffff;" value="&lt;b&gt;Assign Chore&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;assignedTo[]&lt;/div&gt;&lt;div&gt;assignToAll&lt;/div&gt;" vertex="1">
+        <mxCell id="eno-a3d85cc14148" parent="eno-e59518703091" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0050ef;strokeColor=#001DBC;align=left;spacingLeft=3;spacingRight=3;fontColor=#ffffff;" value="&lt;b&gt;Add Chore&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;choreId*&lt;/div&gt;&lt;div&gt;name&lt;/div&gt;&lt;div&gt;isOptional=true&lt;/div&gt;" vertex="1">
           <mxGeometry height="94" width="135" x="17" y="112" as="geometry" />
         </mxCell>
-        <mxCell id="eno-66aa5a5950b1" parent="eno-ad81558878a5" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Chore Assigned&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;assignedTo[]&lt;/div&gt;&lt;div&gt;assignToAll&lt;/div&gt;" vertex="1">
+        <mxCell id="eno-c341df8a347e" parent="eno-e59518703091" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Chore Created&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;name&lt;/div&gt;&lt;div&gt;isOptional=true&lt;/div&gt;" vertex="1">
           <mxGeometry height="94" width="135" x="17" y="216" as="geometry" />
         </mxCell>
-        <mxCell id="eno-dfe7ea1b2c5f" parent="1" style="swimlane;whiteSpace=wrap;html=1;align=right;spacingRight=4;" value="Complete Chore" vertex="1">
+        <mxCell id="eno-989c6060586e" parent="1" style="swimlane;whiteSpace=wrap;html=1;align=right;spacingRight=4;" value="Assign Chore" vertex="1">
           <mxGeometry height="340" width="170" x="1430" y="150" as="geometry">
             <mxRectangle height="30" width="170" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="eno-ece065b0a350" parent="eno-dfe7ea1b2c5f" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=3;spacingRight=3;fontColor=#000000;" value="&lt;b&gt;screen&lt;/b&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;completedAt&lt;/div&gt;" vertex="1">
+        <mxCell id="eno-5dd0a15cae3e" parent="eno-989c6060586e" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=3;spacingRight=3;fontColor=#000000;" value="&lt;b&gt;screen&lt;/b&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;assignedTo[]&lt;/div&gt;" vertex="1">
           <mxGeometry height="62" width="135" x="17" y="40" as="geometry" />
         </mxCell>
-        <mxCell id="eno-4c13d696e3f5" parent="eno-dfe7ea1b2c5f" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0050ef;strokeColor=#001DBC;align=left;spacingLeft=3;spacingRight=3;fontColor=#ffffff;" value="&lt;b&gt;Complete Chore&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;memberId&lt;/div&gt;&lt;div&gt;completedAt&lt;/div&gt;" vertex="1">
+        <mxCell id="eno-1d447fc7b3ed" parent="eno-989c6060586e" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0050ef;strokeColor=#001DBC;align=left;spacingLeft=3;spacingRight=3;fontColor=#ffffff;" value="&lt;b&gt;Assign Chore&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;assignedTo[]&lt;/div&gt;&lt;div&gt;assignToAll&lt;/div&gt;" vertex="1">
           <mxGeometry height="94" width="135" x="17" y="112" as="geometry" />
         </mxCell>
-        <mxCell id="eno-66b8f2c2edeb" parent="eno-dfe7ea1b2c5f" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Chore Completed&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;memberId&lt;/div&gt;&lt;div&gt;completedAt&lt;/div&gt;" vertex="1">
+        <mxCell id="eno-7f3f0d191039" parent="eno-989c6060586e" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Chore Assigned&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;assignedTo[]&lt;/div&gt;&lt;div&gt;assignToAll&lt;/div&gt;" vertex="1">
           <mxGeometry height="94" width="135" x="17" y="216" as="geometry" />
         </mxCell>
-        <mxCell id="eno-2f62350591ba" parent="1" style="swimlane;whiteSpace=wrap;html=1;align=right;spacingRight=4;" value="View Household" vertex="1">
-          <mxGeometry height="532" width="170" x="1620" y="150" as="geometry">
+        <mxCell id="eno-6efd8435a55f" parent="1" style="swimlane;whiteSpace=wrap;html=1;align=right;spacingRight=4;" value="Complete Chore" vertex="1">
+          <mxGeometry height="340" width="170" x="1620" y="150" as="geometry">
             <mxRectangle height="30" width="170" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="eno-30640cc9aae2" parent="eno-2f62350591ba" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=3;spacingRight=3;fontColor=#000000;" value="&lt;b&gt;screen&lt;/b&gt;&lt;div&gt;name&lt;/div&gt;&lt;div&gt;members[]&lt;/div&gt;" vertex="1">
+        <mxCell id="eno-f3b1f1824af9" parent="eno-6efd8435a55f" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=3;spacingRight=3;fontColor=#000000;" value="&lt;b&gt;screen&lt;/b&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;completedAt&lt;/div&gt;" vertex="1">
           <mxGeometry height="62" width="135" x="17" y="40" as="geometry" />
         </mxCell>
-        <mxCell id="eno-182edb039944" parent="eno-2f62350591ba" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#008a00;strokeColor=#005700;align=left;spacingLeft=3;spacingRight=3;fontColor=#ffffff;" value="&lt;b&gt;Household Details&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;name&lt;/div&gt;&lt;div&gt;members[]&lt;/div&gt;&lt;div&gt;accessCode&lt;/div&gt;" vertex="1">
+        <mxCell id="eno-8f87a11ab046" parent="eno-6efd8435a55f" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0050ef;strokeColor=#001DBC;align=left;spacingLeft=3;spacingRight=3;fontColor=#ffffff;" value="&lt;b&gt;Complete Chore&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;memberId&lt;/div&gt;&lt;div&gt;completedAt&lt;/div&gt;" vertex="1">
           <mxGeometry height="94" width="135" x="17" y="112" as="geometry" />
         </mxCell>
-        <mxCell id="eno-71ef9b9c6640" parent="eno-2f62350591ba" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Household Created&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;name&lt;/div&gt;&lt;div&gt;accessCode&lt;/div&gt;" vertex="1">
-          <mxGeometry height="78" width="135" x="17" y="216" as="geometry" />
+        <mxCell id="eno-a0a7ba4342b7" parent="eno-6efd8435a55f" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Chore Completed&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;memberId&lt;/div&gt;&lt;div&gt;completedAt&lt;/div&gt;" vertex="1">
+          <mxGeometry height="94" width="135" x="17" y="216" as="geometry" />
         </mxCell>
-        <mxCell id="eno-0d38a2cc1cd5" parent="eno-2f62350591ba" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Member Added&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;memberId&lt;/div&gt;&lt;div&gt;memberName&lt;/div&gt;&lt;div&gt;color&lt;/div&gt;" vertex="1">
-          <mxGeometry height="94" width="135" x="17" y="304" as="geometry" />
-        </mxCell>
-        <mxCell id="eno-4e177f0f81fd" parent="eno-2f62350591ba" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Member Joined Household&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;memberId&lt;/div&gt;&lt;div&gt;memberName&lt;/div&gt;&lt;div&gt;color&lt;/div&gt;" vertex="1">
-          <mxGeometry height="94" width="135" x="17" y="408" as="geometry" />
-        </mxCell>
-        <mxCell id="eno-674ff33bf10a" parent="1" style="swimlane;whiteSpace=wrap;html=1;align=right;spacingRight=4;" value="View Chore List" vertex="1">
-          <mxGeometry height="584" width="170" x="1810" y="150" as="geometry">
+        <mxCell id="eno-db6a2ac2dddc" parent="1" style="swimlane;whiteSpace=wrap;html=1;align=right;spacingRight=4;" value="View Household" vertex="1">
+          <mxGeometry height="532" width="170" x="1810" y="150" as="geometry">
             <mxRectangle height="30" width="170" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="eno-0f6501fc3ae7" parent="eno-674ff33bf10a" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=3;spacingRight=3;fontColor=#000000;" value="&lt;b&gt;screen&lt;/b&gt;&lt;div&gt;chores[]&lt;/div&gt;" vertex="1">
-          <mxGeometry height="50" width="135" x="17" y="40" as="geometry" />
-        </mxCell>
-        <mxCell id="eno-4eab5663941c" parent="eno-674ff33bf10a" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#008a00;strokeColor=#005700;align=left;spacingLeft=3;spacingRight=3;fontColor=#ffffff;" value="&lt;b&gt;Chore List&lt;/b&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;name&lt;/div&gt;&lt;div&gt;frequency&lt;/div&gt;&lt;div&gt;assignedTo[]&lt;/div&gt;&lt;div&gt;memberCompletions[]&lt;/div&gt;" vertex="1">
-          <mxGeometry height="110" width="135" x="17" y="100" as="geometry" />
-        </mxCell>
-        <mxCell id="eno-594506ec2736" parent="eno-674ff33bf10a" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Chore Created&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;name&lt;/div&gt;&lt;div&gt;frequency&lt;/div&gt;&lt;div&gt;assignedTo[]&lt;/div&gt;&lt;div&gt;assignToAll&lt;/div&gt;" vertex="1">
-          <mxGeometry height="126" width="135" x="17" y="220" as="geometry" />
-        </mxCell>
-        <mxCell id="eno-61737211ec07" parent="eno-674ff33bf10a" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Chore Assigned&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;assignedTo[]&lt;/div&gt;&lt;div&gt;assignToAll&lt;/div&gt;" vertex="1">
-          <mxGeometry height="94" width="135" x="17" y="356" as="geometry" />
-        </mxCell>
-        <mxCell id="eno-0d4416abe86f" parent="eno-674ff33bf10a" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Chore Completed&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;memberId&lt;/div&gt;&lt;div&gt;completedAt&lt;/div&gt;" vertex="1">
-          <mxGeometry height="94" width="135" x="17" y="460" as="geometry" />
-        </mxCell>
-        <mxCell id="eno-392e1ac698dc" parent="1" style="swimlane;whiteSpace=wrap;html=1;align=right;spacingRight=4;" value="View Chore History" vertex="1">
-          <mxGeometry height="308" width="170" x="2000" y="150" as="geometry">
-            <mxRectangle height="30" width="170" as="alternateBounds" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="eno-e3c3d516a06d" parent="eno-392e1ac698dc" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=3;spacingRight=3;fontColor=#000000;" value="&lt;b&gt;screen&lt;/b&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;completions[]&lt;/div&gt;" vertex="1">
+        <mxCell id="eno-b7ccf02c0d81" parent="eno-db6a2ac2dddc" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=3;spacingRight=3;fontColor=#000000;" value="&lt;b&gt;screen&lt;/b&gt;&lt;div&gt;name&lt;/div&gt;&lt;div&gt;members[]&lt;/div&gt;" vertex="1">
           <mxGeometry height="62" width="135" x="17" y="40" as="geometry" />
         </mxCell>
-        <mxCell id="eno-4d39a62cab24" parent="eno-392e1ac698dc" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#008a00;strokeColor=#005700;align=left;spacingLeft=3;spacingRight=3;fontColor=#ffffff;" value="&lt;b&gt;Chore History&lt;/b&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;completions[]&lt;/div&gt;" vertex="1">
+        <mxCell id="eno-e93aeb73203a" parent="eno-db6a2ac2dddc" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#008a00;strokeColor=#005700;align=left;spacingLeft=3;spacingRight=3;fontColor=#ffffff;" value="&lt;b&gt;Household Details&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;name&lt;/div&gt;&lt;div&gt;members[]&lt;/div&gt;&lt;div&gt;accessCode&lt;/div&gt;" vertex="1">
+          <mxGeometry height="94" width="135" x="17" y="112" as="geometry" />
+        </mxCell>
+        <mxCell id="eno-d0d7e59af8d0" parent="eno-db6a2ac2dddc" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Household Created&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;name&lt;/div&gt;&lt;div&gt;accessCode&lt;/div&gt;" vertex="1">
+          <mxGeometry height="78" width="135" x="17" y="216" as="geometry" />
+        </mxCell>
+        <mxCell id="eno-433d15c621a0" parent="eno-db6a2ac2dddc" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Member Added&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;memberId&lt;/div&gt;&lt;div&gt;memberName&lt;/div&gt;&lt;div&gt;color&lt;/div&gt;" vertex="1">
+          <mxGeometry height="94" width="135" x="17" y="304" as="geometry" />
+        </mxCell>
+        <mxCell id="eno-60952d7b4717" parent="eno-db6a2ac2dddc" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Member Joined Household&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;memberId&lt;/div&gt;&lt;div&gt;memberName&lt;/div&gt;&lt;div&gt;color&lt;/div&gt;" vertex="1">
+          <mxGeometry height="94" width="135" x="17" y="408" as="geometry" />
+        </mxCell>
+        <mxCell id="eno-6d973ad2382d" parent="1" style="swimlane;whiteSpace=wrap;html=1;align=right;spacingRight=4;" value="View Chore List" vertex="1">
+          <mxGeometry height="552" width="170" x="2000" y="150" as="geometry">
+            <mxRectangle height="30" width="170" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eno-2fa9d927b66e" parent="eno-6d973ad2382d" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=3;spacingRight=3;fontColor=#000000;" value="&lt;b&gt;screen&lt;/b&gt;&lt;div&gt;chores[]&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="135" x="17" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="eno-4046dd562f19" parent="eno-6d973ad2382d" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#008a00;strokeColor=#005700;align=left;spacingLeft=3;spacingRight=3;fontColor=#ffffff;" value="&lt;b&gt;Chore List&lt;/b&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;name&lt;/div&gt;&lt;div&gt;frequency&lt;/div&gt;&lt;div&gt;assignedTo[]&lt;/div&gt;&lt;div&gt;memberCompletions[]&lt;/div&gt;" vertex="1">
+          <mxGeometry height="110" width="135" x="17" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="eno-d5b68861584b" parent="eno-6d973ad2382d" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Chore Created&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;name&lt;/div&gt;&lt;div&gt;isOptional=true&lt;/div&gt;" vertex="1">
+          <mxGeometry height="94" width="135" x="17" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="eno-1892a1fefd37" parent="eno-6d973ad2382d" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Chore Assigned&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;assignedTo[]&lt;/div&gt;&lt;div&gt;assignToAll&lt;/div&gt;" vertex="1">
+          <mxGeometry height="94" width="135" x="17" y="324" as="geometry" />
+        </mxCell>
+        <mxCell id="eno-b26f91521b72" parent="eno-6d973ad2382d" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Chore Completed&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;memberId&lt;/div&gt;&lt;div&gt;completedAt&lt;/div&gt;" vertex="1">
+          <mxGeometry height="94" width="135" x="17" y="428" as="geometry" />
+        </mxCell>
+        <mxCell id="eno-d112431e1f12" parent="1" style="swimlane;whiteSpace=wrap;html=1;align=right;spacingRight=4;" value="View Chore History" vertex="1">
+          <mxGeometry height="308" width="170" x="2190" y="150" as="geometry">
+            <mxRectangle height="30" width="170" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eno-d82d78a5cdd4" parent="eno-d112431e1f12" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=3;spacingRight=3;fontColor=#000000;" value="&lt;b&gt;screen&lt;/b&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;completions[]&lt;/div&gt;" vertex="1">
+          <mxGeometry height="62" width="135" x="17" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="eno-9e36d0897d02" parent="eno-d112431e1f12" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#008a00;strokeColor=#005700;align=left;spacingLeft=3;spacingRight=3;fontColor=#ffffff;" value="&lt;b&gt;Chore History&lt;/b&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;completions[]&lt;/div&gt;" vertex="1">
           <mxGeometry height="62" width="135" x="17" y="112" as="geometry" />
         </mxCell>
-        <mxCell id="eno-7d43266e274c" parent="eno-392e1ac698dc" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Chore Completed&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;memberId&lt;/div&gt;&lt;div&gt;completedAt&lt;/div&gt;" vertex="1">
+        <mxCell id="eno-7216254feb9d" parent="eno-d112431e1f12" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Chore Completed&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;memberId&lt;/div&gt;&lt;div&gt;completedAt&lt;/div&gt;" vertex="1">
           <mxGeometry height="94" width="135" x="17" y="184" as="geometry" />
         </mxCell>
-        <mxCell id="eno-6006d6a3a4cf" parent="1" style="swimlane;whiteSpace=wrap;html=1;align=right;spacingRight=4;" value="Detect Missed Chore" vertex="1">
-          <mxGeometry height="362" width="310" x="2190" y="150" as="geometry">
+        <mxCell id="eno-519d618b932e" parent="1" style="swimlane;whiteSpace=wrap;html=1;align=right;spacingRight=4;" value="View Overdue Chores" vertex="1">
+          <mxGeometry height="536" width="170" x="2380" y="150" as="geometry">
+            <mxRectangle height="30" width="170" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eno-ea33c27ebad9" parent="eno-519d618b932e" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=3;spacingRight=3;fontColor=#000000;" value="&lt;b&gt;screen&lt;/b&gt;&lt;div&gt;memberOverdue[]&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="135" x="17" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="eno-edde222d59ff" parent="eno-519d618b932e" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#008a00;strokeColor=#005700;align=left;spacingLeft=3;spacingRight=3;fontColor=#ffffff;" value="&lt;b&gt;Member Overdue&lt;/b&gt;&lt;div&gt;memberId&lt;/div&gt;&lt;div&gt;nickname&lt;/div&gt;&lt;div&gt;overdueCount&lt;/div&gt;&lt;div&gt;chores[]&lt;/div&gt;" vertex="1">
+          <mxGeometry height="94" width="135" x="17" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="eno-689ecbef7aca" parent="eno-519d618b932e" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Chore Created&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;name&lt;/div&gt;&lt;div&gt;isOptional=true&lt;/div&gt;" vertex="1">
+          <mxGeometry height="94" width="135" x="17" y="204" as="geometry" />
+        </mxCell>
+        <mxCell id="eno-a444bfdd7b5f" parent="eno-519d618b932e" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Chore Assigned&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;assignedTo[]&lt;/div&gt;&lt;div&gt;assignToAll&lt;/div&gt;" vertex="1">
+          <mxGeometry height="94" width="135" x="17" y="308" as="geometry" />
+        </mxCell>
+        <mxCell id="eno-da73e0de9dfa" parent="eno-519d618b932e" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Chore Completed&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;memberId&lt;/div&gt;&lt;div&gt;completedAt&lt;/div&gt;" vertex="1">
+          <mxGeometry height="94" width="135" x="17" y="412" as="geometry" />
+        </mxCell>
+        <mxCell id="eno-d275f77be00b" parent="1" style="swimlane;whiteSpace=wrap;html=1;align=right;spacingRight=4;" value="Detect Missed Chore" vertex="1">
+          <mxGeometry height="330" width="310" x="2570" y="150" as="geometry">
             <mxRectangle height="30" width="310" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="eno-cea632780a49" parent="eno-6006d6a3a4cf" style="sketch=0;outlineConnect=0;gradientColor=none;fillColor=#898989;strokeColor=#666666;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.gear;" value="" vertex="1">
+        <mxCell id="eno-8a2788827937" parent="eno-d275f77be00b" style="sketch=0;outlineConnect=0;gradientColor=none;fillColor=#898989;strokeColor=#666666;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.gear;" value="" vertex="1">
           <mxGeometry height="43" width="43" x="133" y="40" as="geometry" />
         </mxCell>
-        <mxCell id="eno-2c9888b8287f" parent="eno-6006d6a3a4cf" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="missed chore detector" vertex="1">
+        <mxCell id="eno-648fd979ee98" parent="eno-d275f77be00b" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="missed chore detector" vertex="1">
           <mxGeometry height="24" width="290" x="10" y="88" as="geometry" />
         </mxCell>
-        <mxCell id="eno-45bdda256ad2" parent="eno-6006d6a3a4cf" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#008a00;strokeColor=#005700;align=left;spacingLeft=3;spacingRight=3;fontColor=#ffffff;" value="&lt;b&gt;Due Chores&lt;/b&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;dueDate&lt;/div&gt;&lt;div&gt;assignedTo[]&lt;/div&gt;" vertex="1">
+        <mxCell id="eno-c93fd0ccddd5" parent="eno-d275f77be00b" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#008a00;strokeColor=#005700;align=left;spacingLeft=3;spacingRight=3;fontColor=#ffffff;" value="&lt;b&gt;Due Chores&lt;/b&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;dueDate&lt;/div&gt;&lt;div&gt;assignedTo[]&lt;/div&gt;" vertex="1">
           <mxGeometry height="78" width="135" x="17" y="118" as="geometry" />
         </mxCell>
-        <mxCell id="eno-fa160ad9bdf8" parent="eno-6006d6a3a4cf" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Chore Created&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;name&lt;/div&gt;&lt;div&gt;frequency&lt;/div&gt;&lt;div&gt;assignedTo[]&lt;/div&gt;&lt;div&gt;assignToAll&lt;/div&gt;" vertex="1">
-          <mxGeometry height="126" width="135" x="17" y="206" as="geometry" />
+        <mxCell id="eno-ee3da4aeb1d9" parent="eno-d275f77be00b" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Chore Created&lt;/b&gt;&lt;div&gt;householdId&lt;/div&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;name&lt;/div&gt;&lt;div&gt;isOptional=true&lt;/div&gt;" vertex="1">
+          <mxGeometry height="94" width="135" x="17" y="206" as="geometry" />
         </mxCell>
-        <mxCell id="eno-ae960fe85fc4" parent="eno-6006d6a3a4cf" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0050ef;strokeColor=#001DBC;align=left;spacingLeft=3;spacingRight=3;fontColor=#ffffff;" value="&lt;b&gt;Record Missed Chore&lt;/b&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;memberId&lt;/div&gt;&lt;div&gt;date&lt;/div&gt;" vertex="1">
+        <mxCell id="eno-13f53cb671dc" parent="eno-d275f77be00b" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0050ef;strokeColor=#001DBC;align=left;spacingLeft=3;spacingRight=3;fontColor=#ffffff;" value="&lt;b&gt;Record Missed Chore&lt;/b&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;memberId&lt;/div&gt;&lt;div&gt;date&lt;/div&gt;" vertex="1">
           <mxGeometry height="78" width="135" x="160" y="118" as="geometry" />
         </mxCell>
-        <mxCell id="eno-1ec5b6d39d14" parent="eno-6006d6a3a4cf" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Chore Missed&lt;/b&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;memberId&lt;/div&gt;&lt;div&gt;date&lt;/div&gt;" vertex="1">
+        <mxCell id="eno-2167fdd9f35b" parent="eno-d275f77be00b" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Chore Missed&lt;/b&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;memberId&lt;/div&gt;&lt;div&gt;date&lt;/div&gt;" vertex="1">
           <mxGeometry height="78" width="135" x="160" y="206" as="geometry" />
         </mxCell>
-        <mxCell id="eno-d54c614af2f6" parent="1" style="swimlane;whiteSpace=wrap;html=1;align=right;spacingRight=4;" value="Deduct Allowance" vertex="1">
-          <mxGeometry height="298" width="310" x="2520" y="150" as="geometry">
+        <mxCell id="eno-d9878c396b90" parent="1" style="swimlane;whiteSpace=wrap;html=1;align=right;spacingRight=4;" value="Deduct Allowance" vertex="1">
+          <mxGeometry height="298" width="310" x="2900" y="150" as="geometry">
             <mxRectangle height="30" width="310" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="eno-0c6e630d0a1a" parent="eno-d54c614af2f6" style="sketch=0;outlineConnect=0;gradientColor=none;fillColor=#898989;strokeColor=#666666;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.gear;" value="" vertex="1">
+        <mxCell id="eno-14bd8c9bd585" parent="eno-d9878c396b90" style="sketch=0;outlineConnect=0;gradientColor=none;fillColor=#898989;strokeColor=#666666;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.gear;" value="" vertex="1">
           <mxGeometry height="43" width="43" x="133" y="40" as="geometry" />
         </mxCell>
-        <mxCell id="eno-0f8c8133dadb" parent="eno-d54c614af2f6" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="allowance processor" vertex="1">
+        <mxCell id="eno-dd319817b074" parent="eno-d9878c396b90" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="allowance processor" vertex="1">
           <mxGeometry height="24" width="290" x="10" y="88" as="geometry" />
         </mxCell>
-        <mxCell id="eno-e8ba3c9c75fa" parent="eno-d54c614af2f6" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#008a00;strokeColor=#005700;align=left;spacingLeft=3;spacingRight=3;fontColor=#ffffff;" value="&lt;b&gt;Pending Deductions&lt;/b&gt;&lt;div&gt;memberId&lt;/div&gt;&lt;div&gt;amount&lt;/div&gt;" vertex="1">
+        <mxCell id="eno-3115c132a5ff" parent="eno-d9878c396b90" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#008a00;strokeColor=#005700;align=left;spacingLeft=3;spacingRight=3;fontColor=#ffffff;" value="&lt;b&gt;Pending Deductions&lt;/b&gt;&lt;div&gt;memberId&lt;/div&gt;&lt;div&gt;amount&lt;/div&gt;" vertex="1">
           <mxGeometry height="62" width="135" x="17" y="118" as="geometry" />
         </mxCell>
-        <mxCell id="eno-c4e376fdd3be" parent="eno-d54c614af2f6" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Chore Missed&lt;/b&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;memberId&lt;/div&gt;&lt;div&gt;date&lt;/div&gt;" vertex="1">
+        <mxCell id="eno-f14a4c56db60" parent="eno-d9878c396b90" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Chore Missed&lt;/b&gt;&lt;div&gt;choreId&lt;/div&gt;&lt;div&gt;memberId&lt;/div&gt;&lt;div&gt;date&lt;/div&gt;" vertex="1">
           <mxGeometry height="78" width="135" x="17" y="190" as="geometry" />
         </mxCell>
-        <mxCell id="eno-1ab67b75a233" parent="eno-d54c614af2f6" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0050ef;strokeColor=#001DBC;align=left;spacingLeft=3;spacingRight=3;fontColor=#ffffff;" value="&lt;b&gt;Deduct Allowance&lt;/b&gt;&lt;div&gt;memberId&lt;/div&gt;&lt;div&gt;amount&lt;/div&gt;" vertex="1">
+        <mxCell id="eno-23d0a39a8df2" parent="eno-d9878c396b90" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0050ef;strokeColor=#001DBC;align=left;spacingLeft=3;spacingRight=3;fontColor=#ffffff;" value="&lt;b&gt;Deduct Allowance&lt;/b&gt;&lt;div&gt;memberId&lt;/div&gt;&lt;div&gt;amount&lt;/div&gt;" vertex="1">
           <mxGeometry height="62" width="135" x="160" y="118" as="geometry" />
         </mxCell>
-        <mxCell id="eno-fec7664e22e0" parent="eno-d54c614af2f6" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Allowance Deducted&lt;/b&gt;&lt;div&gt;memberId&lt;/div&gt;&lt;div&gt;amount&lt;/div&gt;" vertex="1">
+        <mxCell id="eno-0cf4c8d0ca16" parent="eno-d9878c396b90" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fa6800;strokeColor=#C73500;align=left;spacingLeft=3;spacingRight=3;fontColor=#FFFFFF;" value="&lt;b&gt;Allowance Deducted&lt;/b&gt;&lt;div&gt;memberId&lt;/div&gt;&lt;div&gt;amount&lt;/div&gt;" vertex="1">
           <mxGeometry height="62" width="135" x="160" y="190" as="geometry" />
         </mxCell>
       </root>
