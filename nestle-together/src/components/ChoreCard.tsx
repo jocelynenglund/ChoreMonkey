@@ -168,11 +168,28 @@ export function ChoreCard({
                 <span className="truncate">{chore.description}</span>
               )}
             </div>
-            <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+            <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground flex-wrap">
               {chore.frequency && (
                 <span className="flex items-center gap-1">
                   <Repeat className="w-3 h-3" />
                   {formatFrequency(chore.frequency)}
+                </span>
+              )}
+              {/* Assignee label */}
+              {chore.assignedToAll ? (
+                <span className="flex items-center gap-1 text-primary">
+                  <Users className="w-3 h-3" />
+                  Everyone
+                </span>
+              ) : assignedMembers.length > 0 ? (
+                <span className="flex items-center gap-1">
+                  <User className="w-3 h-3" />
+                  {assignedMembers.map(m => m.nickname).join(', ')}
+                </span>
+              ) : (
+                <span className="flex items-center gap-1 italic">
+                  <User className="w-3 h-3" />
+                  Unassigned
                 </span>
               )}
             </div>
