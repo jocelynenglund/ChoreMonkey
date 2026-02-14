@@ -1,8 +1,8 @@
 {
   "$schema": "../../giraflow/giraflow.schema.json",
   "name": "ChoreMonkey",
-  "description": "Household chore management with event sourcing. Based on 25+ integration test scenarios.",
-  "version": "1.0.0",
+  "description": "Household chore management with event sourcing. Includes overdue tracking and optional/bonus chores. Based on 34+ integration test scenarios.",
+  "version": "1.1.0",
 
   "timeline": [
     { "type": "comment", "tick": 1, "text": "=== HOUSEHOLD CREATION ===" },
@@ -858,6 +858,72 @@
                 { "memberId": "m-002", "nickname": "ChildA" }
               ]}
             }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "MemberOverdue",
+      "type": "state",
+      "scenarios": [
+        {
+          "name": "Daily chore not completed shows as overdue",
+          "initialState": { "memberOverdue": [] },
+          "steps": [
+            {
+              "given": { "event": "ChoreCreated", "data": { "choreId": "c-001", "displayName": "Make Bed", "frequency": { "type": "daily" }, "isOptional": false } },
+              "then": { "description": "Chore created but no completion yet" }
+            },
+            {
+              "given": { "event": "ChoreAssigned", "data": { "choreId": "c-001", "assignedTo": ["m-001"] } },
+              "then": { "memberOverdue": [{ "memberId": "m-001", "overdueCount": 1, "chores": [{ "choreId": "c-001", "displayName": "Make Bed" }] }] }
+            }
+          ]
+        },
+        {
+          "name": "Optional chores never appear in overdue",
+          "initialState": { "memberOverdue": [] },
+          "steps": [
+            {
+              "given": { "event": "ChoreCreated", "data": { "choreId": "c-bonus", "displayName": "Wash Car", "frequency": { "type": "daily" }, "isOptional": true } },
+              "then": { "description": "Bonus chore created" }
+            },
+            {
+              "given": { "event": "ChoreAssigned", "data": { "choreId": "c-bonus", "assignedTo": ["m-001"] } },
+              "then": { "memberOverdue": [{ "memberId": "m-001", "overdueCount": 0, "chores": [] }] }
+            }
+          ]
+        },
+        {
+          "name": "Completed chore removes from overdue",
+          "initialState": { "memberOverdue": [{ "memberId": "m-001", "overdueCount": 1 }] },
+          "steps": [
+            {
+              "given": { "event": "ChoreCompleted", "data": { "choreId": "c-001", "memberId": "m-001" } },
+              "then": { "memberOverdue": [{ "memberId": "m-001", "overdueCount": 0, "chores": [] }] }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "AddChore (optional)",
+      "type": "command",
+      "scenarios": [
+        {
+          "name": "Create optional/bonus chore",
+          "steps": [
+            { "type": "command", "when": { "displayName": "Wash Car", "isOptional": true }, "produces": [
+              { "event": "ChoreCreated", "data": { "displayName": "Wash Car", "isOptional": true } }
+            ]}
+          ]
+        },
+        {
+          "name": "Regular chore defaults to not optional",
+          "steps": [
+            { "type": "command", "when": { "displayName": "Do Homework" }, "produces": [
+              { "event": "ChoreCreated", "data": { "displayName": "Do Homework", "isOptional": false } }
+            ]}
           ]
         }
       ]

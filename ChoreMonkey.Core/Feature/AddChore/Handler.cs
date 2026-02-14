@@ -12,12 +12,14 @@ public record AddChoreCommand(
     Guid ChoreId, 
     string DisplayName, 
     string Description,
-    ChoreFrequency? Frequency = null);
+    ChoreFrequency? Frequency = null,
+    bool IsOptional = false);
 
 public record AddChoreRequest(
     string DisplayName, 
     string Description,
-    FrequencyRequest? Frequency = null);
+    FrequencyRequest? Frequency = null,
+    bool IsOptional = false);
 
 public record FrequencyRequest(
     string Type,
@@ -38,7 +40,8 @@ internal class Handler(IEventStore store)
             request.HouseholdId, 
             request.DisplayName, 
             request.Description,
-            frequency);
+            frequency,
+            request.IsOptional);
             
         await store.AppendToStreamAsync(streamId, choreCreated, ExpectedVersion.Any);
     }
@@ -59,7 +62,8 @@ internal static class AddChoreEndpoint
                 Guid.NewGuid(), 
                 dto.DisplayName, 
                 dto.Description,
-                frequency);
+                frequency,
+                dto.IsOptional);
                 
             await handler.HandleAsync(command);
             return Results.Created($"/api/households/{householdId}/chores", null);

@@ -72,13 +72,16 @@ export function PinInput({
           ref={(el) => {
             inputRefs.current[index] = el;
           }}
-          type="text"
+          type="tel"
           inputMode="numeric"
+          pattern="[0-9]*"
+          autoComplete="one-time-code"
           maxLength={1}
           value={value}
           onChange={(e) => handleChange(index, e.target.value)}
           onKeyDown={(e) => handleKeyDown(index, e)}
           onPaste={handlePaste}
+          onFocus={(e) => e.target.select()}
           disabled={disabled}
           className={cn(
             'w-14 h-16 text-center text-2xl font-bold rounded-xl border-2 bg-card transition-all duration-200 outline-none',
