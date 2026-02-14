@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Household, Member, Chore, Invite, ChoreFrequency, MemberCompletion, ChoreCompletion, MemberOverdue, OverdueChore } from '@/types/household';
+import type { Household, Member, Chore, Invite, ChoreFrequency, MemberCompletion, ChoreCompletion, MemberOverdue, OverdueChore, MyChoresResponse, MyPendingChore, MyOverdueChore, MyCompletedChore } from '@/types/household';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7422';
 
@@ -41,6 +41,7 @@ interface HouseholdState {
   fetchHouseholdMembers: (householdId: string) => Promise<Member[]>;
   fetchChoreHistory: (householdId: string, choreId: string) => Promise<ChoreCompletion[]>;
   fetchOverdueChores: (householdId: string) => Promise<MemberOverdue[]>;
+  fetchMyChores: (householdId: string, memberId: string) => Promise<MyChoresResponse | null>;
 
   // Local getters (for cached data)
   getHouseholdMembers: (householdId: string) => Member[];
@@ -625,6 +626,45 @@ export const useHouseholdStore = create<HouseholdState>()(
         } catch (error) {
           console.error('Failed to fetch overdue chores', error);
           return [];
+        }
+      },
+
+      fetchMyChores: async (householdId, memberId) => {
+        try {
+          const response = await fetch(
+            `${API_BASE_URL}/api/households/${householdId}/my-chores?memberId=${memberId}`
+          );
+          
+          if (!response.ok) {
+            return null;
+          }
+          
+          const data = await response.json();
+          
+          const result: MyChoresResponse = {
+            pending: (data.pending ?? []).map((c: Record<string, unknown>) => ({
+              choreId: c.choreId as string,
+              displayName: c.displayName as string,
+              frequencyType: c.frequencyType as string | undefined,
+              dueDescription: c.dueDescription as string | undefined,
+            })),
+            overdue: (data.overdue ?? []).map((c: Record<string, unknown>) => ({
+              choreId: c.choreId as string,
+              displayName: c.displayName as string,
+              frequencyType: c.frequencyType as string | undefined,
+              overduePeriod: c.overduePeriod as string,
+            })),
+            completed: (data.completed ?? []).map((c: Record<string, unknown>) => ({
+              choreId: c.choreId as string,
+              displayName: c.displayName as string,
+              completedAt: new Date(c.completedAt as string),
+            })),
+          };
+          
+          return result;
+        } catch (error) {
+          console.error('Failed to fetch my chores', error);
+          return null;
         }
       },
 

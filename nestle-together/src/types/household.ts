@@ -75,3 +75,30 @@ export interface MemberOverdue {
   overdueCount: number;
   chores: OverdueChore[];
 }
+
+// My Chores personal read model
+export interface MyPendingChore {
+  choreId: string;
+  displayName: string;
+  frequencyType?: string;
+  dueDescription?: string;
+}
+
+export interface MyOverdueChore {
+  choreId: string;
+  displayName: string;
+  frequencyType?: string;
+  overduePeriod: string;
+}
+
+export interface MyCompletedChore {
+  choreId: string;
+  displayName: string;
+  completedAt: Date;
+}
+
+export interface MyChoresResponse {
+  pending: MyPendingChore[];
+  overdue: MyOverdueChore[];
+  completed: MyCompletedChore[];
+}
