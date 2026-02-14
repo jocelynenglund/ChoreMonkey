@@ -9,6 +9,7 @@ import { CompleteChoreDialog } from '@/components/CompleteChoreDialog';
 import { InviteDialog } from '@/components/InviteDialog';
 import { MemberAvatar } from '@/components/MemberAvatar';
 import { OverdueAccordion } from '@/components/OverdueAccordion';
+import { CompletionTimeline } from '@/components/CompletionTimeline';
 import type { Household, Chore, ChoreFrequency } from '@/types/household';
 
 export default function HouseholdDashboard() {
@@ -201,6 +202,11 @@ export default function HouseholdDashboard() {
         {/* Overdue Chores Accordion */}
         <div className="mb-6">
           <OverdueAccordion householdId={household.id} />
+        </div>
+
+        {/* Recent Activity Timeline */}
+        <div className="mb-6">
+          <CompletionTimeline householdId={household.id} />
         </div>
 
         {/* Chores Section */}
