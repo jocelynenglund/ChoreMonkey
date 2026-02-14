@@ -121,6 +121,48 @@ public class MultiAssigneeTests(ApiFixture fixture)
     }
 
     [Fact]
+    public async Task CompleteChore_WhenNotAssigned_AutoAssignsThenCompletes()
+    {
+        // Arrange - chore with no assignment
+        var household = await CreateHousehold("Auto-Assign Family");
+        var invite = await GenerateInvite(household.HouseholdId);
+        var kid = await JoinHousehold(household.HouseholdId, invite.InviteId, "Eager Kid");
+        
+        var choreRequest = new 
+        { 
+            DisplayName = "Surprise Cleanup", 
+            Description = "Kid does it without being asked",
+            Frequency = new { Type = "once" }
+        };
+        await _client.PostAsJsonAsync($"/api/households/{household.HouseholdId}/chores", choreRequest);
+        
+        var choresResponse = await _client.GetAsync($"/api/households/{household.HouseholdId}/chores");
+        var chores = await choresResponse.Content.ReadFromJsonAsync<GetChoresResponse>();
+        var choreId = chores!.Chores[0].ChoreId;
+        
+        // Verify no one is assigned initially
+        chores.Chores[0].AssignedTo.Should().BeNull();
+
+        // Act - kid completes unassigned chore
+        var completeRequest = new { MemberId = kid.MemberId };
+        var completeResponse = await _client.PostAsJsonAsync(
+            $"/api/households/{household.HouseholdId}/chores/{choreId}/complete",
+            completeRequest);
+
+        // Assert - kid should now be assigned AND have completed
+        completeResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        
+        var finalChores = await _client.GetFromJsonAsync<GetChoresResponse>(
+            $"/api/households/{household.HouseholdId}/chores");
+        var chore = finalChores!.Chores[0];
+        
+        // Kid got auto-assigned
+        chore.AssignedTo.Should().Contain(kid.MemberId);
+        // And completed
+        chore.LastCompletedBy.Should().Be(kid.MemberId);
+    }
+
+    [Fact]
     public async Task AssignChore_Unassign_ClearsAssignment()
     {
         // Arrange
