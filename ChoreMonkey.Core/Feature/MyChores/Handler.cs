@@ -19,7 +19,8 @@ public record MyOverdueChoreDto(
     Guid ChoreId,
     string DisplayName,
     string? FrequencyType,
-    string OverduePeriod);
+    string OverduePeriod,
+    string PeriodKey);  // For acknowledge-missed: "2024-02-13" or "2024-W06"
 
 public record MyCompletedChoreDto(
     Guid ChoreId,
@@ -48,6 +49,8 @@ internal class Handler(IEventStore store)
         
         var today = DateTime.UtcNow.Date;
         var currentWeekStart = GetMondayOfWeek(today);
+        var previousWeekStart = currentWeekStart.AddDays(-7);
+        var yesterday = today.AddDays(-1);
         
         // Get all chores (excluding deleted)
         var deletedChoreIds = choreEvents.OfType<ChoreDeleted>()
@@ -69,6 +72,12 @@ internal class Handler(IEventStore store)
             .GroupBy(e => e.ChoreId)
             .ToDictionary(g => g.Key, g => g.ToList());
         
+        // Get this member's acknowledged misses
+        var myAcknowledgments = choreEvents.OfType<ChoreMissedAcknowledged>()
+            .Where(a => a.MemberId == request.MemberId)
+            .GroupBy(a => a.ChoreId)
+            .ToDictionary(g => g.Key, g => g.Select(a => a.Period).ToHashSet());
+        
         var pending = new List<MyChoreDto>();
         var overdue = new List<MyOverdueChoreDto>();
         var completed = new List<MyCompletedChoreDto>();
@@ -83,42 +92,55 @@ internal class Handler(IEventStore store)
             if (!isAssignedToMe) continue;
             
             var choreCompletions = myCompletions.GetValueOrDefault(choreId) ?? [];
+            var acknowledgedPeriods = myAcknowledgments.GetValueOrDefault(choreId) ?? [];
             var choreStartDate = chore.StartDate?.Date 
                 ?? (DateTime.TryParse(chore.TimestampUtc, out var parsed) ? parsed.Date : today);
             
-            // Categorize the chore
-            var (status, periodCompletion, overduePeriod) = CategorizeChore(
+            // Categorize for CURRENT period (pending vs completed)
+            var currentPeriodResult = GetCurrentPeriodStatus(
                 chore.Frequency, 
                 choreCompletions, 
                 today, 
-                currentWeekStart,
-                choreStartDate,
-                chore.IsOptional);
+                currentWeekStart);
             
-            switch (status)
+            if (currentPeriodResult.IsCompleted)
             {
-                case ChoreStatus.Pending:
-                    pending.Add(new MyChoreDto(
-                        choreId,
-                        chore.DisplayName,
-                        chore.Frequency?.Type,
-                        GetDueDescription(chore.Frequency, today, currentWeekStart)));
-                    break;
-                    
-                case ChoreStatus.Overdue:
+                completed.Add(new MyCompletedChoreDto(
+                    choreId,
+                    chore.DisplayName,
+                    currentPeriodResult.CompletedAt!.Value));
+            }
+            else
+            {
+                pending.Add(new MyChoreDto(
+                    choreId,
+                    chore.DisplayName,
+                    chore.Frequency?.Type,
+                    GetDueDescription(chore.Frequency, today, currentWeekStart)));
+            }
+            
+            // Check for PREVIOUS period overdue (separate from current period)
+            if (!chore.IsOptional)
+            {
+                var overdueResult = GetPreviousPeriodOverdue(
+                    chore.Frequency,
+                    choreCompletions,
+                    acknowledgedPeriods,
+                    today,
+                    yesterday,
+                    currentWeekStart,
+                    previousWeekStart,
+                    choreStartDate);
+                
+                if (overdueResult.IsOverdue)
+                {
                     overdue.Add(new MyOverdueChoreDto(
                         choreId,
                         chore.DisplayName,
                         chore.Frequency?.Type,
-                        overduePeriod!));
-                    break;
-                    
-                case ChoreStatus.Completed:
-                    completed.Add(new MyCompletedChoreDto(
-                        choreId,
-                        chore.DisplayName,
-                        periodCompletion!.Value));
-                    break;
+                        overdueResult.OverduePeriod!,
+                        overdueResult.PeriodKey!));
+                }
             }
         }
         
@@ -128,164 +150,164 @@ internal class Handler(IEventStore store)
             completed.OrderByDescending(c => c.CompletedAt).ToList());
     }
     
-    private enum ChoreStatus { Pending, Overdue, Completed }
+    private record CurrentPeriodResult(bool IsCompleted, DateTime? CompletedAt);
+    private record OverdueResult(bool IsOverdue, string? OverduePeriod, string? PeriodKey);
     
-    private static (ChoreStatus Status, DateTime? PeriodCompletion, string? OverduePeriod) CategorizeChore(
+    private static CurrentPeriodResult GetCurrentPeriodStatus(
         ChoreFrequency? frequency,
         List<ChoreCompleted> completions,
         DateTime today,
-        DateTime currentWeekStart,
-        DateTime choreStartDate,
-        bool isOptional)
+        DateTime currentWeekStart)
     {
-        if (frequency == null)
+        if (frequency == null || frequency.Type.ToLower() == "once")
         {
-            // No frequency = one-time chore
-            var anyCompletion = completions.MaxBy(c => c.CompletedAt);
-            return anyCompletion != null 
-                ? (ChoreStatus.Completed, anyCompletion.CompletedAt, null)
-                : (ChoreStatus.Pending, null, null);
+            var completion = completions.MaxBy(c => c.CompletedAt);
+            return new CurrentPeriodResult(completion != null, completion?.CompletedAt);
         }
         
         return frequency.Type.ToLower() switch
         {
-            "daily" => CategorizeDailyChore(completions, today, choreStartDate, isOptional),
-            "weekly" => CategorizeWeeklyChore(frequency.Days, completions, today, currentWeekStart, choreStartDate, isOptional),
-            "interval" => CategorizeIntervalChore(frequency.IntervalDays ?? 1, completions, today, choreStartDate, isOptional),
-            "once" => CategorizeOnceChore(completions),
-            _ => (ChoreStatus.Pending, null, null)
+            "daily" => GetDailyCurrentStatus(completions, today),
+            "weekly" => GetWeeklyCurrentStatus(completions, currentWeekStart),
+            "interval" => GetIntervalCurrentStatus(frequency.IntervalDays ?? 1, completions, today),
+            _ => new CurrentPeriodResult(false, null)
         };
     }
     
-    private static (ChoreStatus, DateTime?, string?) CategorizeDailyChore(
-        List<ChoreCompleted> completions,
-        DateTime today,
-        DateTime choreStartDate,
-        bool isOptional)
+    private static CurrentPeriodResult GetDailyCurrentStatus(List<ChoreCompleted> completions, DateTime today)
     {
-        var yesterday = today.AddDays(-1);
-        
-        // Check if completed today
         var todayCompletion = completions.FirstOrDefault(c => c.CompletedAt.Date == today);
-        if (todayCompletion != null)
-            return (ChoreStatus.Completed, todayCompletion.CompletedAt, null);
-        
-        // Check if overdue (missed yesterday) - only for non-optional chores
-        if (!isOptional && choreStartDate <= yesterday)
-        {
-            var yesterdayCompletion = completions.FirstOrDefault(c => c.CompletedAt.Date == yesterday);
-            if (yesterdayCompletion == null)
-                return (ChoreStatus.Overdue, null, "yesterday");
-        }
-        
-        // Pending for today
-        return (ChoreStatus.Pending, null, null);
+        return new CurrentPeriodResult(todayCompletion != null, todayCompletion?.CompletedAt);
     }
     
-    private static (ChoreStatus, DateTime?, string?) CategorizeWeeklyChore(
-        string[]? days,
-        List<ChoreCompleted> completions,
-        DateTime today,
-        DateTime currentWeekStart,
-        DateTime choreStartDate,
-        bool isOptional)
+    private static CurrentPeriodResult GetWeeklyCurrentStatus(List<ChoreCompleted> completions, DateTime currentWeekStart)
     {
-        var previousWeekStart = currentWeekStart.AddDays(-7);
-        
-        // Weekly-anyday: no specific days
-        if (days == null || days.Length == 0)
-        {
-            // Check if completed this week
-            var thisWeekCompletion = completions
-                .Where(c => c.CompletedAt.Date >= currentWeekStart)
-                .MaxBy(c => c.CompletedAt);
-            if (thisWeekCompletion != null)
-                return (ChoreStatus.Completed, thisWeekCompletion.CompletedAt, null);
-            
-            // Check if overdue (missed last week) - only for non-optional and if existed last week
-            if (!isOptional && choreStartDate < currentWeekStart)
-            {
-                var lastWeekCompletion = completions
-                    .FirstOrDefault(c => c.CompletedAt.Date >= previousWeekStart && c.CompletedAt.Date < currentWeekStart);
-                if (lastWeekCompletion == null)
-                    return (ChoreStatus.Overdue, null, "last week");
-            }
-            
-            return (ChoreStatus.Pending, null, null);
-        }
-        
-        // Weekly with specific days
-        var requiredDays = days.Select(d => Enum.Parse<DayOfWeek>(d, ignoreCase: true)).ToHashSet();
-        
-        // Check if completed this week on/after a required day
-        var thisWeekCompletion2 = completions
+        var thisWeekCompletion = completions
             .Where(c => c.CompletedAt.Date >= currentWeekStart)
             .MaxBy(c => c.CompletedAt);
-        if (thisWeekCompletion2 != null)
-            return (ChoreStatus.Completed, thisWeekCompletion2.CompletedAt, null);
-        
-        // Check for overdue (missed last week's required day) - only for non-optional
-        if (!isOptional)
-        {
-            for (int i = 0; i < 7; i++)
-            {
-                var checkDate = previousWeekStart.AddDays(i);
-                if (!requiredDays.Contains(checkDate.DayOfWeek)) continue;
-                if (choreStartDate > checkDate) continue;
-                
-                var completedOnOrAfter = completions.Any(c => c.CompletedAt.Date >= checkDate);
-                if (!completedOnOrAfter)
-                    return (ChoreStatus.Overdue, null, $"last {checkDate.DayOfWeek}");
-            }
-        }
-        
-        return (ChoreStatus.Pending, null, null);
+        return new CurrentPeriodResult(thisWeekCompletion != null, thisWeekCompletion?.CompletedAt);
     }
     
-    private static (ChoreStatus, DateTime?, string?) CategorizeIntervalChore(
+    private static CurrentPeriodResult GetIntervalCurrentStatus(int intervalDays, List<ChoreCompleted> completions, DateTime today)
+    {
+        var lastCompletion = completions.MaxBy(c => c.CompletedAt);
+        if (lastCompletion == null) return new CurrentPeriodResult(false, null);
+        
+        var nextDue = lastCompletion.CompletedAt.Date.AddDays(intervalDays);
+        return new CurrentPeriodResult(today < nextDue, lastCompletion.CompletedAt);
+    }
+    
+    private static OverdueResult GetPreviousPeriodOverdue(
+        ChoreFrequency? frequency,
+        List<ChoreCompleted> completions,
+        HashSet<string> acknowledgedPeriods,
+        DateTime today,
+        DateTime yesterday,
+        DateTime currentWeekStart,
+        DateTime previousWeekStart,
+        DateTime choreStartDate)
+    {
+        if (frequency == null || frequency.Type.ToLower() == "once")
+        {
+            return new OverdueResult(false, null, null);
+        }
+        
+        return frequency.Type.ToLower() switch
+        {
+            "daily" => GetDailyOverdue(completions, acknowledgedPeriods, yesterday, choreStartDate),
+            "weekly" => GetWeeklyOverdue(frequency.Days, completions, acknowledgedPeriods, currentWeekStart, previousWeekStart, choreStartDate),
+            "interval" => GetIntervalOverdue(frequency.IntervalDays ?? 1, completions, acknowledgedPeriods, today, choreStartDate),
+            _ => new OverdueResult(false, null, null)
+        };
+    }
+    
+    private static OverdueResult GetDailyOverdue(
+        List<ChoreCompleted> completions,
+        HashSet<string> acknowledgedPeriods,
+        DateTime yesterday,
+        DateTime choreStartDate)
+    {
+        // Can't be overdue if chore didn't exist yesterday
+        if (choreStartDate > yesterday)
+            return new OverdueResult(false, null, null);
+        
+        var periodKey = yesterday.ToString("yyyy-MM-dd");
+        
+        // Check if acknowledged
+        if (acknowledgedPeriods.Contains(periodKey))
+            return new OverdueResult(false, null, null);
+        
+        // Check if completed yesterday
+        var yesterdayCompletion = completions.FirstOrDefault(c => c.CompletedAt.Date == yesterday);
+        if (yesterdayCompletion != null)
+            return new OverdueResult(false, null, null);
+        
+        return new OverdueResult(true, "yesterday", periodKey);
+    }
+    
+    private static OverdueResult GetWeeklyOverdue(
+        string[]? days,
+        List<ChoreCompleted> completions,
+        HashSet<string> acknowledgedPeriods,
+        DateTime currentWeekStart,
+        DateTime previousWeekStart,
+        DateTime choreStartDate)
+    {
+        // Can't be overdue if chore didn't exist last week
+        if (choreStartDate >= currentWeekStart)
+            return new OverdueResult(false, null, null);
+        
+        var periodKey = GetWeekPeriod(previousWeekStart);
+        
+        // Check if acknowledged
+        if (acknowledgedPeriods.Contains(periodKey))
+            return new OverdueResult(false, null, null);
+        
+        // Check if completed last week
+        var lastWeekCompletion = completions.FirstOrDefault(c => 
+            c.CompletedAt.Date >= previousWeekStart && c.CompletedAt.Date < currentWeekStart);
+        if (lastWeekCompletion != null)
+            return new OverdueResult(false, null, null);
+        
+        return new OverdueResult(true, "last week", periodKey);
+    }
+    
+    private static OverdueResult GetIntervalOverdue(
         int intervalDays,
         List<ChoreCompleted> completions,
+        HashSet<string> acknowledgedPeriods,
         DateTime today,
-        DateTime choreStartDate,
-        bool isOptional)
+        DateTime choreStartDate)
     {
         var lastCompletion = completions.MaxBy(c => c.CompletedAt);
         
+        DateTime dueDate;
         if (lastCompletion == null)
         {
-            // Never completed
-            var firstDueDate = choreStartDate.AddDays(intervalDays);
-            if (today < firstDueDate)
-                return (ChoreStatus.Pending, null, null);
-            
-            var daysOverdue = (int)(today - firstDueDate).TotalDays;
-            if (!isOptional && daysOverdue > 0 && daysOverdue <= intervalDays)
-                return (ChoreStatus.Overdue, null, daysOverdue == 1 ? "yesterday" : $"{daysOverdue} days ago");
-            
-            return (ChoreStatus.Pending, null, null);
+            dueDate = choreStartDate.AddDays(intervalDays);
+        }
+        else
+        {
+            dueDate = lastCompletion.CompletedAt.Date.AddDays(intervalDays);
         }
         
-        var nextDueDate = lastCompletion.CompletedAt.Date.AddDays(intervalDays);
+        if (today <= dueDate)
+            return new OverdueResult(false, null, null);
         
-        // If completed recently enough, it's completed
-        if (today <= nextDueDate)
-            return (ChoreStatus.Completed, lastCompletion.CompletedAt, null);
+        var daysOverdue = (int)(today - dueDate).TotalDays;
         
-        // Overdue - but only within grace period (1 interval)
-        var daysOverdue2 = (int)(today - nextDueDate).TotalDays;
-        if (!isOptional && daysOverdue2 <= intervalDays)
-            return (ChoreStatus.Overdue, null, daysOverdue2 == 1 ? "yesterday" : $"{daysOverdue2} days ago");
+        // Only show if within grace period (1 interval)
+        if (daysOverdue > intervalDays)
+            return new OverdueResult(false, null, null);
         
-        // Past grace period = treat as pending (forgiven)
-        return (ChoreStatus.Pending, null, null);
-    }
-    
-    private static (ChoreStatus, DateTime?, string?) CategorizeOnceChore(List<ChoreCompleted> completions)
-    {
-        var completion = completions.MaxBy(c => c.CompletedAt);
-        return completion != null
-            ? (ChoreStatus.Completed, completion.CompletedAt, null)
-            : (ChoreStatus.Pending, null, null);
+        var periodKey = dueDate.ToString("yyyy-MM-dd");
+        
+        // Check if acknowledged
+        if (acknowledgedPeriods.Contains(periodKey))
+            return new OverdueResult(false, null, null);
+        
+        var overduePeriod = daysOverdue == 1 ? "yesterday" : $"{daysOverdue} days ago";
+        return new OverdueResult(true, overduePeriod, periodKey);
     }
     
     private static string? GetDueDescription(ChoreFrequency? frequency, DateTime today, DateTime currentWeekStart)
@@ -308,6 +330,13 @@ internal class Handler(IEventStore store)
     {
         var diff = (7 + (date.DayOfWeek - DayOfWeek.Monday)) % 7;
         return date.AddDays(-diff).Date;
+    }
+    
+    private static string GetWeekPeriod(DateTime date)
+    {
+        var cal = System.Globalization.CultureInfo.InvariantCulture.Calendar;
+        var week = cal.GetWeekOfYear(date, System.Globalization.CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
+        return $"{date.Year}-W{week:D2}";
     }
 }
 

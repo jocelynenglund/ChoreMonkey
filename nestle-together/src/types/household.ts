@@ -89,6 +89,7 @@ export interface MyOverdueChore {
   displayName: string;
   frequencyType?: string;
   overduePeriod: string;
+  periodKey: string;  // For acknowledge-missed: "2024-02-13" or "2024-W06"
 }
 
 export interface MyCompletedChore {

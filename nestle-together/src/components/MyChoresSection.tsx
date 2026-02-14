@@ -3,7 +3,8 @@ import { useHouseholdStore } from '@/stores/householdStore';
 import type { MyChoresResponse } from '@/types/household';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, AlertTriangle, Clock, Sparkles } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { CheckCircle2, AlertTriangle, Clock, Sparkles, X } from 'lucide-react';
 import {
   Accordion,
   AccordionContent,
@@ -20,7 +21,7 @@ interface MyChoreSectionProps {
 export function MyChoresSection({ householdId, memberId, onCompleteChore }: MyChoreSectionProps) {
   const [myChores, setMyChores] = useState<MyChoresResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { fetchMyChores } = useHouseholdStore();
+  const { fetchMyChores, acknowledgeMissed } = useHouseholdStore();
 
   const loadMyChores = async () => {
     setIsLoading(true);
@@ -32,6 +33,14 @@ export function MyChoresSection({ householdId, memberId, onCompleteChore }: MyCh
   useEffect(() => {
     loadMyChores();
   }, [householdId, memberId]);
+
+  const handleDidntDo = async (choreId: string, periodKey: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Don't trigger the complete action
+    const success = await acknowledgeMissed(householdId, choreId, memberId, periodKey);
+    if (success) {
+      await loadMyChores(); // Refresh to remove the acknowledged item
+    }
+  };
 
   if (isLoading) {
     return (
@@ -84,24 +93,40 @@ export function MyChoresSection({ householdId, memberId, onCompleteChore }: MyCh
             <ul className="space-y-2">
               {myChores.overdue.map((chore) => (
                 <li
-                  key={chore.choreId}
-                  className="flex items-center justify-between p-3 bg-white rounded-md border border-red-200 cursor-pointer hover:bg-red-100 transition-colors"
-                  onClick={() => onCompleteChore?.(chore.choreId)}
+                  key={`${chore.choreId}-${chore.periodKey}`}
+                  className="flex items-center justify-between p-3 bg-white rounded-md border border-red-200"
                 >
-                  <div>
+                  <div 
+                    className="flex-1 cursor-pointer hover:text-red-700 transition-colors"
+                    onClick={() => onCompleteChore?.(chore.choreId)}
+                    title="Complete retroactively"
+                  >
                     <span className="font-medium">{chore.displayName}</span>
                     {chore.frequencyType && (
                       <span className="text-xs text-muted-foreground ml-2">
                         ({chore.frequencyType})
                       </span>
                     )}
+                    <span className="text-sm text-red-600 font-medium ml-2">
+                      • {chore.overduePeriod}
+                    </span>
                   </div>
-                  <span className="text-sm text-red-600 font-medium">
-                    from {chore.overduePeriod}
-                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-muted-foreground hover:text-red-600 hover:bg-red-100"
+                    onClick={(e) => handleDidntDo(chore.choreId, chore.periodKey, e)}
+                    title="Didn't do - acknowledge and dismiss"
+                  >
+                    <X className="h-4 w-4 mr-1" />
+                    Didn't do
+                  </Button>
                 </li>
               ))}
             </ul>
+            <p className="text-xs text-red-600 mt-3">
+              Tap chore to complete retroactively, or "Didn't do" to dismiss
+            </p>
           </CardContent>
         </Card>
       )}

@@ -67,9 +67,9 @@ public class MyChoresTests(ApiFixture fixture)
         // Act
         var result = await GetMyChores(household.HouseholdId, kid.MemberId);
 
-        // Assert - should show as overdue (missed yesterday)
+        // Assert - should show as overdue (missed yesterday) AND pending (for today)
         result.Overdue.Should().ContainSingle(c => c.DisplayName == "Feed Fish" && c.OverduePeriod == "yesterday");
-        result.Pending.Should().BeEmpty();
+        result.Pending.Should().ContainSingle(c => c.DisplayName == "Feed Fish"); // Still pending for today
         result.Completed.Should().BeEmpty();
     }
 

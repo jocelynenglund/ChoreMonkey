@@ -42,6 +42,7 @@ interface HouseholdState {
   fetchChoreHistory: (householdId: string, choreId: string) => Promise<ChoreCompletion[]>;
   fetchOverdueChores: (householdId: string) => Promise<MemberOverdue[]>;
   fetchMyChores: (householdId: string, memberId: string) => Promise<MyChoresResponse | null>;
+  acknowledgeMissed: (householdId: string, choreId: string, memberId: string, period: string) => Promise<boolean>;
 
   // Local getters (for cached data)
   getHouseholdMembers: (householdId: string) => Member[];
@@ -653,6 +654,7 @@ export const useHouseholdStore = create<HouseholdState>()(
               displayName: c.displayName as string,
               frequencyType: c.frequencyType as string | undefined,
               overduePeriod: c.overduePeriod as string,
+              periodKey: c.periodKey as string,
             })),
             completed: (data.completed ?? []).map((c: Record<string, unknown>) => ({
               choreId: c.choreId as string,
@@ -665,6 +667,23 @@ export const useHouseholdStore = create<HouseholdState>()(
         } catch (error) {
           console.error('Failed to fetch my chores', error);
           return null;
+        }
+      },
+
+      acknowledgeMissed: async (householdId, choreId, memberId, period) => {
+        try {
+          const response = await fetch(
+            `${API_BASE_URL}/api/households/${householdId}/chores/${choreId}/acknowledge-missed`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ memberId, period }),
+            }
+          );
+          return response.ok;
+        } catch (error) {
+          console.error('Failed to acknowledge missed chore', error);
+          return false;
         }
       },
 

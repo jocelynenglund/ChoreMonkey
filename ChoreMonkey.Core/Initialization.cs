@@ -21,6 +21,7 @@ using ChoreMonkey.Core.Feature.DeleteChore;
 using ChoreMonkey.Core.Feature.SetAdminPin;
 using ChoreMonkey.Core.Feature.SetMemberPin;
 using ChoreMonkey.Core.Feature.MyChores;
+using ChoreMonkey.Core.Feature.AcknowledgeMissed;
 
 namespace ChoreMonkey.Core;
 
@@ -52,6 +53,7 @@ public static class Initialization
         services.AddScoped<Feature.OverdueChores.Handler>();
         services.AddScoped<Feature.CompletionTimeline.Handler>();
         services.AddScoped<Feature.MyChores.Handler>();
+        services.AddScoped<Feature.AcknowledgeMissed.Handler>();
         services.AddScoped<Feature.DeleteChore.Handler>();
         services.AddScoped<Feature.SetAdminPin.Handler>();
         services.AddScoped<Feature.SetMemberPin.Handler>();
@@ -77,6 +79,7 @@ public static class Initialization
         OverdueChoresEndpoint.Map(householdEndpoints);
         CompletionTimelineEndpoint.Map(householdEndpoints);
         MyChoresEndpoint.Map(householdEndpoints);
+        AcknowledgeMissedEndpoint.Map(householdEndpoints);
         DeleteChoreEndpoint.Map(householdEndpoints);
         SetAdminPinEndpoint.Map(householdEndpoints);
         SetMemberPinEndpoint.Map(householdEndpoints);
