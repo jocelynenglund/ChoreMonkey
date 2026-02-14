@@ -40,7 +40,7 @@ export function AddChoreDialog({ onAdd }: AddChoreDialogProps) {
   const [open, setOpen] = useState(false);
   const [displayName, setDisplayName] = useState('');
   const [description, setDescription] = useState('');
-  const [frequencyType, setFrequencyType] = useState<ChoreFrequency['type']>('once');
+  const [frequencyType, setFrequencyType] = useState<string>('once'); // 'once' | 'daily' | 'weekly' | 'weekly-anyday' | 'interval'
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [intervalDays, setIntervalDays] = useState('3');
   const [isOptional, setIsOptional] = useState(false);
@@ -50,10 +50,13 @@ export function AddChoreDialog({ onAdd }: AddChoreDialogProps) {
     e.preventDefault();
     if (!displayName.trim()) return;
 
-    const frequency: ChoreFrequency = { type: frequencyType };
+    // Map UI frequency type to API frequency
+    const apiFrequencyType = frequencyType === 'weekly-anyday' ? 'weekly' : frequencyType;
+    const frequency: ChoreFrequency = { type: apiFrequencyType as ChoreFrequency['type'] };
     if (frequencyType === 'weekly' && selectedDays.length > 0) {
       frequency.days = selectedDays;
     }
+    // weekly-anyday: no days array = any day this week
     if (frequencyType === 'interval') {
       frequency.intervalDays = parseInt(intervalDays, 10) || 3;
     }
@@ -132,14 +135,15 @@ export function AddChoreDialog({ onAdd }: AddChoreDialogProps) {
 
           <div className="space-y-2">
             <Label>How often?</Label>
-            <Select value={frequencyType} onValueChange={(v) => setFrequencyType(v as ChoreFrequency['type'])}>
+            <Select value={frequencyType} onValueChange={setFrequencyType}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="once">One-time task</SelectItem>
                 <SelectItem value="daily">Every day</SelectItem>
-                <SelectItem value="weekly">Specific days</SelectItem>
+                <SelectItem value="weekly-anyday">Once per week (any day)</SelectItem>
+                <SelectItem value="weekly">Specific days of the week</SelectItem>
                 <SelectItem value="interval">Every X days</SelectItem>
               </SelectContent>
             </Select>

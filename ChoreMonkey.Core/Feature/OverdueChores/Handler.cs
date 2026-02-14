@@ -148,11 +148,21 @@ internal class Handler(IEventStore store)
         return (int)(today - lastCompletedDate).TotalDays - 1;
     }
     
+    private static DateTime GetMondayOfWeek(DateTime date)
+    {
+        var diff = (7 + (date.DayOfWeek - DayOfWeek.Monday)) % 7;
+        return date.AddDays(-diff).Date;
+    }
+
     private static int CalculateWeeklyOverdue(string[]? days, DateTime? lastCompleted, DateTime today, DateTime choreCreatedAt)
     {
-        if (days == null || days.Length == 0) return 0;
+        // Weekly-anyday: no specific days = must complete once per week (Mon-Sun)
+        if (days == null || days.Length == 0)
+        {
+            return CalculateWeeklyAnydayOverdue(lastCompleted, today, choreCreatedAt);
+        }
         
-        // Find the most recent required day that has passed
+        // Weekly with specific days
         var requiredDays = days
             .Select(d => Enum.Parse<DayOfWeek>(d, ignoreCase: true))
             .ToHashSet();
@@ -177,6 +187,41 @@ internal class Handler(IEventStore store)
         }
         
         return 0;
+    }
+
+    private static int CalculateWeeklyAnydayOverdue(DateTime? lastCompleted, DateTime today, DateTime choreCreatedAt)
+    {
+        var currentWeekStart = GetMondayOfWeek(today);
+        var previousWeekStart = currentWeekStart.AddDays(-7);
+        
+        // If chore was created this week, can't be overdue yet
+        if (choreCreatedAt >= currentWeekStart) return 0;
+        
+        // Check if completed this week
+        if (lastCompleted != null && lastCompleted.Value.Date >= currentWeekStart)
+        {
+            return 0; // Completed this week, not overdue
+        }
+        
+        // Check if completed last week
+        if (lastCompleted != null && lastCompleted.Value.Date >= previousWeekStart)
+        {
+            return 0; // Completed last week, give them this week
+        }
+        
+        // Overdue - calculate how many days since last week ended (or since creation)
+        if (lastCompleted == null)
+        {
+            // Never completed - overdue since the week after creation ended
+            var creationWeekStart = GetMondayOfWeek(choreCreatedAt);
+            var firstDueWeekEnd = creationWeekStart.AddDays(7); // End of creation week
+            if (today < firstDueWeekEnd) return 0; // Still in first week
+            return (int)(today - firstDueWeekEnd).TotalDays;
+        }
+        
+        // Last completed more than a week ago
+        var lastCompletedWeekEnd = GetMondayOfWeek(lastCompleted.Value).AddDays(7);
+        return (int)(today - lastCompletedWeekEnd).TotalDays;
     }
     
     private static int CalculateIntervalOverdue(int intervalDays, DateTime? lastCompleted, DateTime today, DateTime choreCreatedAt)

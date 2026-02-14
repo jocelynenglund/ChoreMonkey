@@ -80,26 +80,38 @@ export default function HouseholdDashboard() {
     return <Navigate to="/" replace />;
   }
 
-  // One-time chores that are done
-  const completedOneTime = chores.filter((c) => c.completed);
-  // Recurring chores where current user completed today
-  const completedToday = chores.filter((c) => {
-    if (c.completed) return false; // Already in completedOneTime
-    const myCompletion = c.memberCompletions?.find(mc => mc.memberId === currentMemberId);
-    return myCompletion?.completedToday;
-  });
-  const completedChores = [...completedOneTime, ...completedToday];
+  // Helper: check if I've completed this chore in the current period
+  const isCompletedByMe = (chore: Chore): boolean => {
+    if (chore.completed) return true; // One-time chore done
+    const myCompletion = chore.memberCompletions?.find(mc => mc.memberId === currentMemberId);
+    if (!myCompletion) return false;
+    
+    const freqType = chore.frequency?.type || 'once';
+    const hasNoDays = !chore.frequency?.days?.length;
+    
+    // Weekly with no specific days = weekly-anyday
+    if (freqType === 'weekly' && hasNoDays) {
+      return myCompletion.completedThisWeek;
+    }
+    // Daily or weekly with specific days: check today
+    return myCompletion.completedToday;
+  };
+
+  // Is this chore assigned to me?
+  const isAssignedToMe = (chore: Chore): boolean => {
+    return chore.assignedToAll || (chore.assignedTo?.includes(currentMemberId || '') ?? false);
+  };
+
+  // My chores: assigned to me, split by completion status
+  const allMyChores = chores.filter((c) => !c.isOptional && isAssignedToMe(c));
+  const myPendingChores = allMyChores.filter((c) => !isCompletedByMe(c));
+  const myCompletedChores = allMyChores.filter((c) => isCompletedByMe(c));
+
+  // Other chores: not assigned to me (excluding bonus/optional)
+  const otherChores = chores.filter((c) => !c.isOptional && !isAssignedToMe(c) && !c.completed);
   
-  const pendingChores = chores.filter((c) => !c.completed && !c.isOptional && !completedToday.includes(c));
-  const bonusChores = chores.filter((c) => !c.completed && c.isOptional && !completedToday.includes(c));
-  
-  // Split pending: my chores vs others
-  const myChores = pendingChores.filter(
-    (c) => c.assignedToAll || c.assignedTo?.includes(currentMemberId || '')
-  );
-  const otherChores = pendingChores.filter(
-    (c) => !c.assignedToAll && !c.assignedTo?.includes(currentMemberId || '')
-  );
+  // Bonus chores
+  const bonusChores = chores.filter((c) => c.isOptional && !c.completed);
 
   const handleAddChore = async (displayName: string, description: string, frequency?: ChoreFrequency, isOptional?: boolean) => {
     const newChore = await addChore(household.id, displayName, description, frequency, isOptional);
@@ -212,18 +224,13 @@ export default function HouseholdDashboard() {
           <OverdueAccordion householdId={household.id} />
         </div>
 
-        {/* Recent Activity Timeline */}
-        <div className="mb-6">
-          <CompletionTimeline householdId={household.id} />
-        </div>
-
         {/* Chores Section */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <ClipboardList className="w-5 h-5 text-primary" />
             <h2 className="font-bold text-lg">Chores</h2>
             <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-sm font-medium">
-              {pendingChores.length}
+              {myPendingChores.length}
             </span>
           </div>
           <AddChoreDialog onAdd={handleAddChore} />
@@ -242,16 +249,39 @@ export default function HouseholdDashboard() {
           </div>
         ) : (
           <div className="space-y-3">
-            {/* My Chores */}
-            {myChores.length > 0 && (
+            {/* My Pending Chores */}
+            {myPendingChores.length > 0 && (
               <>
                 <div className="flex items-center gap-2 mb-2">
                   <h3 className="font-semibold text-primary">📌 My Chores</h3>
                   <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium">
-                    {myChores.length}
+                    {myPendingChores.length}
                   </span>
                 </div>
-                {myChores.map((chore) => (
+                {myPendingChores.map((chore) => (
+                  <ChoreCard
+                    key={chore.id}
+                    chore={chore}
+                    members={members}
+                    currentMemberId={currentMemberId || undefined}
+                    onComplete={() => openCompleteDialog(chore)}
+                    onAssign={(memberIds, assignToAll) => handleAssignChore(chore.id, memberIds, assignToAll)}
+                    onDelete={() => handleDeleteChore(chore.id)}
+                  />
+                ))}
+              </>
+            )}
+
+            {/* My Completed Chores */}
+            {myCompletedChores.length > 0 && (
+              <>
+                <div className="flex items-center gap-2 mt-4 mb-2">
+                  <h3 className="font-semibold text-success">✅ My Completed</h3>
+                  <span className="px-2 py-0.5 rounded-full bg-success/10 text-success text-xs font-medium">
+                    {myCompletedChores.length}
+                  </span>
+                </div>
+                {myCompletedChores.map((chore) => (
                   <ChoreCard
                     key={chore.id}
                     chore={chore}
@@ -268,14 +298,12 @@ export default function HouseholdDashboard() {
             {/* Other Chores */}
             {otherChores.length > 0 && (
               <>
-                {myChores.length > 0 && (
-                  <div className="flex items-center gap-2 mt-6 mb-2">
-                    <h3 className="font-semibold text-muted-foreground">📋 Other Chores</h3>
-                    <span className="px-2 py-0.5 rounded-full bg-muted text-muted-foreground text-xs font-medium">
-                      {otherChores.length}
-                    </span>
-                  </div>
-                )}
+                <div className="flex items-center gap-2 mt-6 mb-2">
+                  <h3 className="font-semibold text-muted-foreground">📋 Other Chores</h3>
+                  <span className="px-2 py-0.5 rounded-full bg-muted text-muted-foreground text-xs font-medium">
+                    {otherChores.length}
+                  </span>
+                </div>
                 {otherChores.map((chore) => (
                   <ChoreCard
                     key={chore.id}
@@ -313,32 +341,13 @@ export default function HouseholdDashboard() {
               </>
             )}
 
-            {/* Completed Section */}
-            {completedChores.length > 0 && (
-              <>
-                <div className="flex items-center gap-2 mt-6 mb-3">
-                  <h3 className="font-semibold text-muted-foreground">
-                    ✅ Completed
-                  </h3>
-                  <span className="px-2 py-0.5 rounded-full bg-success/10 text-success text-sm font-medium">
-                    {completedChores.length}
-                  </span>
-                </div>
-                {completedChores.map((chore) => (
-                  <ChoreCard
-                    key={chore.id}
-                    chore={chore}
-                    members={members}
-                    currentMemberId={currentMemberId || undefined}
-                    onComplete={() => openCompleteDialog(chore)}
-                    onAssign={(memberIds, assignToAll) => handleAssignChore(chore.id, memberIds, assignToAll)}
-                    onDelete={() => handleDeleteChore(chore.id)}
-                  />
-                ))}
-              </>
-            )}
           </div>
         )}
+
+        {/* Recent Activity Timeline - moved to bottom */}
+        <div className="mt-8">
+          <CompletionTimeline householdId={household.id} />
+        </div>
       </main>
 
       {/* Complete Chore Dialog */}

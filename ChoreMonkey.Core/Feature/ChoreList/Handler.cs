@@ -26,6 +26,7 @@ public record ChoreDto(
 public record MemberCompletionDto(
     Guid MemberId,
     bool CompletedToday,
+    bool CompletedThisWeek,
     DateTime? LastCompletedAt);
 
 public record FrequencyDto(
@@ -37,11 +38,19 @@ public record GetChoresResponse(List<ChoreDto> Chores);
 
 internal class Handler(IEventStore store)
 {
+    private static DateTime GetMondayOfWeek(DateTime date)
+    {
+        var diff = (7 + (date.DayOfWeek - DayOfWeek.Monday)) % 7;
+        return date.AddDays(-diff).Date;
+    }
+
     public async Task<GetChoresResponse> HandleAsync(GetChoresQuery request)
     {
         var streamId = ChoreAggregate.StreamId(request.HouseholdId);
         var events = await store.FetchEventsAsync(streamId);
         var today = DateTime.UtcNow.Date;
+        var weekStart = GetMondayOfWeek(today);
+        var weekEnd = weekStart.AddDays(7);
 
         // Get all created chores
         var createdChores = events.OfType<ChoreCreated>().ToList();
@@ -72,14 +81,19 @@ internal class Handler(IEventStore store)
                 {
                     var assignedMembers = assignment.AssignedToMemberIds ?? Array.Empty<Guid>();
                     memberCompletions = assignedMembers.Select(memberId => {
-                        var memberLastCompletion = choreCompletions
+                        var memberCompletionsList = choreCompletions
                             .Where(c => c.CompletedByMemberId == memberId)
+                            .ToList();
+                        var memberLastCompletion = memberCompletionsList
                             .OrderByDescending(c => c.CompletedAt)
                             .FirstOrDefault();
                         var completedToday = memberLastCompletion?.CompletedAt.Date == today;
+                        var completedThisWeek = memberCompletionsList
+                            .Any(c => c.CompletedAt.Date >= weekStart && c.CompletedAt.Date < weekEnd);
                         return new MemberCompletionDto(
                             memberId,
                             completedToday,
+                            completedThisWeek,
                             memberLastCompletion?.CompletedAt);
                     }).ToList();
                 }

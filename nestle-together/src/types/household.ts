@@ -22,6 +22,7 @@ export interface ChoreFrequency {
 export interface MemberCompletion {
   memberId: string;
   completedToday: boolean;
+  completedThisWeek: boolean;
   lastCompletedAt?: Date;
 }
 
