@@ -47,10 +47,19 @@ internal class Handler(IEventStore store)
     public async Task<GetChoresResponse> HandleAsync(GetChoresQuery request)
     {
         var streamId = ChoreAggregate.StreamId(request.HouseholdId);
+        var householdStreamId = HouseholdAggregate.StreamId(request.HouseholdId);
+        
         var events = await store.FetchEventsAsync(streamId);
+        var householdEvents = await store.FetchEventsAsync(householdStreamId);
+        
         var today = DateTime.UtcNow.Date;
         var weekStart = GetMondayOfWeek(today);
         var weekEnd = weekStart.AddDays(7);
+        
+        // Get all household members
+        var allMemberIds = householdEvents.OfType<MemberJoinedHousehold>()
+            .Select(e => e.MemberId)
+            .ToArray();
 
         // Get all created chores, excluding deleted ones
         var deletedChoreIds = events.OfType<ChoreDeleted>()
@@ -84,7 +93,10 @@ internal class Handler(IEventStore store)
                 List<MemberCompletionDto>? memberCompletions = null;
                 if (assignment?.AssignedToMemberIds != null || assignment?.AssignToAll == true)
                 {
-                    var assignedMembers = assignment.AssignedToMemberIds ?? Array.Empty<Guid>();
+                    // Use all members if AssignToAll, otherwise use assigned members
+                    var assignedMembers = assignment.AssignToAll == true 
+                        ? allMemberIds 
+                        : (assignment.AssignedToMemberIds ?? Array.Empty<Guid>());
                     memberCompletions = assignedMembers.Select(memberId => {
                         var memberCompletionsList = choreCompletions
                             .Where(c => c.CompletedByMemberId == memberId)
