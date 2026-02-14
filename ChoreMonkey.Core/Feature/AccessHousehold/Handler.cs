@@ -40,10 +40,15 @@ internal class Handler(IEventStore store)
             return new AccessHouseholdResponse(true, request.HouseholdId, householdCreated.Name, IsAdmin: true);
         }
 
-        // Check member PIN if set (different from admin)
-        if (householdCreated.MemberPinHash != null)
+        // Check member PIN if set (could be from creation or later change)
+        var memberPinChanged = events
+            .OfType<MemberPinChanged>()
+            .LastOrDefault();
+        var currentMemberPinHash = memberPinChanged?.NewMemberPinHash ?? householdCreated.MemberPinHash;
+        
+        if (currentMemberPinHash != null)
         {
-            var isMember = PinHasher.VerifyPin(request.PinCode, householdCreated.MemberPinHash);
+            var isMember = PinHasher.VerifyPin(request.PinCode, currentMemberPinHash);
             if (isMember)
             {
                 return new AccessHouseholdResponse(true, request.HouseholdId, householdCreated.Name, IsAdmin: false);

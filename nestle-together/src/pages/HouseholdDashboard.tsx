@@ -10,6 +10,7 @@ import { InviteDialog } from '@/components/InviteDialog';
 import { MemberAvatar } from '@/components/MemberAvatar';
 import { OverdueAccordion } from '@/components/OverdueAccordion';
 import { CompletionTimeline } from '@/components/CompletionTimeline';
+import { SettingsDialog } from '@/components/SettingsDialog';
 import type { Household, Chore, ChoreFrequency } from '@/types/household';
 
 export default function HouseholdDashboard() {
@@ -181,6 +182,7 @@ export default function HouseholdDashboard() {
                   size="sm"
                 />
               )}
+              <SettingsDialog householdId={household.id} />
               <Button
                 variant="ghost"
                 size="icon"
