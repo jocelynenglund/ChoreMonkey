@@ -210,14 +210,15 @@ export default function HouseholdDashboard() {
             {members.map((member) => (
               <div
                 key={member.id}
-                className="flex flex-col items-center gap-1 min-w-fit"
+                className="flex flex-col items-center gap-1 w-16 flex-shrink-0"
+                title={member.nickname}
               >
                 <MemberAvatar
                   nickname={member.nickname}
                   color={member.avatarColor}
                   size="md"
                 />
-                <span className="text-xs text-muted-foreground">
+                <span className="text-xs text-muted-foreground truncate w-full text-center">
                   {member.nickname}
                 </span>
               </div>
