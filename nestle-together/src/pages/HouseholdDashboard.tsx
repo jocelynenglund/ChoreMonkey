@@ -92,6 +92,14 @@ export default function HouseholdDashboard() {
   
   const pendingChores = chores.filter((c) => !c.completed && !c.isOptional && !completedToday.includes(c));
   const bonusChores = chores.filter((c) => !c.completed && c.isOptional && !completedToday.includes(c));
+  
+  // Split pending: my chores vs others
+  const myChores = pendingChores.filter(
+    (c) => c.assignedTo?.includes(currentMemberId || '') && !c.assignedToAll
+  );
+  const otherChores = pendingChores.filter(
+    (c) => !c.assignedTo?.includes(currentMemberId || '') || c.assignedToAll
+  );
 
   const handleAddChore = async (displayName: string, description: string, frequency?: ChoreFrequency, isOptional?: boolean) => {
     const newChore = await addChore(household.id, displayName, description, frequency, isOptional);
@@ -234,18 +242,53 @@ export default function HouseholdDashboard() {
           </div>
         ) : (
           <div className="space-y-3">
-            {/* All Pending Chores */}
-            {pendingChores.map((chore) => (
-              <ChoreCard
-                key={chore.id}
-                chore={chore}
-                members={members}
-                currentMemberId={currentMemberId || undefined}
-                onComplete={() => openCompleteDialog(chore)}
-                onAssign={(memberIds, assignToAll) => handleAssignChore(chore.id, memberIds, assignToAll)}
-                onDelete={() => handleDeleteChore(chore.id)}
-              />
-            ))}
+            {/* My Chores */}
+            {myChores.length > 0 && (
+              <>
+                <div className="flex items-center gap-2 mb-2">
+                  <h3 className="font-semibold text-primary">📌 My Chores</h3>
+                  <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium">
+                    {myChores.length}
+                  </span>
+                </div>
+                {myChores.map((chore) => (
+                  <ChoreCard
+                    key={chore.id}
+                    chore={chore}
+                    members={members}
+                    currentMemberId={currentMemberId || undefined}
+                    onComplete={() => openCompleteDialog(chore)}
+                    onAssign={(memberIds, assignToAll) => handleAssignChore(chore.id, memberIds, assignToAll)}
+                    onDelete={() => handleDeleteChore(chore.id)}
+                  />
+                ))}
+              </>
+            )}
+
+            {/* Other Chores */}
+            {otherChores.length > 0 && (
+              <>
+                {myChores.length > 0 && (
+                  <div className="flex items-center gap-2 mt-6 mb-2">
+                    <h3 className="font-semibold text-muted-foreground">📋 Other Chores</h3>
+                    <span className="px-2 py-0.5 rounded-full bg-muted text-muted-foreground text-xs font-medium">
+                      {otherChores.length}
+                    </span>
+                  </div>
+                )}
+                {otherChores.map((chore) => (
+                  <ChoreCard
+                    key={chore.id}
+                    chore={chore}
+                    members={members}
+                    currentMemberId={currentMemberId || undefined}
+                    onComplete={() => openCompleteDialog(chore)}
+                    onAssign={(memberIds, assignToAll) => handleAssignChore(chore.id, memberIds, assignToAll)}
+                    onDelete={() => handleDeleteChore(chore.id)}
+                  />
+                ))}
+              </>
+            )}
 
             {/* Bonus Chores */}
             {bonusChores.length > 0 && (
