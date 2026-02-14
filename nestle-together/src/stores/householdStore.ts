@@ -19,7 +19,7 @@ interface HouseholdState {
 
   // Commands (now async)
   createHousehold: (name: string, pinCode: string, ownerNickname?: string, memberPinCode?: string) => Promise<Household | null>;
-  addChore: (householdId: string, displayName: string, description: string, frequency?: ChoreFrequency, isOptional?: boolean) => Promise<Chore | null>;
+  addChore: (householdId: string, displayName: string, description: string, frequency?: ChoreFrequency, isOptional?: boolean, startDate?: Date) => Promise<Chore | null>;
   generateInvite: (householdId: string) => Promise<Invite | null>;
   joinHousehold: (householdId: string, inviteId: string, nickname: string) => Promise<Member | null>;
   accessHousehold: (householdId: string, pinCode: string) => Promise<boolean>;
@@ -130,7 +130,7 @@ export const useHouseholdStore = create<HouseholdState>()(
         }
       },
 
-      addChore: async (householdId, displayName, description, frequency, isOptional = false) => {
+      addChore: async (householdId, displayName, description, frequency, isOptional = false, startDate) => {
         set({ isLoading: true, error: null });
 
         try {
@@ -141,6 +141,9 @@ export const useHouseholdStore = create<HouseholdState>()(
               days: frequency.days,
               intervalDays: frequency.intervalDays,
             };
+          }
+          if (startDate) {
+            body.startDate = startDate.toISOString();
           }
 
           const response = await fetch(`${API_BASE_URL}/api/households/${householdId}/chores`, {

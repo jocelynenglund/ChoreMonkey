@@ -77,13 +77,12 @@ internal class Handler(IEventStore store)
                 var lastCompletion = completions.GetValueOrDefault((choreId, memberId));
                 var lastCompletedAt = lastCompletion?.CompletedAt;
                 
-                // Get chore creation date - can't be overdue before it existed
-                var choreCreatedAt = DateTime.TryParse(chore.TimestampUtc, out var parsed) 
-                    ? parsed.Date 
-                    : today;
+                // Get chore start date (or creation date) - can't be overdue before it started
+                var choreStartDate = chore.StartDate?.Date 
+                    ?? (DateTime.TryParse(chore.TimestampUtc, out var parsed) ? parsed.Date : today);
                 
-                // Calculate if overdue (considering creation date)
-                var overdueDays = CalculateOverdueDays(chore.Frequency, lastCompletedAt, today, choreCreatedAt);
+                // Calculate if overdue (considering start date)
+                var overdueDays = CalculateOverdueDays(chore.Frequency, lastCompletedAt, today, choreStartDate);
                 
                 if (overdueDays > 0)
                 {

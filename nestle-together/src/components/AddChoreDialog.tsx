@@ -23,7 +23,7 @@ import { Switch } from '@/components/ui/switch';
 import type { ChoreFrequency } from '@/types/household';
 
 interface AddChoreDialogProps {
-  onAdd: (displayName: string, description: string, frequency?: ChoreFrequency, isOptional?: boolean) => Promise<void> | void;
+  onAdd: (displayName: string, description: string, frequency?: ChoreFrequency, isOptional?: boolean, startDate?: Date) => Promise<void> | void;
 }
 
 const DAYS_OF_WEEK = [
@@ -44,6 +44,7 @@ export function AddChoreDialog({ onAdd }: AddChoreDialogProps) {
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [intervalDays, setIntervalDays] = useState('3');
   const [isOptional, setIsOptional] = useState(false);
+  const [startDate, setStartDate] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -62,7 +63,8 @@ export function AddChoreDialog({ onAdd }: AddChoreDialogProps) {
     }
 
     setIsSubmitting(true);
-    await onAdd(displayName.trim(), description.trim(), frequency, isOptional);
+    const parsedStartDate = startDate ? new Date(startDate) : undefined;
+    await onAdd(displayName.trim(), description.trim(), frequency, isOptional, parsedStartDate);
     setIsSubmitting(false);
     setDisplayName('');
     setDescription('');
@@ -70,6 +72,7 @@ export function AddChoreDialog({ onAdd }: AddChoreDialogProps) {
     setSelectedDays([]);
     setIntervalDays('3');
     setIsOptional(false);
+    setStartDate('');
     setOpen(false);
   };
 
@@ -186,6 +189,23 @@ export function AddChoreDialog({ onAdd }: AddChoreDialogProps) {
                 onChange={(e) => setIntervalDays(e.target.value)}
                 className="h-12 w-24"
               />
+            </div>
+          )}
+
+          {/* Start Date (optional - for testing overdue) */}
+          {frequencyType !== 'once' && (
+            <div className="space-y-2">
+              <Label htmlFor="startDate">Start Date (optional)</Label>
+              <Input
+                id="startDate"
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="h-12"
+              />
+              <p className="text-xs text-muted-foreground">
+                Leave empty for today. Set to past date to test overdue chores.
+              </p>
             </div>
           )}
 

@@ -115,8 +115,8 @@ export default function HouseholdDashboard() {
   // Bonus chores
   const bonusChores = chores.filter((c) => c.isOptional && !c.completed);
 
-  const handleAddChore = async (displayName: string, description: string, frequency?: ChoreFrequency, isOptional?: boolean) => {
-    const newChore = await addChore(household.id, displayName, description, frequency, isOptional);
+  const handleAddChore = async (displayName: string, description: string, frequency?: ChoreFrequency, isOptional?: boolean, startDate?: Date) => {
+    const newChore = await addChore(household.id, displayName, description, frequency, isOptional, startDate);
     if (newChore) {
       setChores((prev) => [...prev, newChore]);
     }

@@ -6,7 +6,8 @@ public record ChoreCreated(
     string DisplayName, 
     string Description,
     ChoreFrequency? Frequency = null,
-    bool IsOptional = false) : EventBase;
+    bool IsOptional = false,
+    DateTime? StartDate = null) : EventBase;
 
 public record ChoreFrequency(
     string Type,           // "daily", "weekly", "interval", "once"
