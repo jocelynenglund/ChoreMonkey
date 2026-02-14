@@ -403,20 +403,28 @@ export const useHouseholdStore = create<HouseholdState>()(
           // API returns { chores: [...] } or direct array
           const choreArray = Array.isArray(data) ? data : (data.chores ?? []);
           // Map API response to frontend type
-          const chores: Chore[] = choreArray.map((c: Record<string, unknown>) => ({
-            id: (c.choreId ?? c.id) as string,
-            householdId: (c.householdId ?? householdId) as string,
-            displayName: c.displayName as string,
-            description: c.description as string,
-            assignedTo: c.assignedTo as string[] | undefined,
-            assignedToAll: c.assignedToAll as boolean | undefined,
-            completed: (c.completed ?? false) as boolean,
-            createdAt: c.createdAt ? new Date(c.createdAt as string) : new Date(),
-            frequency: c.frequency as ChoreFrequency | undefined,
-            lastCompletedAt: c.lastCompletedAt ? new Date(c.lastCompletedAt as string) : undefined,
-            lastCompletedBy: c.lastCompletedBy as string | undefined,
-            memberCompletions: c.memberCompletions as MemberCompletion[] | undefined,
-          }));
+          const chores: Chore[] = choreArray.map((c: Record<string, unknown>) => {
+            const frequency = c.frequency as ChoreFrequency | undefined;
+            const lastCompletedAt = c.lastCompletedAt ? new Date(c.lastCompletedAt as string) : undefined;
+            // One-time chores are "completed" once they have any completion
+            const isOneTime = !frequency || frequency.type === 'once';
+            const completed = isOneTime && lastCompletedAt != null;
+            
+            return {
+              id: (c.choreId ?? c.id) as string,
+              householdId: (c.householdId ?? householdId) as string,
+              displayName: c.displayName as string,
+              description: c.description as string,
+              assignedTo: c.assignedTo as string[] | undefined,
+              assignedToAll: c.assignedToAll as boolean | undefined,
+              completed,
+              createdAt: c.createdAt ? new Date(c.createdAt as string) : new Date(),
+              frequency,
+              lastCompletedAt,
+              lastCompletedBy: c.lastCompletedBy as string | undefined,
+              memberCompletions: c.memberCompletions as MemberCompletion[] | undefined,
+            };
+          });
           set((state) => ({
             chores: [
               ...state.chores.filter((c) => c.householdId !== householdId),

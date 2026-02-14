@@ -26,7 +26,6 @@ export default function HouseholdDashboard() {
     fetchHouseholdMembers,
     getHouseholdChores,
     addChore,
-    toggleChoreComplete,
     completeChore,
     assignChore,
     deleteChore,
@@ -99,13 +98,6 @@ export default function HouseholdDashboard() {
 
   const openCompleteDialog = (chore: Chore) => {
     setCompletingChore(chore);
-  };
-
-  const handleToggleComplete = (choreId: string) => {
-    toggleChoreComplete(choreId);
-    setChores((prev) =>
-      prev.map((c) => (c.id === choreId ? { ...c, completed: !c.completed } : c))
-    );
   };
 
   const handleAssignChore = async (choreId: string, memberIds?: string[], assignToAll?: boolean) => {
@@ -226,7 +218,6 @@ export default function HouseholdDashboard() {
                 chore={chore}
                 members={members}
                 currentMemberId={currentMemberId || undefined}
-                onToggleComplete={() => handleToggleComplete(chore.id)}
                 onComplete={() => openCompleteDialog(chore)}
                 onAssign={(memberIds, assignToAll) => handleAssignChore(chore.id, memberIds, assignToAll)}
                 onDelete={() => handleDeleteChore(chore.id)}
@@ -250,7 +241,6 @@ export default function HouseholdDashboard() {
                     chore={chore}
                     members={members}
                     currentMemberId={currentMemberId || undefined}
-                    onToggleComplete={() => handleToggleComplete(chore.id)}
                     onComplete={() => openCompleteDialog(chore)}
                     onAssign={(memberIds, assignToAll) => handleAssignChore(chore.id, memberIds, assignToAll)}
                     onDelete={() => handleDeleteChore(chore.id)}

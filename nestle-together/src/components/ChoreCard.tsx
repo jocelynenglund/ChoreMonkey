@@ -17,8 +17,7 @@ interface ChoreCardProps {
   chore: Chore;
   members: Member[];
   currentMemberId?: string;
-  onToggleComplete: () => void;
-  onComplete?: () => void;
+  onComplete: () => void;
   onAssign: (memberIds?: string[], assignToAll?: boolean) => void;
   onDelete: () => void;
 }
@@ -56,7 +55,6 @@ export function ChoreCard({
   chore,
   members,
   currentMemberId,
-  onToggleComplete,
   onComplete,
   onAssign,
   onDelete,
@@ -104,7 +102,7 @@ export function ChoreCard({
         chore.completed && !isRecurring && 'opacity-60'
       )}
     >
-      {/* Complete button - different behavior for recurring vs one-time */}
+      {/* Complete button - same behavior for all chores, persists to backend */}
       {isRecurring ? (
         <Button
           size="sm"
@@ -118,12 +116,13 @@ export function ChoreCard({
         </Button>
       ) : (
         <button
-          onClick={onToggleComplete}
+          onClick={chore.completed ? undefined : onComplete}
+          disabled={chore.completed}
           className={cn(
             'w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all duration-200 flex-shrink-0',
             chore.completed
-              ? 'bg-success border-success text-success-foreground'
-              : 'border-muted-foreground/30 hover:border-primary hover:bg-primary/10'
+              ? 'bg-success border-success text-success-foreground cursor-default'
+              : 'border-muted-foreground/30 hover:border-primary hover:bg-primary/10 cursor-pointer'
           )}
         >
           {chore.completed && <Check className="w-4 h-4" />}
