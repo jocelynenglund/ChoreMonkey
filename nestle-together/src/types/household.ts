@@ -47,3 +47,8 @@ export interface Invite {
   createdAt: Date;
   expiresAt: Date;
 }
+
+export interface ChoreCompletion {
+  completedBy: string;
+  completedAt: Date;
+}
