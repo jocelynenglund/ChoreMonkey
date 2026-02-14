@@ -4,7 +4,7 @@ import { ArrowLeft, Lock, Home } from 'lucide-react';
 import { PinInput } from '@/components/PinInput';
 import { MemberSelector } from '@/components/MemberSelector';
 import { useHouseholdStore } from '@/stores/householdStore';
-import type { Household } from '@/types/household';
+import type { Household, Member } from '@/types/household';
 
 export default function AccessHousehold() {
   const navigate = useNavigate();
@@ -15,30 +15,35 @@ export default function AccessHousehold() {
   const {
     getHousehold,
     getHouseholdMembers,
+    fetchHouseholdMembers,
     accessHousehold,
     setCurrentMember,
   } = useHouseholdStore();
 
-  const members = getHouseholdMembers(id || '');
+  const [members, setMembers] = useState<Member[]>([]);
 
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
   const [error, setError] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
 
   useEffect(() => {
-    const fetchHousehold = async () => {
+    const fetchData = async () => {
       if (!id) {
         setIsLoading(false);
         return;
       }
       setIsLoading(true);
-      const fetchedHousehold = await getHousehold(id);
+      const [fetchedHousehold, fetchedMembers] = await Promise.all([
+        getHousehold(id),
+        fetchHouseholdMembers(id),
+      ]);
       setHousehold(fetchedHousehold);
+      setMembers(fetchedMembers);
       setIsLoading(false);
     };
 
-    fetchHousehold();
-  }, [id, getHousehold]);
+    fetchData();
+  }, [id, getHousehold, fetchHouseholdMembers]);
 
   if (isLoading) {
     return (

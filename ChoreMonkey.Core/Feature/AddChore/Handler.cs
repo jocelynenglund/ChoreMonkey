@@ -15,7 +15,7 @@ internal class Handler(IEventStore store)
     public async Task HandleAsync(AddChoreCommand request)
     {
         var streamId = ChoreAggregate.StreamId(request.HouseholdId);
-        await store.AppendAsync(streamId, new ChoreCreated(request.ChoreId, request.HouseholdId, request.DisplayName, request.Description), ExpectedVersion.Any);
+        await store.AppendToStreamAsync(streamId, new ChoreCreated(request.ChoreId, request.HouseholdId, request.DisplayName, request.Description), ExpectedVersion.Any);
     }
 }
 

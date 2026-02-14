@@ -19,7 +19,7 @@ internal class Handler(IEventStore store)
         // Placeholder implementation
         var streamId  = HouseholdAggregate.StreamId(request.HouseholdId);
 
-        var @events = (await store.LoadEventsAsync(streamId))
+        var @events = (await store.FetchEventsAsync(streamId))
             .OfType<ChoreMonkey.Events.HouseholdCreated>()
             .FirstOrDefault();
         return new HouseholdNameResponse(request.HouseholdId, @events?.Name ?? "Unknown");

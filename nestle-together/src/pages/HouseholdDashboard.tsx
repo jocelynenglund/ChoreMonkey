@@ -21,6 +21,7 @@ export default function HouseholdDashboard() {
     currentMemberId,
     getHousehold,
     getHouseholdMembers,
+    fetchHouseholdMembers,
     getHouseholdChores,
     addChore,
     toggleChoreComplete,
@@ -41,6 +42,7 @@ export default function HouseholdDashboard() {
       const [fetchedHousehold, fetchedChores] = await Promise.all([
         getHousehold(id),
         getHouseholdChores(id),
+        fetchHouseholdMembers(id),
       ]);
 
       setHousehold(fetchedHousehold);
@@ -50,7 +52,7 @@ export default function HouseholdDashboard() {
     };
 
     fetchData();
-  }, [id, getHousehold, getHouseholdChores]);
+  }, [id, getHousehold, getHouseholdChores, fetchHouseholdMembers]);
 
   // Redirect if not authenticated or wrong household
   if (!isAuthenticated || currentHouseholdId !== id) {
@@ -91,8 +93,9 @@ export default function HouseholdDashboard() {
     );
   };
 
-  const handleAssignChore = (choreId: string, memberId: string | undefined) => {
-    assignChore(choreId, memberId);
+  const handleAssignChore = async (choreId: string, memberId: string | undefined) => {
+    if (!household) return;
+    await assignChore(household.id, choreId, memberId);
     setChores((prev) =>
       prev.map((c) => (c.id === choreId ? { ...c, assignedTo: memberId } : c))
     );
