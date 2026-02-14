@@ -21,7 +21,14 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - run: dotnet restore
+      - run: |
+          dotnet nuget add source https://nuget.pkg.github.com/jocelynenglund/index.json \
+            --name github \
+            --username jocelynenglund \
+            --password ${{ secrets.NUGET_AUTH_TOKEN }} \
+            --store-password-in-clear-text
+          dotnet restore
+
       - run: dotnet build --configuration Release --no-restore
       - run: dotnet publish ChoreMonkey.ApiService/ChoreMonkey.ApiService.csproj -c Release -o ./publish
 
