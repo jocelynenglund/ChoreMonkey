@@ -79,9 +79,18 @@ export default function HouseholdDashboard() {
     return <Navigate to="/" replace />;
   }
 
-  const completedChores = chores.filter((c) => c.completed);
-  const pendingChores = chores.filter((c) => !c.completed && !c.isOptional);
-  const bonusChores = chores.filter((c) => !c.completed && c.isOptional);
+  // One-time chores that are done
+  const completedOneTime = chores.filter((c) => c.completed);
+  // Recurring chores where current user completed today
+  const completedToday = chores.filter((c) => {
+    if (c.completed) return false; // Already in completedOneTime
+    const myCompletion = c.memberCompletions?.find(mc => mc.memberId === currentMemberId);
+    return myCompletion?.completedToday;
+  });
+  const completedChores = [...completedOneTime, ...completedToday];
+  
+  const pendingChores = chores.filter((c) => !c.completed && !c.isOptional && !completedToday.includes(c));
+  const bonusChores = chores.filter((c) => !c.completed && c.isOptional && !completedToday.includes(c));
 
   const handleAddChore = async (displayName: string, description: string, frequency?: ChoreFrequency, isOptional?: boolean) => {
     const newChore = await addChore(household.id, displayName, description, frequency, isOptional);
