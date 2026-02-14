@@ -22,7 +22,10 @@ public static class Initialization
 {
     public static IServiceCollection AddChoreMonkeyCore(this IServiceCollection services)
     {
-        return services.AddFileEventStore(Path.Combine(Directory.GetCurrentDirectory(), "data"))
+        // Use environment variable for data path, default to ./data for local dev
+        var dataPath = Environment.GetEnvironmentVariable("EVENTSTORE_PATH") 
+            ?? Path.Combine(Directory.GetCurrentDirectory(), "data");
+        return services.AddFileEventStore(dataPath)
             .InstallFeatures();
 
     }
