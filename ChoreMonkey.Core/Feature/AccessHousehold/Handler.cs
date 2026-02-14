@@ -41,6 +41,7 @@ internal static class AccessHouseholdEndpoint
 {
     public static void Map(this RouteGroupBuilder group)
     {
+        // SECURITY NOTE: This endpoint should implement rate limiting to prevent brute force attacks on PIN codes
         group.MapPost("households/{householdId:guid}/access", async (Guid householdId, AccessHouseholdRequest dto, Handler handler) =>
         {
             var query = new AccessHouseholdQuery(householdId, dto.PinCode);
