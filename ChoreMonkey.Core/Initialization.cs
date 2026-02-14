@@ -16,6 +16,7 @@ using ChoreMonkey.Core.Feature.AssignChore;
 using ChoreMonkey.Core.Feature.CompleteChore;
 using ChoreMonkey.Core.Feature.ChoreHistory;
 using ChoreMonkey.Core.Feature.OverdueChores;
+using ChoreMonkey.Core.Feature.CompletionTimeline;
 
 namespace ChoreMonkey.Core;
 
@@ -45,6 +46,7 @@ public static class Initialization
         services.AddScoped<Feature.CompleteChore.Handler>();
         services.AddScoped<Feature.ChoreHistory.Handler>();
         services.AddScoped<Feature.OverdueChores.Handler>();
+        services.AddScoped<Feature.CompletionTimeline.Handler>();
         return services;
     }
     public static IEndpointRouteBuilder MapChoreMonkeyEndpoints(this IEndpointRouteBuilder app)
@@ -65,6 +67,7 @@ public static class Initialization
         CompleteChoreEndpoint.Map(householdEndpoints);
         ChoreHistoryEndpoint.Map(householdEndpoints);
         OverdueChoresEndpoint.Map(householdEndpoints);
+        CompletionTimelineEndpoint.Map(householdEndpoints);
 
         return app;
     }
