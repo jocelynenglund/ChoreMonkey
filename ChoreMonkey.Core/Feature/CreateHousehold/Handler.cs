@@ -8,18 +8,22 @@ using Microsoft.AspNetCore.Http;
 
 namespace ChoreMonkey.Core.Feature.CreateHousehold;
 
-public record CreateHouseholdCommand(Guid HouseholdId, string Name, int PinCode, string OwnerNickname = "Admin");
+public record CreateHouseholdCommand(Guid HouseholdId, string Name, int PinCode, string OwnerNickname = "Admin", int? MemberPinCode = null);
 public record CreateHouseholdResponse(Guid HouseholdId, Guid MemberId, string Name);
 
 internal class Handler(IEventStore store)
 {
     public async Task<CreateHouseholdResponse> HandleAsync(CreateHouseholdCommand request)
     {
-        var pinHash = PinHasher.HashPin(request.PinCode);
+        var adminPinHash = PinHasher.HashPin(request.PinCode);
+        var memberPinHash = request.MemberPinCode.HasValue 
+            ? PinHasher.HashPin(request.MemberPinCode.Value) 
+            : null;
         var memberId = Guid.NewGuid();
         
         // Create household and add owner as first member
-        var householdCreated = new HouseholdCreated(request.HouseholdId, request.Name, pinHash);
+        // PinHash = admin PIN, MemberPinHash = optional separate member PIN
+        var householdCreated = new HouseholdCreated(request.HouseholdId, request.Name, adminPinHash, memberPinHash);
         var memberJoined = new MemberJoinedHousehold(memberId, request.HouseholdId, Guid.Empty, request.OwnerNickname);
         
         await store.StartStreamAsync(
@@ -40,7 +44,8 @@ internal static class CreateHouseholdEndpoint
                 request.HouseholdId ?? Guid.NewGuid(),
                 request.Name,
                 request.PinCode,
-                request.OwnerNickname ?? "Admin"
+                request.OwnerNickname ?? "Admin",
+                request.MemberPinCode
             );
             var result = await handler.HandleAsync(command);
             return Results.Ok(result);
@@ -48,4 +53,4 @@ internal static class CreateHouseholdEndpoint
     }
 }
 
-public record CreateHouseholdRequest(string Name, int PinCode, Guid? HouseholdId = null, string? OwnerNickname = null);
+public record CreateHouseholdRequest(string Name, int PinCode, Guid? HouseholdId = null, string? OwnerNickname = null, int? MemberPinCode = null);

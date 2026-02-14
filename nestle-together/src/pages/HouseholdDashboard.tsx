@@ -33,6 +33,7 @@ export default function HouseholdDashboard() {
     deleteChore,
     generateInvite,
     logout,
+    isAdmin,
   } = useHouseholdStore();
 
   const members = getHouseholdMembers(id || '');
@@ -140,9 +141,12 @@ export default function HouseholdDashboard() {
     );
   };
 
-  const handleDeleteChore = (choreId: string) => {
-    deleteChore(choreId);
-    setChores((prev) => prev.filter((c) => c.id !== choreId));
+  const handleDeleteChore = async (choreId: string) => {
+    if (!household) return;
+    const success = await deleteChore(household.id, choreId);
+    if (success) {
+      setChores((prev) => prev.filter((c) => c.id !== choreId));
+    }
   };
 
   const handleGenerateInvite = () => {
@@ -264,6 +268,7 @@ export default function HouseholdDashboard() {
                     chore={chore}
                     members={members}
                     currentMemberId={currentMemberId || undefined}
+                    isAdmin={isAdmin}
                     onComplete={() => openCompleteDialog(chore)}
                     onAssign={(memberIds, assignToAll) => handleAssignChore(chore.id, memberIds, assignToAll)}
                     onDelete={() => handleDeleteChore(chore.id)}
@@ -287,6 +292,7 @@ export default function HouseholdDashboard() {
                     chore={chore}
                     members={members}
                     currentMemberId={currentMemberId || undefined}
+                    isAdmin={isAdmin}
                     onComplete={() => openCompleteDialog(chore)}
                     onAssign={(memberIds, assignToAll) => handleAssignChore(chore.id, memberIds, assignToAll)}
                     onDelete={() => handleDeleteChore(chore.id)}
@@ -310,6 +316,7 @@ export default function HouseholdDashboard() {
                     chore={chore}
                     members={members}
                     currentMemberId={currentMemberId || undefined}
+                    isAdmin={isAdmin}
                     onComplete={() => openCompleteDialog(chore)}
                     onAssign={(memberIds, assignToAll) => handleAssignChore(chore.id, memberIds, assignToAll)}
                     onDelete={() => handleDeleteChore(chore.id)}
@@ -333,6 +340,7 @@ export default function HouseholdDashboard() {
                     chore={chore}
                     members={members}
                     currentMemberId={currentMemberId || undefined}
+                    isAdmin={isAdmin}
                     onComplete={() => openCompleteDialog(chore)}
                     onAssign={(memberIds, assignToAll) => handleAssignChore(chore.id, memberIds, assignToAll)}
                     onDelete={() => handleDeleteChore(chore.id)}

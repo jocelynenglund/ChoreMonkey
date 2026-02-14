@@ -52,8 +52,13 @@ internal class Handler(IEventStore store)
         var weekStart = GetMondayOfWeek(today);
         var weekEnd = weekStart.AddDays(7);
 
-        // Get all created chores
-        var createdChores = events.OfType<ChoreCreated>().ToList();
+        // Get all created chores, excluding deleted ones
+        var deletedChoreIds = events.OfType<ChoreDeleted>()
+            .Select(d => d.ChoreId)
+            .ToHashSet();
+        var createdChores = events.OfType<ChoreCreated>()
+            .Where(c => !deletedChoreIds.Contains(c.ChoreId))
+            .ToList();
         
         // Get latest assignment for each chore
         var assignments = events.OfType<ChoreAssigned>()

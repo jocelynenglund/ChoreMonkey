@@ -12,11 +12,13 @@ interface HouseholdState {
   currentHouseholdId: string | null;
   currentMemberId: string | null;
   isAuthenticated: boolean;
+  isAdmin: boolean;
+  currentPinCode: string | null;
   isLoading: boolean;
   error: string | null;
 
   // Commands (now async)
-  createHousehold: (name: string, pinCode: string, ownerNickname?: string) => Promise<Household | null>;
+  createHousehold: (name: string, pinCode: string, ownerNickname?: string, memberPinCode?: string) => Promise<Household | null>;
   addChore: (householdId: string, displayName: string, description: string, frequency?: ChoreFrequency, isOptional?: boolean) => Promise<Chore | null>;
   generateInvite: (householdId: string) => Promise<Invite | null>;
   joinHousehold: (householdId: string, inviteId: string, nickname: string) => Promise<Member | null>;
@@ -24,7 +26,7 @@ interface HouseholdState {
   toggleChoreComplete: (choreId: string) => void;
   completeChore: (householdId: string, choreId: string, memberId: string, completedAt?: Date) => Promise<void>;
   assignChore: (householdId: string, choreId: string, memberIds?: string[], assignToAll?: boolean) => Promise<void>;
-  deleteChore: (choreId: string) => void;
+  deleteChore: (householdId: string, choreId: string) => Promise<boolean>;
   setCurrentMember: (memberId: string) => void;
   logout: () => void;
 
@@ -64,17 +66,28 @@ export const useHouseholdStore = create<HouseholdState>()(
       currentHouseholdId: null,
       currentMemberId: null,
       isAuthenticated: false,
+      isAdmin: false,
+      currentPinCode: null,
       isLoading: false,
       error: null,
 
-      createHousehold: async (name, pinCode, ownerNickname = 'Admin') => {
+      createHousehold: async (name, pinCode, ownerNickname = 'Admin', memberPinCode) => {
         set({ isLoading: true, error: null });
 
         try {
+          const body: Record<string, unknown> = { 
+            name, 
+            pinCode: parseInt(pinCode, 10), 
+            ownerNickname 
+          };
+          if (memberPinCode) {
+            body.memberPinCode = parseInt(memberPinCode, 10);
+          }
+          
           const response = await fetch(`${API_BASE_URL}/api/households`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, pinCode: parseInt(pinCode, 10), ownerNickname }),
+            body: JSON.stringify(body),
           });
 
           if (!response.ok) {
@@ -263,7 +276,13 @@ export const useHouseholdStore = create<HouseholdState>()(
           const data = await response.json();
 
           if (data.success) {
-            set({ currentHouseholdId: householdId, isAuthenticated: true, isLoading: false });
+            set({ 
+              currentHouseholdId: householdId, 
+              isAuthenticated: true, 
+              isAdmin: data.isAdmin ?? false,
+              currentPinCode: pinCode,
+              isLoading: false 
+            });
             return true;
           }
 
@@ -339,10 +358,34 @@ export const useHouseholdStore = create<HouseholdState>()(
         }
       },
 
-      deleteChore: (choreId) => {
-        set((state) => ({
-          chores: state.chores.filter((c) => c.id !== choreId),
-        }));
+      deleteChore: async (householdId, choreId) => {
+        const { currentPinCode, isAdmin } = get();
+        if (!isAdmin || !currentPinCode) {
+          console.error('Must be admin to delete chores');
+          return false;
+        }
+
+        try {
+          const response = await fetch(
+            `${API_BASE_URL}/api/households/${householdId}/chores/${choreId}/delete`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ pinCode: parseInt(currentPinCode, 10) }),
+            }
+          );
+
+          if (response.ok) {
+            set((state) => ({
+              chores: state.chores.filter((c) => c.id !== choreId),
+            }));
+            return true;
+          }
+          return false;
+        } catch (error) {
+          console.error('Failed to delete chore', error);
+          return false;
+        }
       },
 
       setCurrentMember: (memberId) => {
@@ -352,8 +395,10 @@ export const useHouseholdStore = create<HouseholdState>()(
       logout: () => {
         set({
           isAuthenticated: false,
+          isAdmin: false,
           currentHouseholdId: null,
           currentMemberId: null,
+          currentPinCode: null,
         });
       },
 

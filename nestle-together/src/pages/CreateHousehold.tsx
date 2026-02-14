@@ -13,6 +13,8 @@ export default function CreateHousehold() {
   const [name, setName] = useState('');
   const [pin, setPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
+  const [useSeparateMemberPin, setUseSeparateMemberPin] = useState(false);
+  const [memberPin, setMemberPin] = useState('');
   const [step, setStep] = useState(1);
   const [error, setError] = useState('');
 
@@ -27,15 +29,24 @@ export default function CreateHousehold() {
 
   const handleCreate = async () => {
     if (pin.length !== 4) {
-      setError('PIN must be 4 digits');
+      setError('Admin PIN must be 4 digits');
       return;
     }
     if (pin !== confirmPin) {
-      setError('PINs do not match');
+      setError('Admin PINs do not match');
+      return;
+    }
+    if (useSeparateMemberPin && memberPin.length !== 4) {
+      setError('Member PIN must be 4 digits');
       return;
     }
 
-    const household = await createHousehold(name.trim(), pin);
+    const household = await createHousehold(
+      name.trim(), 
+      pin, 
+      'Admin',
+      useSeparateMemberPin ? memberPin : undefined
+    );
     if (household) {
       navigate(`/household/${household.id}`);
     }
@@ -126,9 +137,9 @@ export default function CreateHousehold() {
               <div className="w-14 h-14 rounded-2xl bg-accent/20 flex items-center justify-center mb-6">
                 <Lock className="w-7 h-7 text-accent" />
               </div>
-              <h1 className="text-2xl font-bold mb-2">Set a PIN Code</h1>
+              <h1 className="text-2xl font-bold mb-2">Set Admin PIN</h1>
               <p className="text-muted-foreground mb-6">
-                This 4-digit PIN will be used to access your household.
+                This PIN gives full access including deleting chores.
               </p>
 
               <div className="space-y-4">
@@ -148,7 +159,7 @@ export default function CreateHousehold() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPin">Confirm PIN</Label>
+                  <Label htmlFor="confirmPin">Confirm Admin PIN</Label>
                   <Input
                     id="confirmPin"
                     type="password"
@@ -162,6 +173,40 @@ export default function CreateHousehold() {
                     className="h-12 text-base text-center tracking-[0.5em] font-mono"
                   />
                 </div>
+
+                {/* Separate Member PIN option */}
+                <div className="pt-2 border-t">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={useSeparateMemberPin}
+                      onChange={(e) => setUseSeparateMemberPin(e.target.checked)}
+                      className="w-4 h-4 rounded border-gray-300"
+                    />
+                    <span className="text-sm">
+                      Set a separate PIN for family members
+                    </span>
+                  </label>
+                  <p className="text-xs text-muted-foreground mt-1 ml-7">
+                    Members can view and complete chores but not delete them
+                  </p>
+                </div>
+
+                {useSeparateMemberPin && (
+                  <div className="space-y-2">
+                    <Label htmlFor="memberPin">Member PIN</Label>
+                    <Input
+                      id="memberPin"
+                      type="password"
+                      inputMode="numeric"
+                      maxLength={4}
+                      placeholder="••••"
+                      value={memberPin}
+                      onChange={(e) => setMemberPin(e.target.value.replace(/\D/g, ''))}
+                      className="h-12 text-base text-center tracking-[0.5em] font-mono"
+                    />
+                  </div>
+                )}
 
                 {error && (
                   <p className="text-sm text-destructive">{error}</p>

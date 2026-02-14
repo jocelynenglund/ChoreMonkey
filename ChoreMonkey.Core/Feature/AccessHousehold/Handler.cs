@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Routing;
 namespace ChoreMonkey.Core.Feature.AccessHousehold;
 
 public record AccessHouseholdQuery(Guid HouseholdId, int PinCode);
-public record AccessHouseholdResponse(bool Success, Guid HouseholdId, string? HouseholdName);
+public record AccessHouseholdResponse(bool Success, Guid HouseholdId, string? HouseholdName, bool IsAdmin = false);
 
 internal class Handler(IEventStore store)
 {
@@ -27,13 +27,31 @@ internal class Handler(IEventStore store)
             return new AccessHouseholdResponse(false, request.HouseholdId, null);
         }
 
-        var pinMatches = PinHasher.VerifyPin(request.PinCode, householdCreated.PinHash);
+        // Check for admin PIN changes
+        var adminPinChanged = events
+            .OfType<AdminPinChanged>()
+            .LastOrDefault();
+        var currentAdminPinHash = adminPinChanged?.NewPinHash ?? householdCreated.PinHash;
 
-        return new AccessHouseholdResponse(
-            pinMatches,
-            request.HouseholdId,
-            pinMatches ? householdCreated.Name : null
-        );
+        // Check admin PIN first
+        var isAdmin = PinHasher.VerifyPin(request.PinCode, currentAdminPinHash);
+        if (isAdmin)
+        {
+            return new AccessHouseholdResponse(true, request.HouseholdId, householdCreated.Name, IsAdmin: true);
+        }
+
+        // Check member PIN if set (different from admin)
+        if (householdCreated.MemberPinHash != null)
+        {
+            var isMember = PinHasher.VerifyPin(request.PinCode, householdCreated.MemberPinHash);
+            if (isMember)
+            {
+                return new AccessHouseholdResponse(true, request.HouseholdId, householdCreated.Name, IsAdmin: false);
+            }
+        }
+
+        // No match
+        return new AccessHouseholdResponse(false, request.HouseholdId, null);
     }
 }
 

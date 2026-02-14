@@ -23,6 +23,7 @@ interface ChoreCardProps {
   chore: Chore;
   members: Member[];
   currentMemberId?: string;
+  isAdmin?: boolean;
   onComplete: () => void;
   onAssign: (memberIds?: string[], assignToAll?: boolean) => void;
   onDelete: () => void;
@@ -65,6 +66,7 @@ export function ChoreCard({
   chore,
   members,
   currentMemberId,
+  isAdmin = false,
   onComplete,
   onAssign,
   onDelete,
@@ -283,12 +285,15 @@ export function ChoreCard({
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <button
-              onClick={onDelete}
-              className="p-2 rounded-full hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
+            {isAdmin && (
+              <button
+                onClick={onDelete}
+                className="p-2 rounded-full hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                title="Delete chore (admin only)"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            )}
           </div>
         </div>
 

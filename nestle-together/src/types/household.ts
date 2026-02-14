@@ -5,6 +5,13 @@ export interface Household {
   createdAt: Date;
 }
 
+export interface AccessResponse {
+  success: boolean;
+  householdId: string;
+  householdName?: string;
+  isAdmin: boolean;
+}
+
 export interface Member {
   id: string;
   householdId: string;

@@ -2,4 +2,8 @@
 
 namespace ChoreMonkey.Events;
 
-public record HouseholdCreated(Guid HouseholdId, string Name, string PinHash) : EventBase;
+public record HouseholdCreated(
+    Guid HouseholdId, 
+    string Name, 
+    string PinHash,
+    string? MemberPinHash = null) : EventBase;
