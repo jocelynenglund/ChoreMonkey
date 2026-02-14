@@ -1,0 +1,55 @@
+# ChoreMonkey Event Model
+# Household chore management with event sourcing
+
+## Household Setup
+
+[Create Household]
+    ⏹️(name) -> 🟦CreateHousehold(*householdId, name, *accessCode) -> 🟧HouseholdCreated(householdId, name, accessCode)
+
+[Add First Member]
+    🟧HouseholdCreated -> 🟦AddMember(householdId, *memberId, memberName, color) -> 🟧MemberAdded(householdId, memberId, memberName, color)
+
+[Generate Invite]
+    ⏹️(householdId) -> 🟦GenerateInvite(householdId, *inviteCode) -> 🟧InviteGenerated(householdId, inviteCode)
+
+[Join Household]
+    ⏹️(inviteCode, memberName, color) -> 🟦JoinHousehold(inviteCode, *memberId, memberName, color) -> 🟧MemberJoinedHousehold(householdId, memberId, memberName, color)
+
+[Access Household]
+    ⏹️(accessCode, memberId) -> 🟦AccessHousehold(accessCode, memberId) -> 🟧AccessGranted(householdId, memberId)
+
+## Chore Management
+
+[Add Chore]
+    ⏹️(name, frequency, assignedTo[]) -> 🟦AddChore(householdId, *choreId, name, frequency, assignedTo[], assignToAll) -> 🟧ChoreCreated(householdId, choreId, name, frequency, assignedTo[], assignToAll)
+
+[Assign Chore]
+    ⏹️(choreId, assignedTo[]) -> 🟦AssignChore(householdId, choreId, assignedTo[], assignToAll) -> 🟧ChoreAssigned(householdId, choreId, assignedTo[], assignToAll)
+
+[Complete Chore]
+    ⏹️(choreId, completedAt) -> 🟦CompleteChore(householdId, choreId, memberId, completedAt) -> 🟧ChoreCompleted(householdId, choreId, memberId, completedAt)
+
+## Read Models
+
+[View Household]
+    🟧HouseholdCreated -> 📗HouseholdDetails(householdId, name, members[], accessCode) -> ⏹️(name, members[])
+    🟧MemberAdded ->
+    🟧MemberJoinedHousehold ->
+
+[View Chore List]
+    🟧ChoreCreated -> 📗ChoreList*(choreId, name, frequency, assignedTo[], memberCompletions[]) -> ⏹️(chores[])
+    🟧ChoreAssigned ->
+    🟧ChoreCompleted ->
+
+[View Chore History]
+    🟧ChoreCompleted -> 📗ChoreHistory*(choreId, completions[]) -> ⏹️(choreId, completions[])
+
+## Future: Automations
+
+[Detect Missed Chore]
+    🟧ChoreCreated -> 📗DueChores*(choreId, dueDate, assignedTo[])
+    ⚙️MissedChoreDetector -> 🟦RecordMissedChore(choreId, memberId, date) -> 🟧ChoreMissed(choreId, memberId, date)
+
+[Deduct Allowance]
+    🟧ChoreMissed -> 📗PendingDeductions*(memberId, amount)
+    ⚙️AllowanceProcessor -> 🟦DeductAllowance(memberId, amount) -> 🟧AllowanceDeducted(memberId, amount)

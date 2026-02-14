@@ -1,0 +1,382 @@
+{
+  "$schema": "../../giraflow/giraflow.schema.json",
+  "name": "ChoreMonkey",
+  "description": "Household chore management with event sourcing. Families create households, invite members, assign chores, and track completions.",
+  "version": "1.0.0",
+
+  "timeline": [
+    {
+      "type": "actor",
+      "name": "Parent",
+      "tick": 10,
+      "sendsCommand": "CreateHousehold"
+    },
+    {
+      "type": "command",
+      "name": "CreateHousehold",
+      "tick": 20,
+      "example": { "name": "The Englunds" }
+    },
+    {
+      "type": "event",
+      "name": "HouseholdCreated",
+      "tick": 30,
+      "producedBy": "CreateHousehold-20",
+      "example": { "householdId": "hh-001", "name": "The Englunds", "accessCode": "1234" }
+    },
+    {
+      "type": "state",
+      "name": "HouseholdDetails",
+      "tick": 40,
+      "sourcedFrom": ["HouseholdCreated", "MemberAdded", "MemberJoinedHousehold"],
+      "example": { "householdId": "hh-001", "name": "The Englunds", "accessCode": "1234", "members": [] }
+    },
+    {
+      "type": "actor",
+      "name": "Parent",
+      "tick": 50,
+      "readsView": "HouseholdDetails",
+      "sendsCommand": "AddMember"
+    },
+    {
+      "type": "command",
+      "name": "AddMember",
+      "tick": 60,
+      "example": { "householdId": "hh-001", "memberName": "Jocelyn", "color": "#FF6B6B" }
+    },
+    {
+      "type": "event",
+      "name": "MemberAdded",
+      "tick": 70,
+      "producedBy": "AddMember-60",
+      "example": { "householdId": "hh-001", "memberId": "m-001", "memberName": "Jocelyn", "color": "#FF6B6B" }
+    },
+    {
+      "type": "state",
+      "name": "HouseholdDetails",
+      "tick": 80,
+      "sourcedFrom": ["HouseholdCreated", "MemberAdded", "MemberJoinedHousehold"],
+      "example": { 
+        "householdId": "hh-001", 
+        "name": "The Englunds", 
+        "members": [{ "memberId": "m-001", "name": "Jocelyn", "color": "#FF6B6B" }]
+      }
+    },
+    {
+      "type": "actor",
+      "name": "Parent",
+      "tick": 90,
+      "readsView": "HouseholdDetails",
+      "sendsCommand": "GenerateInvite"
+    },
+    {
+      "type": "command",
+      "name": "GenerateInvite",
+      "tick": 100,
+      "example": { "householdId": "hh-001" }
+    },
+    {
+      "type": "event",
+      "name": "InviteGenerated",
+      "tick": 110,
+      "producedBy": "GenerateInvite-100",
+      "example": { "householdId": "hh-001", "inviteCode": "ABC123" }
+    },
+    {
+      "type": "actor",
+      "name": "FamilyMember",
+      "tick": 120,
+      "sendsCommand": "JoinHousehold"
+    },
+    {
+      "type": "command",
+      "name": "JoinHousehold",
+      "tick": 130,
+      "example": { "inviteCode": "ABC123", "memberName": "Derick", "color": "#4ECDC4" }
+    },
+    {
+      "type": "event",
+      "name": "MemberJoinedHousehold",
+      "tick": 140,
+      "producedBy": "JoinHousehold-130",
+      "example": { "householdId": "hh-001", "memberId": "m-002", "memberName": "Derick", "color": "#4ECDC4" }
+    },
+    {
+      "type": "state",
+      "name": "HouseholdDetails",
+      "tick": 150,
+      "sourcedFrom": ["HouseholdCreated", "MemberAdded", "MemberJoinedHousehold"],
+      "example": { 
+        "householdId": "hh-001", 
+        "name": "The Englunds", 
+        "members": [
+          { "memberId": "m-001", "name": "Jocelyn", "color": "#FF6B6B" },
+          { "memberId": "m-002", "name": "Derick", "color": "#4ECDC4" }
+        ]
+      }
+    },
+    {
+      "type": "actor",
+      "name": "FamilyMember",
+      "tick": 160,
+      "sendsCommand": "AccessHousehold"
+    },
+    {
+      "type": "command",
+      "name": "AccessHousehold",
+      "tick": 170,
+      "example": { "accessCode": "1234", "memberId": "m-002" }
+    },
+    {
+      "type": "event",
+      "name": "AccessGranted",
+      "tick": 180,
+      "producedBy": "AccessHousehold-170",
+      "example": { "householdId": "hh-001", "memberId": "m-002" }
+    },
+    {
+      "type": "actor",
+      "name": "Parent",
+      "tick": 200,
+      "readsView": "HouseholdDetails",
+      "sendsCommand": "AddChore"
+    },
+    {
+      "type": "command",
+      "name": "AddChore",
+      "tick": 210,
+      "example": { 
+        "householdId": "hh-001", 
+        "name": "Empty dishwasher",
+        "frequency": { "type": "Daily" },
+        "assignedTo": ["m-002"],
+        "assignToAll": false
+      }
+    },
+    {
+      "type": "event",
+      "name": "ChoreCreated",
+      "tick": 220,
+      "producedBy": "AddChore-210",
+      "example": { 
+        "householdId": "hh-001", 
+        "choreId": "c-001",
+        "name": "Empty dishwasher",
+        "frequency": { "type": "Daily" },
+        "assignedTo": ["m-002"],
+        "assignToAll": false
+      }
+    },
+    {
+      "type": "state",
+      "name": "ChoreList",
+      "tick": 230,
+      "sourcedFrom": ["ChoreCreated", "ChoreAssigned", "ChoreCompleted"],
+      "example": [
+        { 
+          "choreId": "c-001", 
+          "name": "Empty dishwasher", 
+          "frequency": { "type": "Daily" },
+          "assignedTo": ["m-002"],
+          "memberCompletions": []
+        }
+      ]
+    },
+    {
+      "type": "actor",
+      "name": "Parent",
+      "tick": 240,
+      "readsView": "ChoreList",
+      "sendsCommand": "AddChore"
+    },
+    {
+      "type": "command",
+      "name": "AddChore",
+      "tick": 250,
+      "example": { 
+        "householdId": "hh-001", 
+        "name": "Take out trash",
+        "frequency": { "type": "Weekly", "days": ["Monday", "Thursday"] },
+        "assignToAll": true
+      }
+    },
+    {
+      "type": "event",
+      "name": "ChoreCreated",
+      "tick": 260,
+      "producedBy": "AddChore-250",
+      "example": { 
+        "householdId": "hh-001", 
+        "choreId": "c-002",
+        "name": "Take out trash",
+        "frequency": { "type": "Weekly", "days": ["Monday", "Thursday"] },
+        "assignedTo": [],
+        "assignToAll": true
+      }
+    },
+    {
+      "type": "state",
+      "name": "ChoreList",
+      "tick": 270,
+      "sourcedFrom": ["ChoreCreated", "ChoreAssigned", "ChoreCompleted"],
+      "example": [
+        { 
+          "choreId": "c-001", 
+          "name": "Empty dishwasher", 
+          "assignedTo": ["m-002"],
+          "memberCompletions": []
+        },
+        { 
+          "choreId": "c-002", 
+          "name": "Take out trash", 
+          "assignToAll": true,
+          "memberCompletions": []
+        }
+      ]
+    },
+    {
+      "type": "actor",
+      "name": "FamilyMember",
+      "tick": 280,
+      "readsView": "ChoreList",
+      "sendsCommand": "CompleteChore"
+    },
+    {
+      "type": "command",
+      "name": "CompleteChore",
+      "tick": 290,
+      "example": { "householdId": "hh-001", "choreId": "c-001", "memberId": "m-002" }
+    },
+    {
+      "type": "event",
+      "name": "ChoreCompleted",
+      "tick": 300,
+      "producedBy": "CompleteChore-290",
+      "example": { 
+        "householdId": "hh-001", 
+        "choreId": "c-001", 
+        "memberId": "m-002",
+        "completedAt": "2026-02-14T10:30:00Z"
+      }
+    },
+    {
+      "type": "state",
+      "name": "ChoreList",
+      "tick": 310,
+      "sourcedFrom": ["ChoreCreated", "ChoreAssigned", "ChoreCompleted"],
+      "example": [
+        { 
+          "choreId": "c-001", 
+          "name": "Empty dishwasher", 
+          "assignedTo": ["m-002"],
+          "memberCompletions": [{ "memberId": "m-002", "completedAt": "2026-02-14T10:30:00Z" }]
+        },
+        { 
+          "choreId": "c-002", 
+          "name": "Take out trash", 
+          "assignToAll": true,
+          "memberCompletions": []
+        }
+      ]
+    },
+    {
+      "type": "state",
+      "name": "ChoreHistory",
+      "tick": 320,
+      "sourcedFrom": ["ChoreCompleted"],
+      "example": {
+        "choreId": "c-001",
+        "completions": [
+          { "memberId": "m-002", "memberName": "Derick", "completedAt": "2026-02-14T10:30:00Z" }
+        ]
+      }
+    },
+    {
+      "type": "actor",
+      "name": "Parent",
+      "tick": 330,
+      "readsView": "ChoreHistory"
+    }
+  ],
+
+  "specifications": [
+    {
+      "name": "ChoreList",
+      "type": "state",
+      "scenarios": [
+        {
+          "name": "Empty state with no chores",
+          "initialState": [],
+          "steps": []
+        },
+        {
+          "name": "Chore appears when created",
+          "initialState": [],
+          "steps": [
+            {
+              "given": { "event": "ChoreCreated", "data": { "choreId": "c-001", "name": "Dishes", "assignedTo": ["m-001"] } },
+              "then": [{ "choreId": "c-001", "name": "Dishes", "assignedTo": ["m-001"], "memberCompletions": [] }]
+            }
+          ]
+        },
+        {
+          "name": "Completion is tracked per member",
+          "initialState": [],
+          "steps": [
+            {
+              "given": { "event": "ChoreCreated", "data": { "choreId": "c-001", "name": "Dishes", "assignedTo": ["m-001", "m-002"] } },
+              "then": [{ "choreId": "c-001", "name": "Dishes", "assignedTo": ["m-001", "m-002"], "memberCompletions": [] }]
+            },
+            {
+              "given": { "event": "ChoreCompleted", "data": { "choreId": "c-001", "memberId": "m-001", "completedAt": "2026-02-14T10:00:00Z" } },
+              "then": [{ 
+                "choreId": "c-001", 
+                "name": "Dishes", 
+                "assignedTo": ["m-001", "m-002"], 
+                "memberCompletions": [{ "memberId": "m-001", "completedAt": "2026-02-14T10:00:00Z" }]
+              }]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "CompleteChore",
+      "type": "command",
+      "scenarios": [
+        {
+          "name": "Member can complete assigned chore",
+          "steps": [
+            { 
+              "type": "events-only", 
+              "events": [
+                { "event": "ChoreCreated", "data": { "choreId": "c-001", "name": "Dishes", "assignedTo": ["m-001"] } }
+              ] 
+            },
+            { 
+              "type": "command", 
+              "when": { "choreId": "c-001", "memberId": "m-001" }, 
+              "produces": [{ "event": "ChoreCompleted", "data": { "choreId": "c-001", "memberId": "m-001" } }] 
+            }
+          ]
+        },
+        {
+          "name": "Anyone can complete assignToAll chore",
+          "steps": [
+            { 
+              "type": "events-only", 
+              "events": [
+                { "event": "ChoreCreated", "data": { "choreId": "c-001", "name": "Trash", "assignToAll": true } }
+              ] 
+            },
+            { 
+              "type": "command", 
+              "when": { "choreId": "c-001", "memberId": "m-002" }, 
+              "produces": [{ "event": "ChoreCompleted", "data": { "choreId": "c-001", "memberId": "m-002" } }] 
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
