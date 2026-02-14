@@ -10,7 +10,21 @@ using System.Linq;
 namespace ChoreMonkey.Core.Feature.ChoreList;
 
 public record GetChoresQuery(Guid HouseholdId);
-public record ChoreDto(Guid ChoreId, string DisplayName, string Description, Guid? AssignedTo);
+
+public record ChoreDto(
+    Guid ChoreId, 
+    string DisplayName, 
+    string Description, 
+    Guid? AssignedTo,
+    FrequencyDto? Frequency = null,
+    DateTime? LastCompletedAt = null,
+    Guid? LastCompletedBy = null);
+
+public record FrequencyDto(
+    string Type,
+    string[]? Days = null,
+    int? IntervalDays = null);
+
 public record GetChoresResponse(List<ChoreDto> Chores);
 
 internal class Handler(IEventStore store)
@@ -28,12 +42,27 @@ internal class Handler(IEventStore store)
             .GroupBy(e => e.ChoreId)
             .ToDictionary(g => g.Key, g => g.Last().AssignedToMemberId);
 
+        // Get latest completion for each chore
+        var lastCompletions = events.OfType<ChoreCompleted>()
+            .GroupBy(e => e.ChoreId)
+            .ToDictionary(g => g.Key, g => g.OrderByDescending(c => c.CompletedAt).First());
+
         var chores = createdChores
-            .Select(e => new ChoreDto(
-                e.ChoreId, 
-                e.DisplayName, 
-                e.Description,
-                assignments.GetValueOrDefault(e.ChoreId)))
+            .Select(e => {
+                var lastCompletion = lastCompletions.GetValueOrDefault(e.ChoreId);
+                var frequency = e.Frequency != null 
+                    ? new FrequencyDto(e.Frequency.Type, e.Frequency.Days, e.Frequency.IntervalDays)
+                    : new FrequencyDto("once");
+                    
+                return new ChoreDto(
+                    e.ChoreId, 
+                    e.DisplayName, 
+                    e.Description,
+                    assignments.GetValueOrDefault(e.ChoreId),
+                    frequency,
+                    lastCompletion?.CompletedAt,
+                    lastCompletion?.CompletedByMemberId);
+            })
             .ToList();
 
         return new GetChoresResponse(chores);

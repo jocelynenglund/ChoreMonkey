@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Household, Member, Chore, Invite } from '@/types/household';
+import type { Household, Member, Chore, Invite, ChoreFrequency } from '@/types/household';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7422';
 
@@ -17,11 +17,12 @@ interface HouseholdState {
 
   // Commands (now async)
   createHousehold: (name: string, pinCode: string, ownerNickname?: string) => Promise<Household | null>;
-  addChore: (householdId: string, displayName: string, description: string) => Promise<Chore | null>;
+  addChore: (householdId: string, displayName: string, description: string, frequency?: ChoreFrequency) => Promise<Chore | null>;
   generateInvite: (householdId: string) => Promise<Invite | null>;
   joinHousehold: (householdId: string, inviteId: string, nickname: string) => Promise<Member | null>;
   accessHousehold: (householdId: string, pinCode: string) => Promise<boolean>;
   toggleChoreComplete: (choreId: string) => void;
+  completeChore: (householdId: string, choreId: string, memberId: string, completedAt?: Date) => Promise<void>;
   assignChore: (householdId: string, choreId: string, memberId: string | undefined) => Promise<void>;
   deleteChore: (choreId: string) => void;
   setCurrentMember: (memberId: string) => void;
@@ -114,14 +115,23 @@ export const useHouseholdStore = create<HouseholdState>()(
         }
       },
 
-      addChore: async (householdId, displayName, description) => {
+      addChore: async (householdId, displayName, description, frequency) => {
         set({ isLoading: true, error: null });
 
         try {
+          const body: Record<string, unknown> = { displayName, description };
+          if (frequency) {
+            body.frequency = {
+              type: frequency.type,
+              days: frequency.days,
+              intervalDays: frequency.intervalDays,
+            };
+          }
+
           const response = await fetch(`${API_BASE_URL}/api/households/${householdId}/chores`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ displayName, description }),
+            body: JSON.stringify(body),
           });
 
           if (!response.ok) {
@@ -135,6 +145,7 @@ export const useHouseholdStore = create<HouseholdState>()(
             description,
             completed: false,
             createdAt: new Date(),
+            frequency: frequency || { type: 'once' },
           };
 
           set((state) => ({
@@ -269,6 +280,44 @@ export const useHouseholdStore = create<HouseholdState>()(
         }));
       },
 
+      completeChore: async (householdId, choreId, memberId, completedAt) => {
+        try {
+          const body: Record<string, unknown> = { memberId };
+          if (completedAt) {
+            body.completedAt = completedAt.toISOString();
+          }
+
+          const response = await fetch(
+            `${API_BASE_URL}/api/households/${householdId}/chores/${choreId}/complete`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(body),
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error('Failed to complete chore');
+          }
+
+          const data = await response.json();
+          
+          set((state) => ({
+            chores: state.chores.map((c) =>
+              c.id === choreId
+                ? {
+                    ...c,
+                    lastCompletedAt: new Date(data.completedAt),
+                    lastCompletedBy: data.completedBy,
+                  }
+                : c
+            ),
+          }));
+        } catch (error) {
+          console.error('Failed to complete chore', error);
+        }
+      },
+
       assignChore: async (householdId, choreId, memberId) => {
         try {
           await fetch(`${API_BASE_URL}/api/households/${householdId}/chores/${choreId}/assign`, {
@@ -362,6 +411,9 @@ export const useHouseholdStore = create<HouseholdState>()(
             assignedTo: c.assignedTo as string | undefined,
             completed: (c.completed ?? false) as boolean,
             createdAt: c.createdAt ? new Date(c.createdAt as string) : new Date(),
+            frequency: c.frequency as ChoreFrequency | undefined,
+            lastCompletedAt: c.lastCompletedAt ? new Date(c.lastCompletedAt as string) : undefined,
+            lastCompletedBy: c.lastCompletedBy as string | undefined,
           }));
           set((state) => ({
             chores: [

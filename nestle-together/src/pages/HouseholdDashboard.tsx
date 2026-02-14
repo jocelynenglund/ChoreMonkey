@@ -5,15 +5,17 @@ import { Button } from '@/components/ui/button';
 import { useHouseholdStore } from '@/stores/householdStore';
 import { ChoreCard } from '@/components/ChoreCard';
 import { AddChoreDialog } from '@/components/AddChoreDialog';
+import { CompleteChoreDialog } from '@/components/CompleteChoreDialog';
 import { InviteDialog } from '@/components/InviteDialog';
 import { MemberAvatar } from '@/components/MemberAvatar';
-import type { Household, Chore } from '@/types/household';
+import type { Household, Chore, ChoreFrequency } from '@/types/household';
 
 export default function HouseholdDashboard() {
   const { id } = useParams<{ id: string }>();
   const [household, setHousehold] = useState<Household | null>(null);
   const [chores, setChores] = useState<Chore[]>([]);
   const [isDataLoading, setIsDataLoading] = useState(true);
+  const [completingChore, setCompletingChore] = useState<Chore | null>(null);
 
   const {
     isAuthenticated,
@@ -25,6 +27,7 @@ export default function HouseholdDashboard() {
     getHouseholdChores,
     addChore,
     toggleChoreComplete,
+    completeChore,
     assignChore,
     deleteChore,
     generateInvite,
@@ -79,11 +82,23 @@ export default function HouseholdDashboard() {
   const pendingChores = chores.filter((c) => !c.completed);
   const completedChores = chores.filter((c) => c.completed);
 
-  const handleAddChore = async (displayName: string, description: string) => {
-    const newChore = await addChore(household.id, displayName, description);
+  const handleAddChore = async (displayName: string, description: string, frequency?: ChoreFrequency) => {
+    const newChore = await addChore(household.id, displayName, description, frequency);
     if (newChore) {
       setChores((prev) => [...prev, newChore]);
     }
+  };
+
+  const handleCompleteChore = async (choreId: string, completedAt?: Date) => {
+    if (!household || !currentMemberId) return;
+    await completeChore(household.id, choreId, currentMemberId, completedAt);
+    // Refresh chores to get updated lastCompletedAt
+    const updatedChores = await getHouseholdChores(household.id);
+    setChores(updatedChores);
+  };
+
+  const openCompleteDialog = (chore: Chore) => {
+    setCompletingChore(chore);
   };
 
   const handleToggleComplete = (choreId: string) => {
@@ -210,7 +225,9 @@ export default function HouseholdDashboard() {
                 key={chore.id}
                 chore={chore}
                 members={members}
+                currentMemberId={currentMemberId || undefined}
                 onToggleComplete={() => handleToggleComplete(chore.id)}
+                onComplete={() => openCompleteDialog(chore)}
                 onAssign={(memberId) => handleAssignChore(chore.id, memberId)}
                 onDelete={() => handleDeleteChore(chore.id)}
               />
@@ -232,7 +249,9 @@ export default function HouseholdDashboard() {
                     key={chore.id}
                     chore={chore}
                     members={members}
+                    currentMemberId={currentMemberId || undefined}
                     onToggleComplete={() => handleToggleComplete(chore.id)}
+                    onComplete={() => openCompleteDialog(chore)}
                     onAssign={(memberId) => handleAssignChore(chore.id, memberId)}
                     onDelete={() => handleDeleteChore(chore.id)}
                   />
@@ -242,6 +261,14 @@ export default function HouseholdDashboard() {
           </div>
         )}
       </main>
+
+      {/* Complete Chore Dialog */}
+      <CompleteChoreDialog
+        chore={completingChore}
+        open={completingChore !== null}
+        onOpenChange={(open) => !open && setCompletingChore(null)}
+        onComplete={handleCompleteChore}
+      />
     </div>
   );
 }

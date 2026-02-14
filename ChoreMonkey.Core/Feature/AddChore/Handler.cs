@@ -7,15 +7,40 @@ using Microsoft.AspNetCore.Http;
 
 namespace ChoreMonkey.Core.Feature.AddChore;
 
-public record AddChoreCommand(Guid HouseholdId, Guid ChoreId, string DisplayName, string Description);
-public record AddChoreRequest(string DisplayName, string Description);
+public record AddChoreCommand(
+    Guid HouseholdId, 
+    Guid ChoreId, 
+    string DisplayName, 
+    string Description,
+    ChoreFrequency? Frequency = null);
+
+public record AddChoreRequest(
+    string DisplayName, 
+    string Description,
+    FrequencyRequest? Frequency = null);
+
+public record FrequencyRequest(
+    string Type,
+    string[]? Days = null,
+    int? IntervalDays = null);
 
 internal class Handler(IEventStore store)
 {
     public async Task HandleAsync(AddChoreCommand request)
     {
         var streamId = ChoreAggregate.StreamId(request.HouseholdId);
-        await store.AppendToStreamAsync(streamId, new ChoreCreated(request.ChoreId, request.HouseholdId, request.DisplayName, request.Description), ExpectedVersion.Any);
+        
+        // Default to "once" if no frequency specified
+        var frequency = request.Frequency ?? new ChoreFrequency("once");
+        
+        var choreCreated = new ChoreCreated(
+            request.ChoreId, 
+            request.HouseholdId, 
+            request.DisplayName, 
+            request.Description,
+            frequency);
+            
+        await store.AppendToStreamAsync(streamId, choreCreated, ExpectedVersion.Any);
     }
 }
 
@@ -25,7 +50,17 @@ internal static class AddChoreEndpoint
     {
         group.MapPost("households/{householdId:guid}/chores", async (Guid householdId, AddChoreRequest dto, Feature.AddChore.Handler handler) =>
         {
-            var command = new AddChoreCommand(householdId, Guid.NewGuid(), dto.DisplayName, dto.Description);
+            var frequency = dto.Frequency != null 
+                ? new ChoreFrequency(dto.Frequency.Type, dto.Frequency.Days, dto.Frequency.IntervalDays)
+                : null;
+                
+            var command = new AddChoreCommand(
+                householdId, 
+                Guid.NewGuid(), 
+                dto.DisplayName, 
+                dto.Description,
+                frequency);
+                
             await handler.HandleAsync(command);
             return Results.Created($"/api/households/{householdId}/chores", null);
         });
