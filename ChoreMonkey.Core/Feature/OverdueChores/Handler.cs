@@ -77,8 +77,13 @@ internal class Handler(IEventStore store)
                 var lastCompletion = completions.GetValueOrDefault((choreId, memberId));
                 var lastCompletedAt = lastCompletion?.CompletedAt;
                 
-                // Calculate if overdue
-                var overdueDays = CalculateOverdueDays(chore.Frequency, lastCompletedAt, today);
+                // Get chore creation date - can't be overdue before it existed
+                var choreCreatedAt = DateTime.TryParse(chore.TimestampUtc, out var parsed) 
+                    ? parsed.Date 
+                    : today;
+                
+                // Calculate if overdue (considering creation date)
+                var overdueDays = CalculateOverdueDays(chore.Frequency, lastCompletedAt, today, choreCreatedAt);
                 
                 if (overdueDays > 0)
                 {
@@ -104,26 +109,31 @@ internal class Handler(IEventStore store)
                   .ToList());
     }
     
-    private static int CalculateOverdueDays(ChoreFrequency? frequency, DateTime? lastCompleted, DateTime today)
+    private static int CalculateOverdueDays(ChoreFrequency? frequency, DateTime? lastCompleted, DateTime today, DateTime choreCreatedAt)
     {
         if (frequency == null) return 0;
         
         return frequency.Type.ToLower() switch
         {
-            "daily" => CalculateDailyOverdue(lastCompleted, today),
-            "weekly" => CalculateWeeklyOverdue(frequency.Days, lastCompleted, today),
-            "interval" => CalculateIntervalOverdue(frequency.IntervalDays ?? 1, lastCompleted, today),
+            "daily" => CalculateDailyOverdue(lastCompleted, today, choreCreatedAt),
+            "weekly" => CalculateWeeklyOverdue(frequency.Days, lastCompleted, today, choreCreatedAt),
+            "interval" => CalculateIntervalOverdue(frequency.IntervalDays ?? 1, lastCompleted, today, choreCreatedAt),
             "once" => 0, // One-time chores can't be overdue
             _ => 0
         };
     }
     
-    private static int CalculateDailyOverdue(DateTime? lastCompleted, DateTime today)
+    private static int CalculateDailyOverdue(DateTime? lastCompleted, DateTime today, DateTime choreCreatedAt)
     {
+        // Can't be overdue if created today or yesterday (give them today to do it)
+        if (choreCreatedAt >= today.AddDays(-1)) return 0;
+        
         if (lastCompleted == null)
         {
-            // If never completed, consider it 1 day overdue (should have been done yesterday)
-            return 1;
+            // Never completed - overdue since the day after creation
+            var firstDueDate = choreCreatedAt.AddDays(1);
+            if (firstDueDate >= today) return 0;
+            return (int)(today - firstDueDate).TotalDays;
         }
         
         var lastCompletedDate = lastCompleted.Value.Date;
@@ -138,7 +148,7 @@ internal class Handler(IEventStore store)
         return (int)(today - lastCompletedDate).TotalDays - 1;
     }
     
-    private static int CalculateWeeklyOverdue(string[]? days, DateTime? lastCompleted, DateTime today)
+    private static int CalculateWeeklyOverdue(string[]? days, DateTime? lastCompleted, DateTime today, DateTime choreCreatedAt)
     {
         if (days == null || days.Length == 0) return 0;
         
@@ -151,6 +161,10 @@ internal class Handler(IEventStore store)
         for (int i = 1; i <= 7; i++)
         {
             var checkDate = today.AddDays(-i);
+            
+            // Don't count days before the chore was created
+            if (checkDate < choreCreatedAt) continue;
+            
             if (requiredDays.Contains(checkDate.DayOfWeek))
             {
                 // This was a required day - was it completed?
@@ -165,12 +179,14 @@ internal class Handler(IEventStore store)
         return 0;
     }
     
-    private static int CalculateIntervalOverdue(int intervalDays, DateTime? lastCompleted, DateTime today)
+    private static int CalculateIntervalOverdue(int intervalDays, DateTime? lastCompleted, DateTime today, DateTime choreCreatedAt)
     {
         if (lastCompleted == null)
         {
-            // If never completed, consider it overdue by the interval
-            return intervalDays;
+            // If never completed, check if enough days have passed since creation
+            var daysSinceCreation = (int)(today - choreCreatedAt).TotalDays;
+            if (daysSinceCreation <= intervalDays) return 0; // Not enough time has passed
+            return daysSinceCreation - intervalDays;
         }
         
         var daysSinceCompletion = (int)(today - lastCompleted.Value.Date).TotalDays;
