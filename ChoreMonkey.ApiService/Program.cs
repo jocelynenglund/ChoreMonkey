@@ -16,10 +16,14 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("ChoreMonkeyCors", policy =>
     {
-        // Development-friendly policy; tighten for production
-        policy.AllowAnyOrigin()
+        policy.WithOrigins(
+                "http://labs.itsybit.se",
+                "https://labs.itsybit.se",
+                "http://localhost:5173",
+                "https://localhost:5173")
               .AllowAnyMethod()
-              .AllowAnyHeader();
+              .AllowAnyHeader()
+              .AllowCredentials();
     });
 });
 
