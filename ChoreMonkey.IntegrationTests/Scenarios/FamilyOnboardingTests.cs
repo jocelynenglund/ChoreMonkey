@@ -73,26 +73,26 @@ public class FamilyOnboardingTests(ApiFixture fixture)
         // Assign chores to kids
         await _client.PostAsJsonAsync(
             $"/api/households/{household.HouseholdId}/chores/{cleanRoom.ChoreId}/assign",
-            new { MemberId = emma!.MemberId });
+            new { MemberIds = new[] { emma!.MemberId }, AssignToAll = false });
         await _client.PostAsJsonAsync(
             $"/api/households/{household.HouseholdId}/chores/{doDishes.ChoreId}/assign",
-            new { MemberId = jake!.MemberId });
+            new { MemberIds = new[] { jake!.MemberId }, AssignToAll = false });
         await _client.PostAsJsonAsync(
             $"/api/households/{household.HouseholdId}/chores/{takeTrash.ChoreId}/assign",
-            new { MemberId = emma.MemberId });
+            new { MemberIds = new[] { emma.MemberId }, AssignToAll = false });
 
         // === Step 9: Verify final state ===
         var finalChores = await _client.GetFromJsonAsync<GetChoresResponse>(
             $"/api/households/{household.HouseholdId}/chores");
 
         // Emma has 2 chores
-        finalChores!.Chores.Where(c => c.AssignedTo == emma.MemberId).Should().HaveCount(2);
+        finalChores!.Chores.Where(c => c.AssignedTo?.Contains(emma.MemberId) == true).Should().HaveCount(2);
         
         // Jake has 1 chore
-        finalChores.Chores.Where(c => c.AssignedTo == jake.MemberId).Should().HaveCount(1);
+        finalChores.Chores.Where(c => c.AssignedTo?.Contains(jake.MemberId) == true).Should().HaveCount(1);
         
         // All chores are assigned
-        finalChores.Chores.Should().OnlyContain(c => c.AssignedTo != null);
+        finalChores.Chores.Should().OnlyContain(c => c.AssignedTo != null && c.AssignedTo.Length > 0);
     }
 
     #region Response Records
@@ -103,7 +103,7 @@ public class FamilyOnboardingTests(ApiFixture fixture)
     private record ListMembersResponse(List<MemberDto> Members);
     private record MemberDto(Guid MemberId, string Nickname);
     private record GetChoresResponse(List<ChoreDto> Chores);
-    private record ChoreDto(Guid ChoreId, string DisplayName, string Description, Guid? AssignedTo);
+    private record ChoreDto(Guid ChoreId, string DisplayName, string Description, Guid[]? AssignedTo);
 
     #endregion
 }
