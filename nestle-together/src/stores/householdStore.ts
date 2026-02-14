@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Household, Member, Chore, Invite, ChoreFrequency, MemberCompletion } from '@/types/household';
+import type { Household, Member, Chore, Invite, ChoreFrequency, MemberCompletion, ChoreCompletion } from '@/types/household';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7422';
 
@@ -37,6 +37,7 @@ interface HouseholdState {
   getHousehold: (id: string) => Promise<Household | null>;
   getHouseholdChores: (householdId: string) => Promise<Chore[]>;
   fetchHouseholdMembers: (householdId: string) => Promise<Member[]>;
+  fetchChoreHistory: (householdId: string, choreId: string) => Promise<ChoreCompletion[]>;
 
   // Local getters (for cached data)
   getHouseholdMembers: (householdId: string) => Member[];
@@ -503,6 +504,26 @@ export const useHouseholdStore = create<HouseholdState>()(
           return members;
         } catch (error) {
           set({ isLoading: false, error: (error as Error).message });
+          return [];
+        }
+      },
+
+      fetchChoreHistory: async (householdId, choreId) => {
+        try {
+          const response = await fetch(
+            `${API_BASE_URL}/api/households/${householdId}/chores/${choreId}/history`
+          );
+          if (!response.ok) {
+            throw new Error('Failed to fetch chore history');
+          }
+          const data = await response.json();
+          const completions = (data.completions ?? []).map((c: Record<string, unknown>) => ({
+            completedBy: c.completedBy as string,
+            completedAt: new Date(c.completedAt as string),
+          }));
+          return completions;
+        } catch (error) {
+          console.error('Failed to fetch chore history', error);
           return [];
         }
       },
