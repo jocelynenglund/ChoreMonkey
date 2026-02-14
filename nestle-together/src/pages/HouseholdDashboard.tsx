@@ -8,6 +8,7 @@ import { AddChoreDialog } from '@/components/AddChoreDialog';
 import { CompleteChoreDialog } from '@/components/CompleteChoreDialog';
 import { InviteDialog } from '@/components/InviteDialog';
 import { MemberAvatar } from '@/components/MemberAvatar';
+import { OverdueAccordion } from '@/components/OverdueAccordion';
 import type { Household, Chore, ChoreFrequency } from '@/types/household';
 
 export default function HouseholdDashboard() {
@@ -185,6 +186,11 @@ export default function HouseholdDashboard() {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Overdue Chores Accordion */}
+        <div className="mb-6">
+          <OverdueAccordion householdId={household.id} />
         </div>
 
         {/* Chores Section */}

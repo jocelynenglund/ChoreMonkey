@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Household, Member, Chore, Invite, ChoreFrequency, MemberCompletion, ChoreCompletion } from '@/types/household';
+import type { Household, Member, Chore, Invite, ChoreFrequency, MemberCompletion, ChoreCompletion, MemberOverdue, OverdueChore } from '@/types/household';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7422';
 
@@ -38,6 +38,7 @@ interface HouseholdState {
   getHouseholdChores: (householdId: string) => Promise<Chore[]>;
   fetchHouseholdMembers: (householdId: string) => Promise<Member[]>;
   fetchChoreHistory: (householdId: string, choreId: string) => Promise<ChoreCompletion[]>;
+  fetchOverdueChores: (householdId: string) => Promise<MemberOverdue[]>;
 
   // Local getters (for cached data)
   getHouseholdMembers: (householdId: string) => Member[];
@@ -524,6 +525,39 @@ export const useHouseholdStore = create<HouseholdState>()(
           return completions;
         } catch (error) {
           console.error('Failed to fetch chore history', error);
+          return [];
+        }
+      },
+
+      fetchOverdueChores: async (householdId) => {
+        try {
+          const response = await fetch(
+            `${API_BASE_URL}/api/households/${householdId}/overdue`
+          );
+          if (!response.ok) {
+            throw new Error('Failed to fetch overdue chores');
+          }
+          const data = await response.json();
+          const memberOverdue: MemberOverdue[] = (data.memberOverdue ?? []).map(
+            (m: Record<string, unknown>) => ({
+              memberId: m.memberId as string,
+              nickname: m.nickname as string,
+              overdueCount: m.overdueCount as number,
+              chores: ((m.chores as Record<string, unknown>[]) ?? []).map(
+                (c: Record<string, unknown>) => ({
+                  choreId: c.choreId as string,
+                  displayName: c.displayName as string,
+                  overdueDays: c.overdueDays as number,
+                  lastCompleted: c.lastCompleted
+                    ? new Date(c.lastCompleted as string)
+                    : undefined,
+                })
+              ),
+            })
+          );
+          return memberOverdue;
+        } catch (error) {
+          console.error('Failed to fetch overdue chores', error);
           return [];
         }
       },

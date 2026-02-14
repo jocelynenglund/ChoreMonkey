@@ -52,3 +52,17 @@ export interface ChoreCompletion {
   completedBy: string;
   completedAt: Date;
 }
+
+export interface OverdueChore {
+  choreId: string;
+  displayName: string;
+  overdueDays: number;
+  lastCompleted?: Date;
+}
+
+export interface MemberOverdue {
+  memberId: string;
+  nickname: string;
+  overdueCount: number;
+  chores: OverdueChore[];
+}
