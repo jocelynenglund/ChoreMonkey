@@ -17,7 +17,7 @@ internal class Handler(IEventStore store)
     {
         var streamId = HouseholdAggregate.StreamId(request.HouseholdId);
 
-        var events = await store.LoadEventsAsync(streamId);
+        var events = await store.FetchEventsAsync(streamId);
         var householdCreated = events
             .OfType<HouseholdCreated>()
             .FirstOrDefault();

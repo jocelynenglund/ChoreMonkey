@@ -4,7 +4,7 @@ import { ArrowLeft, Lock, Home } from 'lucide-react';
 import { PinInput } from '@/components/PinInput';
 import { MemberSelector } from '@/components/MemberSelector';
 import { useHouseholdStore } from '@/stores/householdStore';
-import type { Household } from '@/types/household';
+import type { Household, Member } from '@/types/household';
 
 export default function AccessHousehold() {
   const navigate = useNavigate();
@@ -15,30 +15,39 @@ export default function AccessHousehold() {
   const {
     getHousehold,
     getHouseholdMembers,
+    fetchHouseholdMembers,
     accessHousehold,
     setCurrentMember,
   } = useHouseholdStore();
 
-  const members = getHouseholdMembers(id || '');
+  const [members, setMembers] = useState<Member[]>([]);
 
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
   const [error, setError] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
 
   useEffect(() => {
-    const fetchHousehold = async () => {
+    const fetchData = async () => {
       if (!id) {
         setIsLoading(false);
         return;
       }
       setIsLoading(true);
-      const fetchedHousehold = await getHousehold(id);
+      const [fetchedHousehold, fetchedMembers] = await Promise.all([
+        getHousehold(id),
+        fetchHouseholdMembers(id),
+      ]);
       setHousehold(fetchedHousehold);
+      setMembers(fetchedMembers);
+      // Auto-select if only one member
+      if (fetchedMembers.length === 1) {
+        setSelectedMemberId(fetchedMembers[0].id);
+      }
       setIsLoading(false);
     };
 
-    fetchHousehold();
-  }, [id, getHousehold]);
+    fetchData();
+  }, [id, getHousehold, fetchHouseholdMembers]);
 
   if (isLoading) {
     return (
@@ -75,20 +84,26 @@ export default function AccessHousehold() {
   }
 
   const handlePinComplete = async (pin: string) => {
+    // Require member selection
+    if (!selectedMemberId) {
+      setError(true);
+      return;
+    }
+    
     setIsVerifying(true);
     setError(false);
 
     const success = await accessHousehold(household.id, pin);
     if (success) {
-      if (selectedMemberId) {
-        setCurrentMember(selectedMemberId);
-      }
+      setCurrentMember(selectedMemberId);
       navigate(`/household/${household.id}`);
     } else {
       setError(true);
       setIsVerifying(false);
     }
   };
+  
+  const needsMemberSelection = members.length > 1 && !selectedMemberId;
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12">
@@ -112,7 +127,7 @@ export default function AccessHousehold() {
             Enter your PIN to access the household
           </p>
 
-          {members.length > 1 && (
+          {members.length > 0 && (
             <div className="mb-8">
               <p className="text-sm text-muted-foreground mb-4">Who's this?</p>
               <MemberSelector
@@ -127,9 +142,15 @@ export default function AccessHousehold() {
             <PinInput
               onComplete={handlePinComplete}
               error={error}
-              disabled={isVerifying}
+              disabled={isVerifying || needsMemberSelection}
             />
           </div>
+          
+          {needsMemberSelection && (
+            <p className="text-sm text-muted-foreground animate-fade-in mb-2">
+              Please select who you are first
+            </p>
+          )}
 
           {error && (
             <p className="text-sm text-destructive animate-fade-in">

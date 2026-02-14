@@ -15,10 +15,11 @@ internal class Handler(IEventStore store)
     public async Task<GenerateInviteResponse> HandleAsync(GenerateInviteCommand request)
     {
         var inviteId = Guid.NewGuid();
-        var link = $"https://invite.example/{inviteId}";
+        // Link format: /join/{householdId}/{inviteId} - frontend will prepend base URL
+        var link = $"/join/{request.HouseholdId}/{inviteId}";
 
         var streamId = HouseholdAggregate.StreamId(request.HouseholdId);
-        await store.AppendAsync(streamId, new InviteGenerated(request.HouseholdId, inviteId, link), ExpectedVersion.Any);
+        await store.AppendToStreamAsync(streamId, new InviteGenerated(request.HouseholdId, inviteId, link), ExpectedVersion.Any);
 
         return new GenerateInviteResponse(request.HouseholdId, inviteId, link);
     }

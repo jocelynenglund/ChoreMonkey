@@ -13,6 +13,12 @@ export interface Member {
   joinedAt: Date;
 }
 
+export interface ChoreFrequency {
+  type: 'daily' | 'weekly' | 'interval' | 'once';
+  days?: string[];      // For weekly: ['monday', 'thursday']
+  intervalDays?: number; // For interval: every X days
+}
+
 export interface Chore {
   id: string;
   householdId: string;
@@ -21,6 +27,9 @@ export interface Chore {
   assignedTo?: string;
   completed: boolean;
   createdAt: Date;
+  frequency?: ChoreFrequency;
+  lastCompletedAt?: Date;
+  lastCompletedBy?: string;
 }
 
 export interface Invite {
