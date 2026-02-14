@@ -1,4 +1,5 @@
 using ChoreMonkey.Core.Domain;
+using ChoreMonkey.Core.Security;
 using ChoreMonkey.Events;
 using FileEventStore;
 using Microsoft.AspNetCore.Builder;
@@ -7,12 +8,12 @@ using Microsoft.AspNetCore.Routing;
 
 namespace ChoreMonkey.Core.Feature.OverdueChores;
 
-public record GetOverdueQuery(Guid HouseholdId);
+public record GetOverdueQuery(Guid HouseholdId, int PinCode);
 
 public record OverdueChoreDto(
     Guid ChoreId,
     string DisplayName,
-    int OverdueDays,
+    string OverduePeriod,
     DateTime? LastCompleted);
 
 public record MemberOverdueDto(
@@ -25,13 +26,26 @@ public record GetOverdueResponse(List<MemberOverdueDto> MemberOverdue);
 
 internal class Handler(IEventStore store)
 {
-    public async Task<GetOverdueResponse> HandleAsync(GetOverdueQuery request)
+    public async Task<GetOverdueResponse?> HandleAsync(GetOverdueQuery request)
     {
         var householdStreamId = HouseholdAggregate.StreamId(request.HouseholdId);
         var choreStreamId = ChoreAggregate.StreamId(request.HouseholdId);
         
         var householdEvents = await store.FetchEventsAsync(householdStreamId);
         var choreEvents = await store.FetchEventsAsync(choreStreamId);
+        
+        // Verify admin access
+        var householdCreated = householdEvents.OfType<HouseholdCreated>().FirstOrDefault();
+        if (householdCreated == null) return null;
+        
+        var adminPinHash = householdEvents.OfType<AdminPinChanged>()
+            .OrderByDescending(e => e.TimestampUtc)
+            .FirstOrDefault()?.NewPinHash ?? householdCreated.PinHash;
+        
+        if (!PinHasher.VerifyPin(request.PinCode, adminPinHash))
+        {
+            return null; // Not admin - return null (endpoint will return 403)
+        }
         
         var today = DateTime.UtcNow.Date;
         
@@ -81,15 +95,15 @@ internal class Handler(IEventStore store)
                 var choreStartDate = chore.StartDate?.Date 
                     ?? (DateTime.TryParse(chore.TimestampUtc, out var parsed) ? parsed.Date : today);
                 
-                // Calculate if overdue (considering start date)
-                var overdueDays = CalculateOverdueDays(chore.Frequency, lastCompletedAt, today, choreStartDate);
+                // Calculate if overdue within grace period
+                var overduePeriod = CalculateOverduePeriod(chore.Frequency, lastCompletedAt, today, choreStartDate);
                 
-                if (overdueDays > 0)
+                if (overduePeriod != null)
                 {
                     overdueChores.Add(new OverdueChoreDto(
                         choreId,
                         chore.DisplayName,
-                        overdueDays,
+                        overduePeriod,
                         lastCompletedAt));
                 }
             }
@@ -98,7 +112,7 @@ internal class Handler(IEventStore store)
                 memberId,
                 nickname,
                 overdueChores.Count,
-                overdueChores.OrderByDescending(c => c.OverdueDays).ToList()));
+                overdueChores.OrderBy(c => c.DisplayName).ToList()));
         }
         
         // Sort: members with overdue chores first, then by count descending
@@ -108,43 +122,39 @@ internal class Handler(IEventStore store)
                   .ToList());
     }
     
-    private static int CalculateOverdueDays(ChoreFrequency? frequency, DateTime? lastCompleted, DateTime today, DateTime choreCreatedAt)
+    private static string? CalculateOverduePeriod(ChoreFrequency? frequency, DateTime? lastCompleted, DateTime today, DateTime choreCreatedAt)
     {
-        if (frequency == null) return 0;
+        if (frequency == null) return null;
         
         return frequency.Type.ToLower() switch
         {
             "daily" => CalculateDailyOverdue(lastCompleted, today, choreCreatedAt),
             "weekly" => CalculateWeeklyOverdue(frequency.Days, lastCompleted, today, choreCreatedAt),
             "interval" => CalculateIntervalOverdue(frequency.IntervalDays ?? 1, lastCompleted, today, choreCreatedAt),
-            "once" => 0, // One-time chores can't be overdue
-            _ => 0
+            "once" => null, // One-time chores can't be overdue
+            _ => null
         };
     }
     
-    private static int CalculateDailyOverdue(DateTime? lastCompleted, DateTime today, DateTime choreCreatedAt)
+    /// <summary>
+    /// Daily chores: only overdue if missed YESTERDAY (grace period = 1 day)
+    /// Older misses are forgiven - we only show the most recent missed day
+    /// </summary>
+    private static string? CalculateDailyOverdue(DateTime? lastCompleted, DateTime today, DateTime choreCreatedAt)
     {
-        // Can't be overdue if created today or yesterday (give them today to do it)
-        if (choreCreatedAt >= today.AddDays(-1)) return 0;
+        var yesterday = today.AddDays(-1);
         
-        if (lastCompleted == null)
-        {
-            // Never completed - overdue since the day after creation
-            var firstDueDate = choreCreatedAt.AddDays(1);
-            if (firstDueDate >= today) return 0;
-            return (int)(today - firstDueDate).TotalDays;
-        }
-        
-        var lastCompletedDate = lastCompleted.Value.Date;
+        // Can't be overdue if chore didn't exist yesterday
+        if (choreCreatedAt > yesterday) return null;
         
         // If completed today, not overdue
-        if (lastCompletedDate >= today) return 0;
+        if (lastCompleted?.Date >= today) return null;
         
-        // If completed yesterday, not overdue (they have today to do it)
-        if (lastCompletedDate >= today.AddDays(-1)) return 0;
+        // If completed yesterday, not overdue
+        if (lastCompleted?.Date >= yesterday) return null;
         
-        // Overdue by number of days since it should have been done
-        return (int)(today - lastCompletedDate).TotalDays - 1;
+        // Missed yesterday - that's the only overdue we show (grace period)
+        return "yesterday";
     }
     
     private static DateTime GetMondayOfWeek(DateTime date)
@@ -153,91 +163,85 @@ internal class Handler(IEventStore store)
         return date.AddDays(-diff).Date;
     }
 
-    private static int CalculateWeeklyOverdue(string[]? days, DateTime? lastCompleted, DateTime today, DateTime choreCreatedAt)
-    {
-        // Weekly-anyday: no specific days = must complete once per week (Mon-Sun)
-        if (days == null || days.Length == 0)
-        {
-            return CalculateWeeklyAnydayOverdue(lastCompleted, today, choreCreatedAt);
-        }
-        
-        // Weekly with specific days
-        var requiredDays = days
-            .Select(d => Enum.Parse<DayOfWeek>(d, ignoreCase: true))
-            .ToHashSet();
-        
-        // Look back up to 7 days to find the last required day
-        for (int i = 1; i <= 7; i++)
-        {
-            var checkDate = today.AddDays(-i);
-            
-            // Don't count days before the chore was created
-            if (checkDate < choreCreatedAt) continue;
-            
-            if (requiredDays.Contains(checkDate.DayOfWeek))
-            {
-                // This was a required day - was it completed?
-                if (lastCompleted == null || lastCompleted.Value.Date < checkDate)
-                {
-                    return i; // Overdue by this many days
-                }
-                return 0; // Was completed on or after the required day
-            }
-        }
-        
-        return 0;
-    }
-
-    private static int CalculateWeeklyAnydayOverdue(DateTime? lastCompleted, DateTime today, DateTime choreCreatedAt)
+    /// <summary>
+    /// Weekly chores: only overdue if missed LAST WEEK (grace period = 1 week)
+    /// Older weeks are forgiven - we only show the most recent missed week
+    /// </summary>
+    private static string? CalculateWeeklyOverdue(string[]? days, DateTime? lastCompleted, DateTime today, DateTime choreCreatedAt)
     {
         var currentWeekStart = GetMondayOfWeek(today);
         var previousWeekStart = currentWeekStart.AddDays(-7);
         
-        // If chore was created this week, can't be overdue yet
-        if (choreCreatedAt >= currentWeekStart) return 0;
-        
-        // Check if completed this week
-        if (lastCompleted != null && lastCompleted.Value.Date >= currentWeekStart)
+        // Weekly-anyday: no specific days = must complete once per week (Mon-Sun)
+        if (days == null || days.Length == 0)
         {
-            return 0; // Completed this week, not overdue
+            // Can't be overdue if created this week or last week
+            if (choreCreatedAt >= previousWeekStart) return null;
+            
+            // If completed this week, not overdue
+            if (lastCompleted?.Date >= currentWeekStart) return null;
+            
+            // If completed last week, not overdue (that's the grace period)
+            if (lastCompleted?.Date >= previousWeekStart) return null;
+            
+            // Missed last week - that's the only overdue we show
+            return "last week";
         }
         
-        // Check if completed last week
-        if (lastCompleted != null && lastCompleted.Value.Date >= previousWeekStart)
+        // Weekly with specific days - check if they missed last week's required day
+        var requiredDays = days
+            .Select(d => Enum.Parse<DayOfWeek>(d, ignoreCase: true))
+            .ToHashSet();
+        
+        // Find last week's required day(s)
+        for (int i = 0; i < 7; i++)
         {
-            return 0; // Completed last week, give them this week
+            var checkDate = previousWeekStart.AddDays(i);
+            
+            if (!requiredDays.Contains(checkDate.DayOfWeek)) continue;
+            
+            // Found a required day last week - was it already created then?
+            if (choreCreatedAt > checkDate) continue;
+            
+            // Check if completed on or after that day (up to now)
+            if (lastCompleted?.Date >= checkDate) return null;
+            
+            // Missed last week's required day - overdue within grace period
+            return $"last {checkDate.DayOfWeek}";
         }
         
-        // Overdue - calculate how many days since last week ended (or since creation)
-        if (lastCompleted == null)
-        {
-            // Never completed - overdue since the week after creation ended
-            var creationWeekStart = GetMondayOfWeek(choreCreatedAt);
-            var firstDueWeekEnd = creationWeekStart.AddDays(7); // End of creation week
-            if (today < firstDueWeekEnd) return 0; // Still in first week
-            return (int)(today - firstDueWeekEnd).TotalDays;
-        }
-        
-        // Last completed more than a week ago
-        var lastCompletedWeekEnd = GetMondayOfWeek(lastCompleted.Value).AddDays(7);
-        return (int)(today - lastCompletedWeekEnd).TotalDays;
+        return null;
     }
     
-    private static int CalculateIntervalOverdue(int intervalDays, DateTime? lastCompleted, DateTime today, DateTime choreCreatedAt)
+    /// <summary>
+    /// Interval chores: only overdue within 1 interval grace period
+    /// If more than 2 intervals have passed, only show 1 interval overdue
+    /// </summary>
+    private static string? CalculateIntervalOverdue(int intervalDays, DateTime? lastCompleted, DateTime today, DateTime choreCreatedAt)
     {
+        DateTime dueDate;
+        
         if (lastCompleted == null)
         {
-            // If never completed, check if enough days have passed since creation
-            var daysSinceCreation = (int)(today - choreCreatedAt).TotalDays;
-            if (daysSinceCreation <= intervalDays) return 0; // Not enough time has passed
-            return daysSinceCreation - intervalDays;
+            // First due date is intervalDays after creation
+            dueDate = choreCreatedAt.AddDays(intervalDays);
+        }
+        else
+        {
+            // Due date is intervalDays after last completion
+            dueDate = lastCompleted.Value.Date.AddDays(intervalDays);
         }
         
-        var daysSinceCompletion = (int)(today - lastCompleted.Value.Date).TotalDays;
+        // Not due yet
+        if (today <= dueDate) return null;
         
-        if (daysSinceCompletion <= intervalDays) return 0;
+        var daysOverdue = (int)(today - dueDate).TotalDays;
         
-        return daysSinceCompletion - intervalDays;
+        // Only show if within grace period (1 interval)
+        if (daysOverdue > intervalDays) return null;
+        
+        if (daysOverdue == 1) return "yesterday";
+        return $"{daysOverdue} days ago";
     }
 }
 
@@ -247,10 +251,23 @@ internal static class OverdueChoresEndpoint
     {
         group.MapGet("households/{householdId:guid}/overdue", async (
             Guid householdId,
+            HttpContext context,
             Handler handler) =>
         {
-            var query = new GetOverdueQuery(householdId);
+            var pinCodeHeader = context.Request.Headers["X-Pin-Code"].FirstOrDefault();
+            if (string.IsNullOrEmpty(pinCodeHeader) || !int.TryParse(pinCodeHeader, out var pinCode))
+            {
+                return Results.Json(new { error = "PIN required" }, statusCode: 401);
+            }
+            
+            var query = new GetOverdueQuery(householdId, pinCode);
             var result = await handler.HandleAsync(query);
+            
+            if (result == null)
+            {
+                return Results.Json(new { error = "Admin access required" }, statusCode: 403);
+            }
+            
             return Results.Ok(result);
         });
     }

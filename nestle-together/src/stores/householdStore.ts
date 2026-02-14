@@ -580,10 +580,26 @@ export const useHouseholdStore = create<HouseholdState>()(
       },
 
       fetchOverdueChores: async (householdId) => {
+        const { currentPinCode } = get();
+        if (!currentPinCode) {
+          return []; // No PIN, can't fetch overdue
+        }
+        
         try {
           const response = await fetch(
-            `${API_BASE_URL}/api/households/${householdId}/overdue`
+            `${API_BASE_URL}/api/households/${householdId}/overdue`,
+            {
+              headers: {
+                'X-Pin-Code': currentPinCode,
+              },
+            }
           );
+          
+          // 401/403 = not admin, return empty (not an error)
+          if (response.status === 401 || response.status === 403) {
+            return [];
+          }
+          
           if (!response.ok) {
             throw new Error('Failed to fetch overdue chores');
           }
@@ -597,7 +613,7 @@ export const useHouseholdStore = create<HouseholdState>()(
                 (c: Record<string, unknown>) => ({
                   choreId: c.choreId as string,
                   displayName: c.displayName as string,
-                  overdueDays: c.overdueDays as number,
+                  overduePeriod: c.overduePeriod as string,
                   lastCompleted: c.lastCompleted
                     ? new Date(c.lastCompleted as string)
                     : undefined,

@@ -4,17 +4,45 @@ namespace ChoreMonkey.IntegrationTests;
 public class OverdueChoresTests(ApiFixture fixture)
 {
     private readonly HttpClient _client = fixture.Client;
+    private const string AdminPin = "1234";
+    private const string MemberPin = "5678";
+
+    [Fact]
+    public async Task OverdueEndpoint_RequiresAdminPin()
+    {
+        // Arrange
+        var household = await CreateHousehold("Admin Test Family");
+
+        // Act - no PIN header
+        var response = await _client.GetAsync($"/api/households/{household.HouseholdId}/overdue");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    public async Task OverdueEndpoint_RejectsMemberPin()
+    {
+        // Arrange
+        var household = await CreateHouseholdWithMemberPin("Member Test Family");
+
+        // Act - use member PIN instead of admin PIN
+        var request = new HttpRequestMessage(HttpMethod.Get, $"/api/households/{household.HouseholdId}/overdue");
+        request.Headers.Add("X-Pin-Code", MemberPin);
+        var response = await _client.SendAsync(request);
+
+        // Assert - member PIN should be rejected (admin only)
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
 
     [Fact]
     public async Task DailyChore_CreatedTodayAndNeverCompleted_NotOverdueYet()
     {
         // Arrange - a chore created TODAY should NOT be overdue immediately
-        // (give the kid time to do it!)
         var household = await CreateHousehold("Overdue Test Family");
         var invite = await GenerateInvite(household.HouseholdId);
         var kid = await JoinHousehold(household.HouseholdId, invite.InviteId, "New Kid");
         
-        // Add a daily chore TODAY
         var choreRequest = new 
         { 
             DisplayName = "Make Bed", 
@@ -27,21 +55,15 @@ public class OverdueChoresTests(ApiFixture fixture)
             $"/api/households/{household.HouseholdId}/chores");
         var choreId = chores!.Chores[0].ChoreId;
         
-        // Assign to kid
         await _client.PostAsJsonAsync(
             $"/api/households/{household.HouseholdId}/chores/{choreId}/assign",
             new { MemberIds = new[] { kid.MemberId }, AssignToAll = false });
 
-        // Act - Get overdue chores immediately
-        var response = await _client.GetAsync($"/api/households/{household.HouseholdId}/overdue");
+        // Act - Get overdue chores (with admin PIN)
+        var result = await GetOverdueChores(household.HouseholdId);
 
         // Assert - should NOT be overdue (just created today)
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        
-        var result = await response.Content.ReadFromJsonAsync<GetOverdueResponse>();
         var kidOverdue = result!.MemberOverdue.FirstOrDefault(m => m.MemberId == kid.MemberId);
-        
-        // Chore was just created, can't be overdue yet
         kidOverdue?.OverdueCount.Should().Be(0);
     }
 
@@ -75,19 +97,18 @@ public class OverdueChoresTests(ApiFixture fixture)
             new { MemberId = kid.MemberId });
 
         // Act
-        var response = await _client.GetAsync($"/api/households/{household.HouseholdId}/overdue");
+        var result = await GetOverdueChores(household.HouseholdId);
 
         // Assert
-        var result = await response.Content.ReadFromJsonAsync<GetOverdueResponse>();
         var kidOverdue = result!.MemberOverdue.First(m => m.MemberId == kid.MemberId);
         kidOverdue.OverdueCount.Should().Be(0);
         kidOverdue.Chores.Should().BeEmpty();
     }
 
     [Fact]
-    public async Task IntervalChore_PastInterval_IsOverdue()
+    public async Task IntervalChore_WithinGracePeriod_IsOverdue()
     {
-        // Arrange
+        // Arrange - 3 day interval, completed 4 days ago = 1 day overdue (within grace)
         var household = await CreateHousehold("Interval Family");
         var invite = await GenerateInvite(household.HouseholdId);
         var kid = await JoinHousehold(household.HouseholdId, invite.InviteId, "Plant Forgetter");
@@ -108,19 +129,56 @@ public class OverdueChoresTests(ApiFixture fixture)
             $"/api/households/{household.HouseholdId}/chores/{choreId}/assign",
             new { MemberIds = new[] { kid.MemberId }, AssignToAll = false });
 
-        // Complete it 5 days ago (overdue by 2 days)
-        var fiveDaysAgo = DateTime.UtcNow.AddDays(-5);
+        // Complete it 4 days ago (1 day overdue - within 3-day grace period)
+        var fourDaysAgo = DateTime.UtcNow.AddDays(-4);
         await _client.PostAsJsonAsync(
             $"/api/households/{household.HouseholdId}/chores/{choreId}/complete",
-            new { MemberId = kid.MemberId, CompletedAt = fiveDaysAgo });
+            new { MemberId = kid.MemberId, CompletedAt = fourDaysAgo });
 
         // Act
-        var response = await _client.GetAsync($"/api/households/{household.HouseholdId}/overdue");
+        var result = await GetOverdueChores(household.HouseholdId);
 
-        // Assert
-        var result = await response.Content.ReadFromJsonAsync<GetOverdueResponse>();
+        // Assert - should be overdue (within grace period)
         var kidOverdue = result!.MemberOverdue.First(m => m.MemberId == kid.MemberId);
-        kidOverdue.Chores.Should().Contain(c => c.DisplayName == "Water Plants" && c.OverdueDays >= 2);
+        kidOverdue.Chores.Should().Contain(c => c.DisplayName == "Water Plants");
+    }
+
+    [Fact]
+    public async Task IntervalChore_PastGracePeriod_NotShown()
+    {
+        // Arrange - 3 day interval, completed 7 days ago = 4 days overdue (past 3-day grace)
+        var household = await CreateHousehold("Old Interval Family");
+        var invite = await GenerateInvite(household.HouseholdId);
+        var kid = await JoinHousehold(household.HouseholdId, invite.InviteId, "Plant Forgetter");
+        
+        var choreRequest = new 
+        { 
+            DisplayName = "Water Plants", 
+            Description = "Every 3 days",
+            Frequency = new { Type = "interval", IntervalDays = 3 }
+        };
+        await _client.PostAsJsonAsync($"/api/households/{household.HouseholdId}/chores", choreRequest);
+        
+        var chores = await _client.GetFromJsonAsync<GetChoresResponse>(
+            $"/api/households/{household.HouseholdId}/chores");
+        var choreId = chores!.Chores[0].ChoreId;
+        
+        await _client.PostAsJsonAsync(
+            $"/api/households/{household.HouseholdId}/chores/{choreId}/assign",
+            new { MemberIds = new[] { kid.MemberId }, AssignToAll = false });
+
+        // Complete it 7 days ago (4 days overdue - past grace period)
+        var sevenDaysAgo = DateTime.UtcNow.AddDays(-7);
+        await _client.PostAsJsonAsync(
+            $"/api/households/{household.HouseholdId}/chores/{choreId}/complete",
+            new { MemberId = kid.MemberId, CompletedAt = sevenDaysAgo });
+
+        // Act
+        var result = await GetOverdueChores(household.HouseholdId);
+
+        // Assert - should NOT be shown (past grace period = forgiven)
+        var kidOverdue = result!.MemberOverdue.First(m => m.MemberId == kid.MemberId);
+        kidOverdue.Chores.Should().NotContain(c => c.DisplayName == "Water Plants");
     }
 
     [Fact]
@@ -148,65 +206,26 @@ public class OverdueChoresTests(ApiFixture fixture)
             new { MemberIds = new[] { kid.MemberId }, AssignToAll = false });
 
         // Act - Never completed, but "once" chores can't be overdue
-        var response = await _client.GetAsync($"/api/households/{household.HouseholdId}/overdue");
+        var result = await GetOverdueChores(household.HouseholdId);
 
         // Assert
-        var result = await response.Content.ReadFromJsonAsync<GetOverdueResponse>();
         var kidOverdue = result!.MemberOverdue.First(m => m.MemberId == kid.MemberId);
         kidOverdue.Chores.Should().NotContain(c => c.DisplayName == "Fix Bike");
-    }
-
-    [Fact]
-    public async Task NewlyCreatedChore_BothKidsShowZeroOverdue()
-    {
-        // Arrange - when a chore is just created, no one should be overdue yet
-        var household = await CreateHousehold("Mixed Family");
-        var invite1 = await GenerateInvite(household.HouseholdId);
-        var goodKid = await JoinHousehold(household.HouseholdId, invite1.InviteId, "Good Kid");
-        var invite2 = await GenerateInvite(household.HouseholdId);
-        var otherKid = await JoinHousehold(household.HouseholdId, invite2.InviteId, "Other Kid");
-        
-        // Create a daily chore TODAY
-        var choreRequest = new 
-        { 
-            DisplayName = "Daily Task", 
-            Description = "Daily",
-            Frequency = new { Type = "daily" }
-        };
-        await _client.PostAsJsonAsync($"/api/households/{household.HouseholdId}/chores", choreRequest);
-        
-        var chores = await _client.GetFromJsonAsync<GetChoresResponse>(
-            $"/api/households/{household.HouseholdId}/chores");
-        var choreId = chores!.Chores[0].ChoreId;
-        
-        // Assign to both kids
-        await _client.PostAsJsonAsync(
-            $"/api/households/{household.HouseholdId}/chores/{choreId}/assign",
-            new { MemberIds = new[] { goodKid.MemberId, otherKid.MemberId }, AssignToAll = false });
-
-        // Good kid completes it (even though not overdue yet)
-        await _client.PostAsJsonAsync(
-            $"/api/households/{household.HouseholdId}/chores/{choreId}/complete",
-            new { MemberId = goodKid.MemberId });
-
-        // Act
-        var response = await _client.GetAsync($"/api/households/{household.HouseholdId}/overdue");
-
-        // Assert - BOTH should have 0 overdue since the chore was just created today
-        var result = await response.Content.ReadFromJsonAsync<GetOverdueResponse>();
-        
-        var goodKidOverdue = result!.MemberOverdue.FirstOrDefault(m => m.MemberId == goodKid.MemberId);
-        goodKidOverdue?.OverdueCount.Should().Be(0);
-        
-        var otherKidOverdue = result.MemberOverdue.FirstOrDefault(m => m.MemberId == otherKid.MemberId);
-        otherKidOverdue?.OverdueCount.Should().Be(0); // Not overdue - chore was just created!
     }
 
     #region Helpers
 
     private async Task<CreateHouseholdResponse> CreateHousehold(string name)
     {
-        var request = new { Name = name, PinCode = 1234 };
+        var request = new { Name = name, PinCode = AdminPin };
+        var response = await _client.PostAsJsonAsync("/api/households", request);
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<CreateHouseholdResponse>())!;
+    }
+
+    private async Task<CreateHouseholdResponse> CreateHouseholdWithMemberPin(string name)
+    {
+        var request = new { Name = name, PinCode = AdminPin, MemberPinCode = MemberPin };
         var response = await _client.PostAsJsonAsync("/api/households", request);
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadFromJsonAsync<CreateHouseholdResponse>())!;
@@ -227,6 +246,15 @@ public class OverdueChoresTests(ApiFixture fixture)
         return (await response.Content.ReadFromJsonAsync<JoinHouseholdResponse>())!;
     }
 
+    private async Task<GetOverdueResponse> GetOverdueChores(Guid householdId)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, $"/api/households/{householdId}/overdue");
+        request.Headers.Add("X-Pin-Code", AdminPin);
+        var response = await _client.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<GetOverdueResponse>())!;
+    }
+
     #endregion
 
     #region Response Records
@@ -238,7 +266,7 @@ public class OverdueChoresTests(ApiFixture fixture)
     private record ChoreDto(Guid ChoreId, string DisplayName);
     private record GetOverdueResponse(List<MemberOverdueDto> MemberOverdue);
     private record MemberOverdueDto(Guid MemberId, string Nickname, int OverdueCount, List<OverdueChoreDto> Chores);
-    private record OverdueChoreDto(Guid ChoreId, string DisplayName, int OverdueDays, DateTime? LastCompleted);
+    private record OverdueChoreDto(Guid ChoreId, string DisplayName, string OverduePeriod, DateTime? LastCompleted);
 
     #endregion
 }

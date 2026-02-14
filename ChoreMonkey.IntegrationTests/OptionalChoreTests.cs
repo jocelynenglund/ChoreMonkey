@@ -4,6 +4,7 @@ namespace ChoreMonkey.IntegrationTests;
 public class OptionalChoreTests(ApiFixture fixture)
 {
     private readonly HttpClient _client = fixture.Client;
+    private const string AdminPin = "1234";
 
     [Fact]
     public async Task AddOptionalChore_AppearsWithFlag()
@@ -56,8 +57,10 @@ public class OptionalChoreTests(ApiFixture fixture)
             $"/api/households/{household.HouseholdId}/chores/{choreId}/assign",
             new { MemberIds = new[] { kid.MemberId }, AssignToAll = false });
 
-        // Act - check overdue (should NOT include the bonus chore)
-        var response = await _client.GetAsync($"/api/households/{household.HouseholdId}/overdue");
+        // Act - check overdue (should NOT include the bonus chore) - requires admin PIN
+        var overdueRequest = new HttpRequestMessage(HttpMethod.Get, $"/api/households/{household.HouseholdId}/overdue");
+        overdueRequest.Headers.Add("X-Pin-Code", AdminPin);
+        var response = await _client.SendAsync(overdueRequest);
 
         // Assert
         var result = await response.Content.ReadFromJsonAsync<GetOverdueResponse>();
@@ -126,7 +129,7 @@ public class OptionalChoreTests(ApiFixture fixture)
     private record ChoreDto(Guid ChoreId, string DisplayName, bool IsOptional);
     private record GetOverdueResponse(List<MemberOverdueDto> MemberOverdue);
     private record MemberOverdueDto(Guid MemberId, string Nickname, int OverdueCount, List<OverdueChoreDto> Chores);
-    private record OverdueChoreDto(Guid ChoreId, string DisplayName, int OverdueDays);
+    private record OverdueChoreDto(Guid ChoreId, string DisplayName, string OverduePeriod);
 
     #endregion
 }

@@ -4,6 +4,7 @@ namespace ChoreMonkey.IntegrationTests;
 public class OverdueStartDateTests(ApiFixture fixture)
 {
     private readonly HttpClient _client = fixture.Client;
+    private const string AdminPin = "1234";
 
     [Fact]
     public async Task DailyChore_CreatedToday_NotOverdue()
@@ -30,11 +31,10 @@ public class OverdueStartDateTests(ApiFixture fixture)
             $"/api/households/{household.HouseholdId}/chores/{choreId}/assign",
             new { MemberIds = new[] { kid.MemberId }, AssignToAll = false });
 
-        // Act - check overdue immediately after creation
-        var response = await _client.GetAsync($"/api/households/{household.HouseholdId}/overdue");
+        // Act - check overdue immediately after creation (with admin PIN)
+        var result = await GetOverdueChores(household.HouseholdId);
 
         // Assert - should NOT be overdue (just created today)
-        var result = await response.Content.ReadFromJsonAsync<GetOverdueResponse>();
         var kidOverdue = result!.MemberOverdue.FirstOrDefault(m => m.MemberId == kid.MemberId);
 
         kidOverdue?.OverdueCount.Should().Be(0);
@@ -65,11 +65,10 @@ public class OverdueStartDateTests(ApiFixture fixture)
             $"/api/households/{household.HouseholdId}/chores/{choreId}/assign",
             new { MemberIds = new[] { kid.MemberId }, AssignToAll = false });
 
-        // Act - check overdue immediately
-        var response = await _client.GetAsync($"/api/households/{household.HouseholdId}/overdue");
+        // Act - check overdue immediately (with admin PIN)
+        var result = await GetOverdueChores(household.HouseholdId);
 
         // Assert - should NOT be overdue (interval hasn't passed since creation)
-        var result = await response.Content.ReadFromJsonAsync<GetOverdueResponse>();
         var kidOverdue = result!.MemberOverdue.FirstOrDefault(m => m.MemberId == kid.MemberId);
 
         kidOverdue?.OverdueCount.Should().Be(0);
@@ -101,11 +100,10 @@ public class OverdueStartDateTests(ApiFixture fixture)
             $"/api/households/{household.HouseholdId}/chores/{choreId}/assign",
             new { MemberIds = new[] { kid.MemberId }, AssignToAll = false });
 
-        // Act
-        var response = await _client.GetAsync($"/api/households/{household.HouseholdId}/overdue");
+        // Act (with admin PIN)
+        var result = await GetOverdueChores(household.HouseholdId);
 
         // Assert - should NOT be overdue if the chore was created after the scheduled day
-        var result = await response.Content.ReadFromJsonAsync<GetOverdueResponse>();
         var kidOverdue = result!.MemberOverdue.FirstOrDefault(m => m.MemberId == kid.MemberId);
 
         // The chore was just created, so any "missed" days before creation don't count
@@ -141,11 +139,10 @@ public class OverdueStartDateTests(ApiFixture fixture)
             $"/api/households/{household.HouseholdId}/chores/{choreId}/complete",
             new { MemberId = kid.MemberId, CompletedAt = yesterday });
 
-        // Act
-        var response = await _client.GetAsync($"/api/households/{household.HouseholdId}/overdue");
+        // Act (with admin PIN)
+        var result = await GetOverdueChores(household.HouseholdId);
 
         // Assert - completed yesterday, so not overdue today
-        var result = await response.Content.ReadFromJsonAsync<GetOverdueResponse>();
         var kidOverdue = result!.MemberOverdue.FirstOrDefault(m => m.MemberId == kid.MemberId);
 
         kidOverdue?.OverdueCount.Should().Be(0);
@@ -176,6 +173,15 @@ public class OverdueStartDateTests(ApiFixture fixture)
         return (await response.Content.ReadFromJsonAsync<JoinHouseholdResponse>())!;
     }
 
+    private async Task<GetOverdueResponse> GetOverdueChores(Guid householdId)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, $"/api/households/{householdId}/overdue");
+        request.Headers.Add("X-Pin-Code", AdminPin);
+        var response = await _client.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<GetOverdueResponse>())!;
+    }
+
     #endregion
 
     #region Response Records
@@ -187,7 +193,7 @@ public class OverdueStartDateTests(ApiFixture fixture)
     private record ChoreDto(Guid ChoreId, string DisplayName);
     private record GetOverdueResponse(List<MemberOverdueDto> MemberOverdue);
     private record MemberOverdueDto(Guid MemberId, string Nickname, int OverdueCount, List<OverdueChoreDto> Chores);
-    private record OverdueChoreDto(Guid ChoreId, string DisplayName, int OverdueDays);
+    private record OverdueChoreDto(Guid ChoreId, string DisplayName, string OverduePeriod);
 
     #endregion
 }

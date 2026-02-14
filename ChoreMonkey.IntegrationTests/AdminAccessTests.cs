@@ -142,13 +142,12 @@ public class AdminAccessTests(ApiFixture fixture) : IClassFixture<ApiFixture>
             new { currentPinCode = 1234, newPinCode = 9999 });
         Assert.Equal(HttpStatusCode.OK, changeResponse.StatusCode);
 
-        // Old PIN no longer works as admin
+        // Old PIN no longer works (no member PIN set, so it's completely invalid)
         var access1 = await _client.PostAsJsonAsync($"/api/households/{householdId}/access", new
         {
             pinCode = 1234
         });
-        var access1Data = await access1.Content.ReadFromJsonAsync<dynamic>();
-        Assert.False(access1Data!.GetProperty("success").GetBoolean());
+        Assert.Equal(HttpStatusCode.Unauthorized, access1.StatusCode);
 
         // New PIN is admin
         var access2 = await _client.PostAsJsonAsync($"/api/households/{householdId}/access", new

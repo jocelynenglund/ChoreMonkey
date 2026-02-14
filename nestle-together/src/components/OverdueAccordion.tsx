@@ -18,7 +18,12 @@ interface OverdueAccordionProps {
 export function OverdueAccordion({ householdId }: OverdueAccordionProps) {
   const [memberOverdue, setMemberOverdue] = useState<MemberOverdue[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { fetchOverdueChores, members } = useHouseholdStore();
+  const { fetchOverdueChores, members, isAdmin } = useHouseholdStore();
+  
+  // Only admins can see overdue chores
+  if (!isAdmin) {
+    return null;
+  }
 
   useEffect(() => {
     const loadOverdue = async () => {
@@ -101,9 +106,7 @@ export function OverdueAccordion({ householdId }: OverdueAccordionProps) {
                         <span className="font-medium">{chore.displayName}</span>
                       </div>
                       <span className="text-sm text-red-600">
-                        {chore.overdueDays === 1
-                          ? '1 day overdue'
-                          : `${chore.overdueDays} days overdue`}
+                        from {chore.overduePeriod}
                       </span>
                     </li>
                   ))}

@@ -53,8 +53,10 @@ public class WeeklyAnydayTests(ApiFixture fixture) : IClassFixture<ApiFixture>
             completedAt = thisMonday.AddHours(10).ToString("O")
         });
 
-        // Act - check overdue
-        var overdueResponse = await _client.GetAsync($"/api/households/{householdId}/overdue");
+        // Act - check overdue (requires admin PIN)
+        var overdueRequest = new HttpRequestMessage(HttpMethod.Get, $"/api/households/{householdId}/overdue");
+        overdueRequest.Headers.Add("X-Pin-Code", "1234");
+        var overdueResponse = await _client.SendAsync(overdueRequest);
         var overdueData = await overdueResponse.Content.ReadFromJsonAsync<dynamic>();
 
         // Assert - member should have 0 overdue chores
