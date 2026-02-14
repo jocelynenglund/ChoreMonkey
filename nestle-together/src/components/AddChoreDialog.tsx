@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Star } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -19,10 +19,11 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
 import type { ChoreFrequency } from '@/types/household';
 
 interface AddChoreDialogProps {
-  onAdd: (displayName: string, description: string, frequency?: ChoreFrequency) => Promise<void> | void;
+  onAdd: (displayName: string, description: string, frequency?: ChoreFrequency, isOptional?: boolean) => Promise<void> | void;
 }
 
 const DAYS_OF_WEEK = [
@@ -42,6 +43,7 @@ export function AddChoreDialog({ onAdd }: AddChoreDialogProps) {
   const [frequencyType, setFrequencyType] = useState<ChoreFrequency['type']>('once');
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [intervalDays, setIntervalDays] = useState('3');
+  const [isOptional, setIsOptional] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -57,13 +59,14 @@ export function AddChoreDialog({ onAdd }: AddChoreDialogProps) {
     }
 
     setIsSubmitting(true);
-    await onAdd(displayName.trim(), description.trim(), frequency);
+    await onAdd(displayName.trim(), description.trim(), frequency, isOptional);
     setIsSubmitting(false);
     setDisplayName('');
     setDescription('');
     setFrequencyType('once');
     setSelectedDays([]);
     setIntervalDays('3');
+    setIsOptional(false);
     setOpen(false);
   };
 
@@ -106,6 +109,27 @@ export function AddChoreDialog({ onAdd }: AddChoreDialogProps) {
               rows={3}
             />
           </div>
+
+          {/* Bonus Chore Toggle */}
+          <div className="flex items-center justify-between p-3 rounded-lg bg-amber-50 border border-amber-200">
+            <div className="flex items-center gap-2">
+              <Star className="w-5 h-5 text-amber-500" />
+              <div>
+                <Label htmlFor="isOptional" className="text-sm font-medium cursor-pointer">
+                  Bonus Chore
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Anyone can do it for extra credit
+                </p>
+              </div>
+            </div>
+            <Switch
+              id="isOptional"
+              checked={isOptional}
+              onCheckedChange={setIsOptional}
+            />
+          </div>
+
           <div className="space-y-2">
             <Label>How often?</Label>
             <Select value={frequencyType} onValueChange={(v) => setFrequencyType(v as ChoreFrequency['type'])}>
