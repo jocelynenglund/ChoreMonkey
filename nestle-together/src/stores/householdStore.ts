@@ -27,6 +27,7 @@ interface HouseholdState {
   completeChore: (householdId: string, choreId: string, memberId: string, completedAt?: Date) => Promise<void>;
   assignChore: (householdId: string, choreId: string, memberIds?: string[], assignToAll?: boolean) => Promise<void>;
   deleteChore: (householdId: string, choreId: string) => Promise<boolean>;
+  changeNickname: (householdId: string, memberId: string, newNickname: string) => Promise<boolean>;
   setCurrentMember: (memberId: string) => void;
   logout: () => void;
 
@@ -389,6 +390,33 @@ export const useHouseholdStore = create<HouseholdState>()(
           return false;
         } catch (error) {
           console.error('Failed to delete chore', error);
+          return false;
+        }
+      },
+
+      changeNickname: async (householdId, memberId, newNickname) => {
+        try {
+          const response = await fetch(
+            `${API_BASE_URL}/api/households/${householdId}/members/${memberId}/nickname`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ nickname: newNickname }),
+            }
+          );
+
+          if (response.ok) {
+            // Update local member data
+            set((state) => ({
+              members: state.members.map((m) =>
+                m.id === memberId ? { ...m, nickname: newNickname } : m
+              ),
+            }));
+            return true;
+          }
+          return false;
+        } catch (error) {
+          console.error('Failed to change nickname', error);
           return false;
         }
       },

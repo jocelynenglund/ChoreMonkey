@@ -18,8 +18,22 @@ internal class Handler(IEventStore store)
         var streamId = HouseholdAggregate.StreamId(request.HouseholdId);
         var events = await store.FetchEventsAsync(streamId);
         
-        var members = events.OfType<MemberJoinedHousehold>()
-            .Select(e => new MemberDto(e.MemberId, e.Nickname))
+        // Get all members who joined
+        var joinedMembers = events.OfType<MemberJoinedHousehold>().ToList();
+        
+        // Get latest nickname changes per member
+        var nicknameChanges = events.OfType<MemberNicknameChanged>()
+            .GroupBy(e => e.MemberId)
+            .ToDictionary(
+                g => g.Key,
+                g => g.OrderByDescending(e => e.TimestampUtc).First().NewNickname
+            );
+        
+        var members = joinedMembers
+            .Select(e => new MemberDto(
+                e.MemberId, 
+                nicknameChanges.GetValueOrDefault(e.MemberId, e.Nickname)
+            ))
             .ToList();
         
         return new ListMembersResponse(members);

@@ -33,6 +33,7 @@ export function useHouseholdRealtime(householdId: string | null) {
           break;
 
         case 'MemberJoined':
+        case 'MemberNicknameChanged':
           // Refresh member list
           fetchHouseholdMembers(householdId);
           break;
