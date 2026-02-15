@@ -365,7 +365,7 @@ export default function HouseholdDashboard() {
           householdId={household.id}
           memberId={currentMember.id}
           currentNickname={currentMember.nickname}
-          currentStatus={currentMember.status}
+          currentStatus={currentMember.status ?? ''}
           avatarColor={currentMember.avatarColor}
         />
       )}

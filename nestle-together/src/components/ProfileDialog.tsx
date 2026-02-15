@@ -32,7 +32,7 @@ export function ProfileDialog({
   avatarColor 
 }: ProfileDialogProps) {
   const [nickname, setNickname] = useState(currentNickname);
-  const [status, setStatus] = useState(currentStatus);
+  const [status, setStatus] = useState(currentStatus ?? '');
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   
@@ -115,7 +115,7 @@ export function ProfileDialog({
               rows={3}
             />
             <p className="text-xs text-muted-foreground text-center">
-              {status.length}/200 • Long statuses will scroll
+              {(status ?? '').length}/200 • Long statuses will scroll
             </p>
           </div>
 
