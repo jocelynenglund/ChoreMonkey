@@ -1,6 +1,15 @@
 {
-  "generated": "2026-02-15T14:56:01.225Z",
+  "generated": "2026-02-15T14:57:44.766Z",
   "commits": [
+    {
+      "hash": "c176cf5ba6e13e47cece7f48dd8d03c6e72f6254",
+      "shortHash": "c176cf5",
+      "message": "fix: Speed up marquee (100px/sec)",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Speed up marquee (100px/sec)"
+    },
     {
       "hash": "5ecdb4e602952b7027154220fddcaa87793fa323",
       "shortHash": "5ecdb4e",
@@ -171,15 +180,6 @@
       "author": "ItsyBOT",
       "type": "feature",
       "displayMessage": "Add padding to scroll container for ring overflow"
-    },
-    {
-      "hash": "4c5be4a82c0732d3643b47efbf2c0e6cb9020fa7",
-      "shortHash": "4c5be4a",
-      "message": "feat: add SignalR handlers for status and nickname changes",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Add SignalR handlers for status and nickname changes"
     }
   ]
 }

@@ -128,7 +128,7 @@ export function ChoreCard({
           chore.completed && !isRecurring && 'opacity-60'
         )}
       >
-        <div className="p-4 flex items-center gap-4">
+        <div className="p-3 sm:p-4 flex items-center gap-2 sm:gap-4">
           {/* Complete button */}
           {isRecurring ? (
             <Button
@@ -196,9 +196,9 @@ export function ChoreCard({
               )}
             </div>
             
-            {/* Multi-user completion status */}
+            {/* Multi-user completion status - compact on mobile */}
             {isRecurring && (chore.assignedToAll || assignedMembers.length > 1) && chore.memberCompletions && (
-              <div className="flex items-center gap-2 mt-2 flex-wrap">
+              <div className="flex items-center gap-1 sm:gap-2 mt-2 flex-wrap">
                 {(chore.memberCompletions ?? []).map(mc => {
                   const member = (members ?? []).find(m => m.id === mc.memberId);
                   if (!member) return null;
@@ -206,15 +206,24 @@ export function ChoreCard({
                     <div 
                       key={mc.memberId}
                       className={cn(
-                        "flex items-center gap-1 px-2 py-1 rounded-full text-xs",
+                        "flex items-center gap-1 rounded-full text-xs",
+                        "p-0.5 sm:px-2 sm:py-1", // Compact on mobile
                         mc.completedToday 
                           ? "bg-success/20 text-success" 
                           : "bg-muted text-muted-foreground"
                       )}
+                      title={`${member.nickname}${mc.completedToday ? ' ✓' : ''}`}
                     >
-                      <MemberAvatar nickname={member.nickname} color={member.avatarColor} size="xs" />
-                      <span>{member.nickname}</span>
-                      {mc.completedToday && <Check className="w-3 h-3" />}
+                      <div className="relative">
+                        <MemberAvatar nickname={member.nickname} color={member.avatarColor} size="xs" />
+                        {mc.completedToday && (
+                          <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-success rounded-full flex items-center justify-center sm:hidden">
+                            <Check className="w-2 h-2 text-white" />
+                          </div>
+                        )}
+                      </div>
+                      <span className="hidden sm:inline">{member.nickname}</span>
+                      {mc.completedToday && <Check className="w-3 h-3 hidden sm:block" />}
                     </div>
                   );
                 })}
@@ -222,7 +231,7 @@ export function ChoreCard({
             )}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             {/* Expand button for history */}
             <CollapsibleTrigger asChild>
               <button 
