@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { UserMinus, AlertTriangle } from 'lucide-react';
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -12,29 +11,55 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import type { Member } from '@/types/household';
 
 interface RemoveMemberDialogProps {
   member: Member;
-  onRemove: () => Promise<void>;
+  onRemove: (pinCode: string) => Promise<boolean>;
 }
 
 export function RemoveMemberDialog({ member, onRemove }: RemoveMemberDialogProps) {
   const [isRemoving, setIsRemoving] = useState(false);
   const [open, setOpen] = useState(false);
+  const [pinCode, setPinCode] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
   const handleRemove = async () => {
+    if (!pinCode.trim()) {
+      setError('Please enter your admin PIN');
+      return;
+    }
+
     setIsRemoving(true);
+    setError(null);
+    
     try {
-      await onRemove();
-      setOpen(false);
+      const success = await onRemove(pinCode.trim());
+      if (success) {
+        setOpen(false);
+        setPinCode('');
+      } else {
+        setError('Invalid admin PIN. Please try again.');
+      }
+    } catch {
+      setError('Failed to remove member. Please try again.');
     } finally {
       setIsRemoving(false);
     }
   };
 
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (!isOpen) {
+      setPinCode('');
+      setError(null);
+    }
+  };
+
   return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
+    <AlertDialog open={open} onOpenChange={handleOpenChange}>
       <AlertDialogTrigger asChild>
         <Button
           variant="ghost"
@@ -58,15 +83,44 @@ export function RemoveMemberDialog({ member, onRemove }: RemoveMemberDialogProps
             This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
+        
+        <div className="py-4">
+          <Label htmlFor="admin-pin" className="text-sm font-medium">
+            Enter Admin PIN to confirm
+          </Label>
+          <Input
+            id="admin-pin"
+            type="password"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            placeholder="Admin PIN"
+            value={pinCode}
+            onChange={(e) => {
+              setPinCode(e.target.value);
+              setError(null);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleRemove();
+              }
+            }}
+            className="mt-2"
+            autoFocus
+          />
+          {error && (
+            <p className="text-sm text-destructive mt-2">{error}</p>
+          )}
+        </div>
+
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isRemoving}>Cancel</AlertDialogCancel>
-          <AlertDialogAction
+          <Button
             onClick={handleRemove}
-            disabled={isRemoving}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            disabled={isRemoving || !pinCode.trim()}
+            variant="destructive"
           >
             {isRemoving ? 'Removing...' : 'Remove Member'}
-          </AlertDialogAction>
+          </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

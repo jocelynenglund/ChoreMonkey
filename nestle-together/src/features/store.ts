@@ -53,7 +53,7 @@ interface AppState {
   generateInvite: (householdId: string) => Promise<Invite | null>;
   changeNickname: (householdId: string, memberId: string, newNickname: string) => Promise<boolean>;
   changeStatus: (householdId: string, memberId: string, status: string) => Promise<boolean>;
-  removeMember: (householdId: string, memberId: string, removedByMemberId: string) => Promise<boolean>;
+  removeMember: (householdId: string, memberId: string, removedByMemberId: string, pinCode?: string) => Promise<boolean>;
   
   // Chores
   getHouseholdChores: (householdId: string) => Promise<Chore[]>;
@@ -226,10 +226,10 @@ export const useAppStore = create<AppState>()(
       changeStatus: (householdId, memberId, status) =>
         membersApi.changeStatus(householdId, memberId, status),
 
-      removeMember: async (householdId, memberId) => {
-        const { currentPinCode } = get();
-        if (!currentPinCode) return false;
-        return membersApi.removeMember(householdId, memberId, parseInt(currentPinCode, 10));
+      removeMember: async (householdId, memberId, _removedByMemberId, pinCode) => {
+        const pin = pinCode || get().currentPinCode;
+        if (!pin) return false;
+        return membersApi.removeMember(householdId, memberId, parseInt(pin, 10));
       },
 
       getHouseholdChores: (householdId) => choresApi.fetchChores(householdId),

@@ -1,6 +1,15 @@
 {
-  "generated": "2026-02-15T15:13:14.029Z",
+  "generated": "2026-02-15T15:26:42.918Z",
   "commits": [
+    {
+      "hash": "57448217d7c9be92307671a5a48a4ea538f6c765",
+      "shortHash": "5744821",
+      "message": "fix: Read householdName from API (not just name)",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Read householdName from API (not just name)"
+    },
     {
       "hash": "175d4fa3f5d21da72fc0a3da226afc8b4911af8e",
       "shortHash": "175d4fa",
@@ -171,15 +180,6 @@
       "author": "ItsyBOT",
       "type": "refactor",
       "displayMessage": "Extract frontend into vertical feature slices"
-    },
-    {
-      "hash": "d2663454c7274a8c4a3b1f19767bed88ced2bac1",
-      "shortHash": "d266345",
-      "message": "fix: show date instead of time for past day completions",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Show date instead of time for past day completions"
     }
   ]
 }
