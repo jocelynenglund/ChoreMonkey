@@ -149,14 +149,16 @@ export function TeamOverviewAccordion({ householdId, onAssignmentChange }: TeamO
           {teamData.map((member) => (
             <AccordionItem key={member.memberId} value={member.memberId}>
               <AccordionTrigger className="px-4 hover:no-underline">
-                <div className="flex items-center gap-3 w-full">
-                  <MemberAvatar
-                    nickname={member.nickname}
-                    color={getMemberColor(member.memberId)}
-                    size="sm"
-                  />
-                  <span className="font-medium">{member.nickname}</span>
-                  <div className="ml-auto mr-2 flex gap-2">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 w-full">
+                  <div className="flex items-center gap-3">
+                    <MemberAvatar
+                      nickname={member.nickname}
+                      color={getMemberColor(member.memberId)}
+                      size="sm"
+                    />
+                    <span className="font-medium">{member.nickname}</span>
+                  </div>
+                  <div className="flex gap-2 sm:ml-auto mr-2 pl-11 sm:pl-0">
                     {member.overdueCount > 0 && (
                       <Badge variant="destructive">
                         {member.overdueCount} overdue

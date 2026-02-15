@@ -1,6 +1,15 @@
 {
-  "generated": "2026-02-15T15:05:57.072Z",
+  "generated": "2026-02-15T15:07:05.922Z",
   "commits": [
+    {
+      "hash": "e747f11bf140b43a18d9e72bdfb9479af1e68b47",
+      "shortHash": "e747f11",
+      "message": "rename: Team Overview → Household Overview",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "update",
+      "displayMessage": "Rename: Team Overview → Household Overview"
+    },
     {
       "hash": "9bf01ed4ebe55efaa6f0eaf4d0b93ef20de72729",
       "shortHash": "9bf01ed",
@@ -171,15 +180,6 @@
       "author": "ItsyBOT",
       "type": "feature",
       "displayMessage": "Add What's New changelog on logo click"
-    },
-    {
-      "hash": "715562cb015503211d7fb5b38c158426d38a9098",
-      "shortHash": "715562c",
-      "message": "feat: add MemberLookup query slice for reusable member names",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Add MemberLookup query slice for reusable member names"
     }
   ]
 }
