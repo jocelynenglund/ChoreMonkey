@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+env:
+  DOTNET_VERSION: '9.0.x'
+  NODE_VERSION: '22'
+
+jobs:
+  test-backend:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Configure NuGet
+        run: |
+          dotnet nuget update source github \
+            --username jocelynenglund \
+            --password ${{ secrets.NUGET_AUTH_TOKEN }} \
+            --store-password-in-clear-text
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test --configuration Release --no-build --verbosity normal
+
+  build-frontend:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: nestle-together/package-lock.json
+
+      - name: Install dependencies
+        working-directory: nestle-together
+        run: npm ci
+
+      - name: Build
+        working-directory: nestle-together
+        run: npm run build
+        env:
+          VITE_API_URL: https://itsybitsylist-api.azurewebsites.net
