@@ -749,8 +749,11 @@ export const useHouseholdStore = create<HouseholdState>()(
         }
       },
 
-      getHouseholdMembers: (householdId) =>
-        get().members.filter((m) => m.householdId === householdId),
+      getHouseholdMembers: (householdId) => {
+        const allMembers = get().members;
+        if (!Array.isArray(allMembers)) return [];
+        return allMembers.filter((m) => m.householdId === householdId);
+      },
 
       getInviteByCode: (inviteId) => {
         const invite = get().invites.find((i) => i.id === inviteId);

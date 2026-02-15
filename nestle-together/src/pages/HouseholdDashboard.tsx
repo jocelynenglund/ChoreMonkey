@@ -80,8 +80,8 @@ export default function HouseholdDashboard() {
     isAdmin,
   } = useHouseholdStore();
 
-  const members = getHouseholdMembers(id || '');
-  const currentMember = members.find((m) => m.id === currentMemberId);
+  const members = getHouseholdMembers(id || '') || [];
+  const currentMember = currentMemberId ? members.find((m) => m.id === currentMemberId) : undefined;
 
   useEffect(() => {
     const fetchData = async () => {

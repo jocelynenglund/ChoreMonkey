@@ -79,7 +79,7 @@ export function ChoreCard({
   
   const fetchChoreHistory = useHouseholdStore((s) => s.fetchChoreHistory);
   
-  const assignedMembers = members.filter((m) => chore.assignedTo?.includes(m.id));
+  const assignedMembers = (members || []).filter((m) => chore.assignedTo?.includes(m.id));
   const isRecurring = chore.frequency && chore.frequency.type !== 'once';
   
   const currentUserCompletion = chore.memberCompletions?.find(mc => mc.memberId === currentMemberId);

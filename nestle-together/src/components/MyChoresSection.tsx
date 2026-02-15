@@ -59,9 +59,9 @@ export function MyChoresSection({ householdId, memberId, onCompleteChore }: MyCh
     );
   }
 
-  const hasOverdue = myChores.overdue.length > 0;
-  const hasPending = myChores.pending.length > 0;
-  const hasCompleted = myChores.completed.length > 0;
+  const hasOverdue = (myChores.overdue?.length ?? 0) > 0;
+  const hasPending = (myChores.pending?.length ?? 0) > 0;
+  const hasCompleted = (myChores.completed?.length ?? 0) > 0;
   const allDone = !hasOverdue && !hasPending;
 
   return (

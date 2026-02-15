@@ -55,7 +55,7 @@ export function OverdueAccordion({ householdId }: OverdueAccordionProps) {
   }
 
   const getMemberColor = (memberId: string) => {
-    const member = members.find((m) => m.id === memberId);
+    const member = (members || []).find((m) => m.id === memberId);
     return member?.avatarColor || 'hsl(150 50% 50%)';
   };
 
