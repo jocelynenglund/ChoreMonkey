@@ -1,6 +1,24 @@
 {
-  "generated": "2026-02-15T13:36:39.131Z",
+  "generated": "2026-02-15T13:57:33.043Z",
   "commits": [
+    {
+      "hash": "9cd3b602489c9572c6e74b0695056f40afcc7b64",
+      "shortHash": "9cd3b60",
+      "message": "debug: add console logging for chores API response",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Debug: add console logging for chores API response"
+    },
+    {
+      "hash": "a30590c0c8236e00df44e56ddfa1cd20ff363335",
+      "shortHash": "a30590c",
+      "message": "Update deploy-staging.yml to handle branch input",
+      "date": "2026-02-15",
+      "author": "Jocelyn Englund",
+      "type": "update",
+      "displayMessage": "Update deploy-staging.yml to handle branch input"
+    },
     {
       "hash": "af9c0ddd0e3728af151ce7ae4dbd9178fc157455",
       "shortHash": "af9c0dd",
@@ -9,6 +27,15 @@
       "author": "ItsyBOT",
       "type": "fix",
       "displayMessage": "Proper member/chore ID mapping with avatar colors"
+    },
+    {
+      "hash": "f07e51d7234473657bc83297f9aafac0c305e8d8",
+      "shortHash": "f07e51d",
+      "message": "fix: filter deleted chores from overdue list",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Filter deleted chores from overdue list"
     },
     {
       "hash": "31eacd9f47940ec5896ea1177b7ac86b1da3da9e",
@@ -153,33 +180,6 @@
       "author": "ItsyBOT",
       "type": "fix",
       "displayMessage": "Proper text truncation with explicit width and overflow"
-    },
-    {
-      "hash": "054a778fe1eb37419c49657360ea341663c5929b",
-      "shortHash": "054a778",
-      "message": "feat: add glow ring for members with status updates",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Add glow ring for members with status updates"
-    },
-    {
-      "hash": "f16f80219a95699ab4db5ed39283bca4c2478c86",
-      "shortHash": "f16f802",
-      "message": "Add GitHub Actions workflow for staging deployment",
-      "date": "2026-02-15",
-      "author": "Jocelyn Englund",
-      "type": "feature",
-      "displayMessage": "Add GitHub Actions workflow for staging deployment"
-    },
-    {
-      "hash": "03ccd24cbaeb77313f9b9f57a26db306e2d6ee39",
-      "shortHash": "03ccd24",
-      "message": "fix: ensure member names truncate properly in member strip",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Ensure member names truncate properly in member strip"
     }
   ]
 }

@@ -7,6 +7,7 @@ import * as choresApi from './chores/api';
 import * as myChoresApi from './my-chores/api';
 import * as overdueApi from './overdue/api';
 import * as activityApi from './activity/api';
+import * as teamOverviewApi from './team-overview/api';
 
 import type { Household } from './household/types';
 import type { Member, Invite } from './members/types';
@@ -14,6 +15,7 @@ import type { Chore, ChoreFrequency, ChoreCompletion } from './chores/types';
 import type { MyChoresResponse } from './my-chores/types';
 import type { MemberOverdue } from './overdue/types';
 import type { Activity } from './activity/types';
+import type { MemberOverview } from './team-overview/types';
 
 const AVATAR_COLORS = [
   'hsl(150 50% 50%)',
@@ -70,6 +72,9 @@ interface AppState {
   
   // Activity
   fetchActivityTimeline: (householdId: string, limit?: number) => Promise<Activity[]>;
+  
+  // Team Overview (admin only)
+  fetchTeamOverview: (householdId: string) => Promise<MemberOverview[]>;
 }
 
 export const useAppStore = create<AppState>()(
@@ -291,6 +296,12 @@ export const useAppStore = create<AppState>()(
 
       fetchActivityTimeline: (householdId, limit) =>
         activityApi.fetchActivityTimeline(householdId, limit),
+
+      fetchTeamOverview: async (householdId) => {
+        const { currentPinCode, isAdmin } = get();
+        if (!isAdmin || !currentPinCode) return [];
+        return teamOverviewApi.fetchTeamOverview(householdId, parseInt(currentPinCode, 10));
+      },
     }),
     {
       name: 'choremonkey-storage',

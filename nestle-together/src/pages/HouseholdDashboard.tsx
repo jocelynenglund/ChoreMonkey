@@ -48,7 +48,7 @@ import { AddChoreDialog } from '@/components/AddChoreDialog';
 import { CompleteChoreDialog } from '@/components/CompleteChoreDialog';
 import { InviteDialog } from '@/components/InviteDialog';
 import { MemberAvatar } from '@/components/MemberAvatar';
-import { OverdueAccordion } from '@/components/OverdueAccordion';
+import { TeamOverviewAccordion } from '@/components/TeamOverviewAccordion';
 import { CompletionTimeline } from '@/components/CompletionTimeline';
 import { SettingsDialog } from '@/components/SettingsDialog';
 import { MyChoresSection } from '@/components/MyChoresSection';
@@ -341,7 +341,7 @@ export default function HouseholdDashboard() {
 
         {/* Admin: Overdue Chores (all members) */}
         <div className="mb-6">
-          <OverdueAccordion householdId={household.id} />
+          <TeamOverviewAccordion householdId={household.id} />
         </div>
 
         {/* My Chores Section Header */}

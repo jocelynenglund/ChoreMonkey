@@ -10,9 +10,7 @@ export async function fetchChores(householdId: string): Promise<Chore[]> {
   }
 
   const data = await response.json();
-  console.log('[DEBUG] Raw chores API response:', data);
   const choreArray = Array.isArray(data) ? data : (data.chores ?? []);
-  console.log('[DEBUG] Chore array:', choreArray);
   
   return choreArray.map((c: Record<string, unknown>) => {
     const frequency = c.frequency as import('./types').ChoreFrequency | undefined;
