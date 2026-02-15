@@ -1,6 +1,123 @@
 {
-  "generated": "2026-02-15T17:12:10.527Z",
+  "generated": "2026-02-15T19:29:34.412Z",
   "commits": [
+    {
+      "hash": "4ae39ba83747b401554a9512eb2a7f19cb860f7f",
+      "shortHash": "4ae39ba",
+      "message": "fix: invalid JSON in giraflow (leading zeros)",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Invalid JSON in giraflow (leading zeros)"
+    },
+    {
+      "hash": "858075c64eddd633e3b3aa9253fe2a0fb87db479",
+      "shortHash": "858075c",
+      "message": "refactor: organize integration tests into module folders",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "refactor",
+      "displayMessage": "Organize integration tests into module folders"
+    },
+    {
+      "hash": "bd2f25645d85c1992d38abd486c8ddf9e7c7eadd",
+      "shortHash": "bd2f256",
+      "message": "chore: remove unused projects and build artifacts",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "update",
+      "displayMessage": "Remove unused projects and build artifacts"
+    },
+    {
+      "hash": "eaadebf897d1596cdd17575e630237f515f9879b",
+      "shortHash": "eaadebf",
+      "message": "Implement e2e-tests in CI workflow",
+      "date": "2026-02-15",
+      "author": "Jocelyn Englund",
+      "type": "update",
+      "displayMessage": "Implement e2e-tests in CI workflow"
+    },
+    {
+      "hash": "412d3f7ef2db93dbf8ef91f12e1d42b68ef365d3",
+      "shortHash": "412d3f7",
+      "message": "Modify test command and disable e2e tests temporarily",
+      "date": "2026-02-15",
+      "author": "Jocelyn Englund",
+      "type": "update",
+      "displayMessage": "Modify test command and disable e2e tests temporarily"
+    },
+    {
+      "hash": "83be094f9ebe8a76e62fcc1690dff04fa22b5e9d",
+      "shortHash": "83be094",
+      "message": "fix: AddChore endpoint returns chore ID in response",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "AddChore endpoint returns chore ID in response"
+    },
+    {
+      "hash": "267b92fb73675b75cad4c430e06f5ddfe6ecd77d",
+      "shortHash": "267b92f",
+      "message": "fix: Correct DTOs and test logic for integration tests",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Correct DTOs and test logic for integration tests"
+    },
+    {
+      "hash": "a990815e08665613d1adfa16489227499b557ce3",
+      "shortHash": "a990815",
+      "message": "Implement E2E tests in CI workflow",
+      "date": "2026-02-15",
+      "author": "Jocelyn Englund",
+      "type": "update",
+      "displayMessage": "Implement E2E tests in CI workflow"
+    },
+    {
+      "hash": "e0c2f425cb56cb3cdc5537498084d51bd1e38d43",
+      "shortHash": "e0c2f42",
+      "message": "fix: Store currentPinCode on household creation",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Store currentPinCode on household creation"
+    },
+    {
+      "hash": "1d418aa9c1ababccfd65e2d2a35d2003ed10d6dd",
+      "shortHash": "1d418aa",
+      "message": "test: Add Playwright E2E test suite",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Add Playwright E2E test suite"
+    },
+    {
+      "hash": "2dec50d5c1bfea5fe1ed4794d53aaf7d6616c6a3",
+      "shortHash": "2dec50d",
+      "message": "refactor(frontend): Reorganize features into 5 aligned modules",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "update",
+      "displayMessage": "Refactor(frontend): Reorganize features into 5 aligned modules"
+    },
+    {
+      "hash": "e6422ec9e37b303d66f803623780a4a41bf778f7",
+      "shortHash": "e6422ec",
+      "message": "refactor(backend): Reorganize features into module structure",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "update",
+      "displayMessage": "Refactor(backend): Reorganize features into module structure"
+    },
+    {
+      "hash": "026203f86ec97a60dce316a2cc843bbd3fc3c187",
+      "shortHash": "026203f",
+      "message": "Add CI workflow for backend and frontend",
+      "date": "2026-02-15",
+      "author": "Jocelyn Englund",
+      "type": "feature",
+      "displayMessage": "Add CI workflow for backend and frontend"
+    },
     {
       "hash": "c0561bcde165a40f7c9d2d635ea8bc1744c6a2ce",
       "shortHash": "c0561bc",
@@ -63,123 +180,6 @@
       "author": "Jocelyn Englund",
       "type": "update",
       "displayMessage": "Update deploy.yml"
-    },
-    {
-      "hash": "19fdbf32c6ea9779882fb0b890c9b3615bb1c299",
-      "shortHash": "19fdbf3",
-      "message": "Update deploy-staging.yml",
-      "date": "2026-02-15",
-      "author": "Jocelyn Englund",
-      "type": "update",
-      "displayMessage": "Update deploy-staging.yml"
-    },
-    {
-      "hash": "6ed890908ce4fccf21717f494d4c4d1b118fc449",
-      "shortHash": "6ed8909",
-      "message": "Update deploy.yml",
-      "date": "2026-02-15",
-      "author": "Jocelyn Englund",
-      "type": "update",
-      "displayMessage": "Update deploy.yml"
-    },
-    {
-      "hash": "74eab68a677dbb57fae101412e72acdee256572d",
-      "shortHash": "74eab68",
-      "message": "Update deploy-staging.yml",
-      "date": "2026-02-15",
-      "author": "Jocelyn Englund",
-      "type": "update",
-      "displayMessage": "Update deploy-staging.yml"
-    },
-    {
-      "hash": "f3c82cfeb30087cd3244467e2820d2c16563632e",
-      "shortHash": "f3c82cf",
-      "message": "Update deploy.yml",
-      "date": "2026-02-15",
-      "author": "Jocelyn Englund",
-      "type": "update",
-      "displayMessage": "Update deploy.yml"
-    },
-    {
-      "hash": "df89b964c68d76e700322ea50529eb8742144f49",
-      "shortHash": "df89b96",
-      "message": "feat: Human-readable version format (YYYY.MM.DD.build)",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Human-readable version format (YYYY.MM.DD.build)"
-    },
-    {
-      "hash": "41db55038198316434f1337033a512b3e9d6fb1b",
-      "shortHash": "41db550",
-      "message": "feat: Add build versioning for API and frontend",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Add build versioning for API and frontend"
-    },
-    {
-      "hash": "ae04981eef3f262231ce973dae29853a9e8edfec",
-      "shortHash": "ae04981",
-      "message": "fix: TeamOverviewAccordion refreshes on SignalR events via refreshKey prop",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "TeamOverviewAccordion refreshes on SignalR events via refreshKey prop"
-    },
-    {
-      "hash": "7514996e61d8054a046dea3a373e43f991ddc09e",
-      "shortHash": "7514996",
-      "message": "fix: Send request body with removedByMemberId in removeMember API",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Send request body with removedByMemberId in removeMember API"
-    },
-    {
-      "hash": "d8e222181e64e8d1d555acff9402bf3cd91cac9e",
-      "shortHash": "d8e2221",
-      "message": "fix: Ensure all AppendToStreamAsync overloads publish SignalR events",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Ensure all AppendToStreamAsync overloads publish SignalR events"
-    },
-    {
-      "hash": "d0a25ed0393e2d1128ab8389591b79d052a00704",
-      "shortHash": "d0a25ed",
-      "message": "feat: Add PIN confirmation to Remove Member dialog",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Add PIN confirmation to Remove Member dialog"
-    },
-    {
-      "hash": "57448217d7c9be92307671a5a48a4ea538f6c765",
-      "shortHash": "5744821",
-      "message": "fix: Read householdName from API (not just name)",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Read householdName from API (not just name)"
-    },
-    {
-      "hash": "175d4fa3f5d21da72fc0a3da226afc8b4911af8e",
-      "shortHash": "175d4fa",
-      "message": "fix: changeNickname API - send 'nickname' not 'newNickname'",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "ChangeNickname API - send 'nickname' not 'newNickname'"
-    },
-    {
-      "hash": "57d768b9ab44c6a490b2e02bf8026245f91ee505",
-      "shortHash": "57d768b",
-      "message": "ui: Stack member badges on second row (mobile)",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "update",
-      "displayMessage": "Ui: Stack member badges on second row (mobile)"
     }
   ]
 }
