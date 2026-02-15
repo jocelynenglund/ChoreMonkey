@@ -53,6 +53,7 @@ import { CompletionTimeline } from '@/components/CompletionTimeline';
 import { SettingsDialog } from '@/components/SettingsDialog';
 import { MyChoresSection } from '@/components/MyChoresSection';
 import { ProfileDialog } from '@/components/ProfileDialog';
+import { RemoveMemberDialog } from '@/components/RemoveMemberDialog';
 import type { Household, Chore, ChoreFrequency } from '@/types/household';
 
 export default function HouseholdDashboard() {
@@ -81,6 +82,7 @@ export default function HouseholdDashboard() {
     generateInvite,
     logout,
     isAdmin,
+    removeMember,
   } = useHouseholdStore();
 
   const members = getHouseholdMembers(id || '') || [];
@@ -277,23 +279,41 @@ export default function HouseholdDashboard() {
           </div>
           <div className="flex gap-3 overflow-x-auto pb-1">
             {(members ?? []).map((member) => (
-              <button
+              <div
                 key={member.id}
-                className="flex flex-col items-center gap-1 w-16 flex-shrink-0 cursor-pointer"
-                title={member.status || member.nickname}
-                onClick={() => member.status && setHoveredMemberStatus(
-                  hoveredMemberStatus === member.status ? null : member.status
-                )}
+                className="flex flex-col items-center gap-1 w-16 flex-shrink-0 relative group"
               >
-                <MemberAvatar
-                  nickname={member.nickname}
-                  color={member.avatarColor}
-                  size="md"
-                />
-                <span className="text-xs text-muted-foreground truncate w-full text-center">
-                  {member.nickname}
-                </span>
-              </button>
+                <button
+                  className="flex flex-col items-center gap-1 cursor-pointer"
+                  title={member.status || member.nickname}
+                  onClick={() => member.status && setHoveredMemberStatus(
+                    hoveredMemberStatus === member.status ? null : member.status
+                  )}
+                >
+                  <MemberAvatar
+                    nickname={member.nickname}
+                    color={member.avatarColor}
+                    size="md"
+                  />
+                  <span className="text-xs text-muted-foreground truncate w-full text-center">
+                    {member.nickname}
+                  </span>
+                </button>
+                {/* Remove button - admin only, can't remove self */}
+                {isAdmin && member.id !== currentMemberId && (
+                  <div className="absolute -top-1 -right-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <RemoveMemberDialog
+                      member={member}
+                      onRemove={async () => {
+                        if (currentMemberId) {
+                          await removeMember(household.id, member.id, currentMemberId);
+                          await fetchHouseholdMembers(household.id);
+                        }
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
             ))}
           </div>
           {hoveredMemberStatus && (

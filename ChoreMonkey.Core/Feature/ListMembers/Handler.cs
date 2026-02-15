@@ -21,6 +21,11 @@ internal class Handler(IEventStore store)
         // Get all members who joined
         var joinedMembers = events.OfType<MemberJoinedHousehold>().ToList();
         
+        // Get removed member IDs
+        var removedMemberIds = events.OfType<MemberRemoved>()
+            .Select(e => e.MemberId)
+            .ToHashSet();
+        
         // Get latest nickname changes per member
         var nicknameChanges = events.OfType<MemberNicknameChanged>()
             .GroupBy(e => e.MemberId)
@@ -38,6 +43,7 @@ internal class Handler(IEventStore store)
             );
         
         var members = joinedMembers
+            .Where(e => !removedMemberIds.Contains(e.MemberId))
             .Select(e => new MemberDto(
                 e.MemberId, 
                 nicknameChanges.GetValueOrDefault(e.MemberId, e.Nickname),

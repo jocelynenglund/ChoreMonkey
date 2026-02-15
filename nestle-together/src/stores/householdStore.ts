@@ -45,6 +45,7 @@ interface HouseholdState {
   fetchOverdueChores: (householdId: string) => Promise<MemberOverdue[]>;
   fetchMyChores: (householdId: string, memberId: string) => Promise<MyChoresResponse | null>;
   acknowledgeMissed: (householdId: string, choreId: string, memberId: string, period: string) => Promise<boolean>;
+  removeMember: (householdId: string, memberId: string, removedByMemberId: string) => Promise<boolean>;
 
   // Local getters (for cached data)
   getHouseholdMembers: (householdId: string) => Member[];
@@ -745,6 +746,39 @@ export const useHouseholdStore = create<HouseholdState>()(
           return response.ok;
         } catch (error) {
           console.error('Failed to acknowledge missed chore', error);
+          return false;
+        }
+      },
+
+      removeMember: async (householdId, memberId, removedByMemberId) => {
+        const { currentPinCode } = get();
+        if (!currentPinCode) {
+          return false;
+        }
+        
+        try {
+          const response = await fetch(
+            `${API_BASE_URL}/api/households/${householdId}/members/${memberId}/remove`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-Pin-Code': currentPinCode,
+              },
+              body: JSON.stringify({ removedByMemberId }),
+            }
+          );
+          
+          if (response.ok) {
+            // Remove from local state
+            set((state) => ({
+              members: state.members.filter((m) => m.id !== memberId),
+            }));
+            return true;
+          }
+          return false;
+        } catch (error) {
+          console.error('Failed to remove member', error);
           return false;
         }
       },

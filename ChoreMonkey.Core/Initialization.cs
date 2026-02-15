@@ -24,6 +24,7 @@ using ChoreMonkey.Core.Feature.MyChores;
 using ChoreMonkey.Core.Feature.AcknowledgeMissed;
 using ChoreMonkey.Core.Feature.ChangeMemberNickname;
 using ChoreMonkey.Core.Feature.ChangeMemberStatus;
+using ChoreMonkey.Core.Feature.RemoveMember;
 using ChoreMonkey.Core.Infrastructure;
 using ChoreMonkey.Core.Infrastructure.SignalR;
 
@@ -88,6 +89,7 @@ public static class Initialization
         services.AddScoped<Feature.SetMemberPin.Handler>();
         services.AddScoped<Feature.ChangeMemberNickname.Handler>();
         services.AddScoped<Feature.ChangeMemberStatus.Handler>();
+        services.AddScoped<Feature.RemoveMember.Handler>();
         return services;
     }
     public static IEndpointRouteBuilder MapChoreMonkeyEndpoints(this IEndpointRouteBuilder app)
@@ -116,6 +118,7 @@ public static class Initialization
         SetMemberPinEndpoint.Map(householdEndpoints);
         ChangeMemberNicknameEndpoint.Map(householdEndpoints);
         ChangeMemberStatusEndpoint.Map(householdEndpoints);
+        RemoveMemberEndpoint.Map(householdEndpoints);
 
         return app;
     }
