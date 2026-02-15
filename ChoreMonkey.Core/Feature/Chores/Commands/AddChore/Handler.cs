@@ -28,9 +28,11 @@ public record FrequencyRequest(
     string[]? Days = null,
     int? IntervalDays = null);
 
+public record AddChoreResponse(Guid Id);
+
 internal class Handler(IEventStore store)
 {
-    public async Task HandleAsync(AddChoreCommand request)
+    public async Task<AddChoreResponse> HandleAsync(AddChoreCommand request)
     {
         var streamId = ChoreAggregate.StreamId(request.HouseholdId);
         
@@ -47,6 +49,8 @@ internal class Handler(IEventStore store)
             request.StartDate);
             
         await store.AppendToStreamAsync(streamId, choreCreated, ExpectedVersion.Any);
+        
+        return new AddChoreResponse(request.ChoreId);
     }
 }
 
@@ -60,17 +64,18 @@ internal static class AddChoreEndpoint
                 ? new ChoreFrequency(dto.Frequency.Type, dto.Frequency.Days, dto.Frequency.IntervalDays)
                 : null;
                 
+            var choreId = Guid.NewGuid();
             var command = new AddChoreCommand(
                 householdId, 
-                Guid.NewGuid(), 
+                choreId, 
                 dto.DisplayName, 
                 dto.Description,
                 frequency,
                 dto.IsOptional,
                 dto.StartDate);
                 
-            await handler.HandleAsync(command);
-            return Results.Created($"/api/households/{householdId}/chores", null);
+            var result = await handler.HandleAsync(command);
+            return Results.Created($"/api/households/{householdId}/chores/{choreId}", result);
         });
     }
 }
