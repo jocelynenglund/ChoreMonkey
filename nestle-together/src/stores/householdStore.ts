@@ -27,6 +27,8 @@ interface HouseholdState {
   completeChore: (householdId: string, choreId: string, memberId: string, completedAt?: Date) => Promise<void>;
   assignChore: (householdId: string, choreId: string, memberIds?: string[], assignToAll?: boolean) => Promise<void>;
   deleteChore: (householdId: string, choreId: string) => Promise<boolean>;
+  changeNickname: (householdId: string, memberId: string, newNickname: string) => Promise<boolean>;
+  changeStatus: (householdId: string, memberId: string, status: string) => Promise<boolean>;
   setCurrentMember: (memberId: string) => void;
   logout: () => void;
 
@@ -346,11 +348,16 @@ export const useHouseholdStore = create<HouseholdState>()(
       },
 
       assignChore: async (householdId, choreId, memberIds, assignToAll = false) => {
+        const { currentMemberId } = get();
         try {
           await fetch(`${API_BASE_URL}/api/households/${householdId}/chores/${choreId}/assign`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ memberIds: memberIds || null, assignToAll }),
+            body: JSON.stringify({ 
+              memberIds: memberIds || null, 
+              assignToAll,
+              assignedByMemberId: currentMemberId 
+            }),
           });
 
           set((state) => ({
@@ -389,6 +396,60 @@ export const useHouseholdStore = create<HouseholdState>()(
           return false;
         } catch (error) {
           console.error('Failed to delete chore', error);
+          return false;
+        }
+      },
+
+      changeNickname: async (householdId, memberId, newNickname) => {
+        try {
+          const response = await fetch(
+            `${API_BASE_URL}/api/households/${householdId}/members/${memberId}/nickname`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ nickname: newNickname }),
+            }
+          );
+
+          if (response.ok) {
+            // Update local member data
+            set((state) => ({
+              members: state.members.map((m) =>
+                m.id === memberId ? { ...m, nickname: newNickname } : m
+              ),
+            }));
+            return true;
+          }
+          return false;
+        } catch (error) {
+          console.error('Failed to change nickname', error);
+          return false;
+        }
+      },
+
+      changeStatus: async (householdId, memberId, status) => {
+        try {
+          const response = await fetch(
+            `${API_BASE_URL}/api/households/${householdId}/members/${memberId}/status`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ status }),
+            }
+          );
+
+          if (response.ok) {
+            // Update local member data
+            set((state) => ({
+              members: state.members.map((m) =>
+                m.id === memberId ? { ...m, status } : m
+              ),
+            }));
+            return true;
+          }
+          return false;
+        } catch (error) {
+          console.error('Failed to change status', error);
           return false;
         }
       },
@@ -544,6 +605,7 @@ export const useHouseholdStore = create<HouseholdState>()(
             nickname: m.nickname as string,
             avatarColor: AVATAR_COLORS[index % AVATAR_COLORS.length],
             joinedAt: m.joinedAt ? new Date(m.joinedAt as string) : new Date(),
+            status: m.status as string | undefined,
           }));
 
           set((state) => ({
@@ -700,6 +762,19 @@ export const useHouseholdStore = create<HouseholdState>()(
     }),
     {
       name: 'household-storage',
+      // Ensure arrays are never null when restoring from localStorage
+      merge: (persistedState, currentState) => {
+        const persisted = persistedState as Partial<HouseholdState> | undefined;
+        return {
+          ...currentState,
+          ...persisted,
+          // Ensure arrays are always arrays, never null
+          households: persisted?.households ?? [],
+          members: persisted?.members ?? [],
+          chores: persisted?.chores ?? [],
+          invites: persisted?.invites ?? [],
+        };
+      },
     }
   )
 );

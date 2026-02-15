@@ -22,6 +22,8 @@ using ChoreMonkey.Core.Feature.SetAdminPin;
 using ChoreMonkey.Core.Feature.SetMemberPin;
 using ChoreMonkey.Core.Feature.MyChores;
 using ChoreMonkey.Core.Feature.AcknowledgeMissed;
+using ChoreMonkey.Core.Feature.ChangeMemberNickname;
+using ChoreMonkey.Core.Feature.ChangeMemberStatus;
 
 namespace ChoreMonkey.Core;
 
@@ -57,6 +59,8 @@ public static class Initialization
         services.AddScoped<Feature.DeleteChore.Handler>();
         services.AddScoped<Feature.SetAdminPin.Handler>();
         services.AddScoped<Feature.SetMemberPin.Handler>();
+        services.AddScoped<Feature.ChangeMemberNickname.Handler>();
+        services.AddScoped<Feature.ChangeMemberStatus.Handler>();
         return services;
     }
     public static IEndpointRouteBuilder MapChoreMonkeyEndpoints(this IEndpointRouteBuilder app)
@@ -83,6 +87,8 @@ public static class Initialization
         DeleteChoreEndpoint.Map(householdEndpoints);
         SetAdminPinEndpoint.Map(householdEndpoints);
         SetMemberPinEndpoint.Map(householdEndpoints);
+        ChangeMemberNicknameEndpoint.Map(householdEndpoints);
+        ChangeMemberStatusEndpoint.Map(householdEndpoints);
 
         return app;
     }
