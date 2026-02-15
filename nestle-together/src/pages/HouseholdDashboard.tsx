@@ -341,7 +341,10 @@ export default function HouseholdDashboard() {
 
         {/* Admin: Overdue Chores (all members) */}
         <div className="mb-6">
-          <TeamOverviewAccordion householdId={household.id} />
+          <TeamOverviewAccordion 
+            householdId={household.id} 
+            onAssignmentChange={() => setRefreshKey(k => k + 1)}
+          />
         </div>
 
         {/* My Chores Section Header */}
@@ -417,7 +420,7 @@ export default function HouseholdDashboard() {
 
         {/* Recent Activity Timeline */}
         <div className="mt-8">
-          <CompletionTimeline householdId={household.id} />
+          <CompletionTimeline key={refreshKey} householdId={household.id} />
         </div>
       </main>
 

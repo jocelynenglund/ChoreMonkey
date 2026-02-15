@@ -22,6 +22,7 @@ import { MemberAvatar } from './MemberAvatar';
 
 interface TeamOverviewAccordionProps {
   householdId: string;
+  onAssignmentChange?: () => void;
 }
 
 interface EditingChore {
@@ -30,7 +31,7 @@ interface EditingChore {
   currentAssignees: string[];
 }
 
-export function TeamOverviewAccordion({ householdId }: TeamOverviewAccordionProps) {
+export function TeamOverviewAccordion({ householdId, onAssignmentChange }: TeamOverviewAccordionProps) {
   const [teamData, setTeamData] = useState<MemberOverview[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [editingChore, setEditingChore] = useState<EditingChore | null>(null);
@@ -88,6 +89,8 @@ export function TeamOverviewAccordion({ householdId }: TeamOverviewAccordionProp
       // Refresh the data
       await loadTeam();
       setEditingChore(null);
+      // Notify parent to refresh activity timeline
+      onAssignmentChange?.();
     } finally {
       setIsSaving(false);
     }

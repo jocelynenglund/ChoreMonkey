@@ -1,6 +1,15 @@
 {
-  "generated": "2026-02-15T14:10:22.602Z",
+  "generated": "2026-02-15T14:15:08.395Z",
   "commits": [
+    {
+      "hash": "6696ff34c582d5baf60ef15f0881d6e73b52a42d",
+      "shortHash": "6696ff3",
+      "message": "feat: Add chore reassignment in Team Overview",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Add chore reassignment in Team Overview"
+    },
     {
       "hash": "8fbd925b0475a4f78a0b66957f5f140a16ad8d79",
       "shortHash": "8fbd925",
@@ -171,15 +180,6 @@
       "author": "ItsyBOT",
       "type": "feature",
       "displayMessage": "Add choremonkey.itsybit.se to CORS allowed origins"
-    },
-    {
-      "hash": "78e4761337332d5dc60d08e3ef0455535ecdfdbf",
-      "shortHash": "78e4761",
-      "message": "fix: force fixed width on member containers to prevent overflow",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Force fixed width on member containers to prevent overflow"
     }
   ]
 }
