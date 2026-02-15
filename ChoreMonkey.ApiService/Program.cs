@@ -54,17 +54,38 @@ app.MapChoreMonkeyHub();
 app.MapGet("/api/version", () => {
     var assembly = Assembly.GetExecutingAssembly();
     var infoVersion = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "unknown";
-    // InformationalVersion may contain git SHA or "version+sha" format
-    var gitSha = infoVersion.Contains('+') ? infoVersion.Split('+').Last() : infoVersion;
-    if (gitSha.Length > 7) gitSha = gitSha[..7];
     
-    var buildTime = File.GetLastWriteTimeUtc(assembly.Location);
-    // Human-readable version: YYYY.MM.DD.sha
-    var version = $"{buildTime:yyyy.MM.dd}.{gitSha}";
+    // Parse InformationalVersion which is set to BUILD_VERSION (e.g., "2026.02.15.42")
+    // or fallback to "version+sha" format
+    string version;
+    string gitSha;
+    
+    if (infoVersion.Contains('+'))
+    {
+        // Format: "1.0.0+abc1234"
+        gitSha = infoVersion.Split('+').Last();
+        if (gitSha.Length > 7) gitSha = gitSha[..7];
+        var buildTime = File.GetLastWriteTimeUtc(assembly.Location);
+        version = $"{buildTime:yyyy.MM.dd}.{gitSha}";
+    }
+    else if (infoVersion.Split('.').Length >= 4)
+    {
+        // Format: "2026.02.15.42" - already human-readable
+        version = infoVersion;
+        gitSha = Environment.GetEnvironmentVariable("GIT_SHA") ?? "unknown";
+        if (gitSha.Length > 7) gitSha = gitSha[..7];
+    }
+    else
+    {
+        version = infoVersion;
+        gitSha = "unknown";
+    }
+    
+    var buildTimeUtc = File.GetLastWriteTimeUtc(assembly.Location);
     
     return Results.Ok(new { 
         version,
-        buildTime = buildTime.ToString("o"),
+        buildTime = buildTimeUtc.ToString("o"),
         gitSha,
         component = "api"
     });
