@@ -3,29 +3,41 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using ChoreMonkey.Core.Feature.CreateHousehold;
-using ChoreMonkey.Core.Feature.HouseholdName;
-using ChoreMonkey.Core.Feature.AddChore;
-using ChoreMonkey.Core.Feature.ChoreList;
-using ChoreMonkey.Core.Feature.GenerateInvite;
-using ChoreMonkey.Core.Feature.InviteLink;
-using ChoreMonkey.Core.Feature.AccessHousehold;
-using ChoreMonkey.Core.Feature.JoinHousehold;
-using ChoreMonkey.Core.Feature.ListMembers;
-using ChoreMonkey.Core.Feature.AssignChore;
-using ChoreMonkey.Core.Feature.CompleteChore;
-using ChoreMonkey.Core.Feature.ChoreHistory;
-using ChoreMonkey.Core.Feature.OverdueChores;
-using ChoreMonkey.Core.Feature.CompletionTimeline;
-using ChoreMonkey.Core.Feature.DeleteChore;
-using ChoreMonkey.Core.Feature.SetAdminPin;
-using ChoreMonkey.Core.Feature.SetMemberPin;
-using ChoreMonkey.Core.Feature.MyChores;
-using ChoreMonkey.Core.Feature.AcknowledgeMissed;
-using ChoreMonkey.Core.Feature.ChangeMemberNickname;
-using ChoreMonkey.Core.Feature.ChangeMemberStatus;
-using ChoreMonkey.Core.Feature.RemoveMember;
-using ChoreMonkey.Core.Feature.TeamOverview;
+
+// Household module
+using ChoreMonkey.Core.Feature.Household.Commands.CreateHousehold;
+using ChoreMonkey.Core.Feature.Household.Commands.SetAdminPin;
+using ChoreMonkey.Core.Feature.Household.Commands.SetMemberPin;
+using ChoreMonkey.Core.Feature.Household.Queries.HouseholdName;
+using ChoreMonkey.Core.Feature.Household.Queries.AccessHousehold;
+
+// Members module
+using ChoreMonkey.Core.Feature.Members.Commands.JoinHousehold;
+using ChoreMonkey.Core.Feature.Members.Commands.RemoveMember;
+using ChoreMonkey.Core.Feature.Members.Commands.ChangeMemberNickname;
+using ChoreMonkey.Core.Feature.Members.Commands.ChangeMemberStatus;
+using ChoreMonkey.Core.Feature.Members.Queries.ListMembers;
+using ChoreMonkey.Core.Feature.Members.Queries.MemberLookup;
+
+// Invites module
+using ChoreMonkey.Core.Feature.Invites.Commands.GenerateInvite;
+using ChoreMonkey.Core.Feature.Invites.Queries.InviteLink;
+
+// Chores module
+using ChoreMonkey.Core.Feature.Chores.Commands.AddChore;
+using ChoreMonkey.Core.Feature.Chores.Commands.AssignChore;
+using ChoreMonkey.Core.Feature.Chores.Commands.CompleteChore;
+using ChoreMonkey.Core.Feature.Chores.Commands.DeleteChore;
+using ChoreMonkey.Core.Feature.Chores.Commands.AcknowledgeMissed;
+using ChoreMonkey.Core.Feature.Chores.Queries.ChoreList;
+using ChoreMonkey.Core.Feature.Chores.Queries.ChoreHistory;
+using ChoreMonkey.Core.Feature.Chores.Queries.MyChores;
+using ChoreMonkey.Core.Feature.Chores.Queries.OverdueChores;
+
+// Activity module
+using ChoreMonkey.Core.Feature.Activity.Queries.CompletionTimeline;
+using ChoreMonkey.Core.Feature.Activity.Queries.TeamOverview;
+
 using ChoreMonkey.Core.Infrastructure;
 using ChoreMonkey.Core.Infrastructure.SignalR;
 
@@ -67,60 +79,82 @@ public static class Initialization
         
         return services.InstallFeatures();
     }
+
     public static IServiceCollection InstallFeatures(this IServiceCollection services)
     {
-        services.AddScoped<Feature.CreateHousehold.Handler>();
-        services.AddScoped<Feature.HouseholdName.Handler>();
-        services.AddScoped<Feature.AddChore.Handler>();
-        services.AddScoped<Feature.ChoreList.Handler>();
-        services.AddScoped<Feature.GenerateInvite.Handler>();
-        services.AddScoped<Feature.InviteLink.Handler>();
-        services.AddScoped<Feature.AccessHousehold.Handler>();
-        services.AddScoped<Feature.JoinHousehold.Handler>();
-        services.AddScoped<Feature.ListMembers.Handler>();
-        services.AddScoped<Feature.AssignChore.Handler>();
-        services.AddScoped<Feature.CompleteChore.Handler>();
-        services.AddScoped<Feature.ChoreHistory.Handler>();
-        services.AddScoped<Feature.OverdueChores.Handler>();
-        services.AddScoped<Feature.CompletionTimeline.Handler>();
-        services.AddScoped<Feature.MyChores.Handler>();
-        services.AddScoped<Feature.AcknowledgeMissed.Handler>();
-        services.AddScoped<Feature.DeleteChore.Handler>();
-        services.AddScoped<Feature.SetAdminPin.Handler>();
-        services.AddScoped<Feature.SetMemberPin.Handler>();
-        services.AddScoped<Feature.ChangeMemberNickname.Handler>();
-        services.AddScoped<Feature.ChangeMemberStatus.Handler>();
-        services.AddScoped<Feature.RemoveMember.Handler>();
-        services.AddScoped<Feature.TeamOverview.Handler>();
+        // Household module
+        services.AddScoped<Feature.Household.Commands.CreateHousehold.Handler>();
+        services.AddScoped<Feature.Household.Commands.SetAdminPin.Handler>();
+        services.AddScoped<Feature.Household.Commands.SetMemberPin.Handler>();
+        services.AddScoped<Feature.Household.Queries.HouseholdName.Handler>();
+        services.AddScoped<Feature.Household.Queries.AccessHousehold.Handler>();
+
+        // Members module
+        services.AddScoped<Feature.Members.Commands.JoinHousehold.Handler>();
+        services.AddScoped<Feature.Members.Commands.RemoveMember.Handler>();
+        services.AddScoped<Feature.Members.Commands.ChangeMemberNickname.Handler>();
+        services.AddScoped<Feature.Members.Commands.ChangeMemberStatus.Handler>();
+        services.AddScoped<Feature.Members.Queries.ListMembers.Handler>();
+        services.AddScoped<Feature.Members.Queries.MemberLookup.Handler>();
+
+        // Invites module
+        services.AddScoped<Feature.Invites.Commands.GenerateInvite.Handler>();
+        services.AddScoped<Feature.Invites.Queries.InviteLink.Handler>();
+
+        // Chores module
+        services.AddScoped<Feature.Chores.Commands.AddChore.Handler>();
+        services.AddScoped<Feature.Chores.Commands.AssignChore.Handler>();
+        services.AddScoped<Feature.Chores.Commands.CompleteChore.Handler>();
+        services.AddScoped<Feature.Chores.Commands.DeleteChore.Handler>();
+        services.AddScoped<Feature.Chores.Commands.AcknowledgeMissed.Handler>();
+        services.AddScoped<Feature.Chores.Queries.ChoreList.Handler>();
+        services.AddScoped<Feature.Chores.Queries.ChoreHistory.Handler>();
+        services.AddScoped<Feature.Chores.Queries.MyChores.Handler>();
+        services.AddScoped<Feature.Chores.Queries.OverdueChores.Handler>();
+
+        // Activity module
+        services.AddScoped<Feature.Activity.Queries.CompletionTimeline.Handler>();
+        services.AddScoped<Feature.Activity.Queries.TeamOverview.Handler>();
+
         return services;
     }
+
     public static IEndpointRouteBuilder MapChoreMonkeyEndpoints(this IEndpointRouteBuilder app)
     {
         var householdEndpoints = app.MapGroup("/api")
             .WithTags("household");
 
+        // Household module
         CreateHouseholdEndpoint.Map(householdEndpoints);
-        HouseholdNameEndpoint.Map(householdEndpoints);
-        AddChoreEndpoint.Map(householdEndpoints);
-        ChoreListEndpoint.Map(householdEndpoints);
-        GenerateInviteEndpoint.Map(householdEndpoints);
-        InviteLinkEndpoint.Map(householdEndpoints);
-        AccessHouseholdEndpoint.Map(householdEndpoints);
-        JoinHouseholdEndpoint.Map(householdEndpoints);
-        ListMembersEndpoint.Map(householdEndpoints);
-        AssignChoreEndpoint.Map(householdEndpoints);
-        CompleteChoreEndpoint.Map(householdEndpoints);
-        ChoreHistoryEndpoint.Map(householdEndpoints);
-        OverdueChoresEndpoint.Map(householdEndpoints);
-        CompletionTimelineEndpoint.Map(householdEndpoints);
-        MyChoresEndpoint.Map(householdEndpoints);
-        AcknowledgeMissedEndpoint.Map(householdEndpoints);
-        DeleteChoreEndpoint.Map(householdEndpoints);
         SetAdminPinEndpoint.Map(householdEndpoints);
         SetMemberPinEndpoint.Map(householdEndpoints);
+        HouseholdNameEndpoint.Map(householdEndpoints);
+        AccessHouseholdEndpoint.Map(householdEndpoints);
+
+        // Members module
+        JoinHouseholdEndpoint.Map(householdEndpoints);
+        RemoveMemberEndpoint.Map(householdEndpoints);
         ChangeMemberNicknameEndpoint.Map(householdEndpoints);
         ChangeMemberStatusEndpoint.Map(householdEndpoints);
-        RemoveMemberEndpoint.Map(householdEndpoints);
+        ListMembersEndpoint.Map(householdEndpoints);
+
+        // Invites module
+        GenerateInviteEndpoint.Map(householdEndpoints);
+        InviteLinkEndpoint.Map(householdEndpoints);
+
+        // Chores module
+        AddChoreEndpoint.Map(householdEndpoints);
+        AssignChoreEndpoint.Map(householdEndpoints);
+        CompleteChoreEndpoint.Map(householdEndpoints);
+        DeleteChoreEndpoint.Map(householdEndpoints);
+        AcknowledgeMissedEndpoint.Map(householdEndpoints);
+        ChoreListEndpoint.Map(householdEndpoints);
+        ChoreHistoryEndpoint.Map(householdEndpoints);
+        MyChoresEndpoint.Map(householdEndpoints);
+        OverdueChoresEndpoint.Map(householdEndpoints);
+
+        // Activity module
+        CompletionTimelineEndpoint.Map(householdEndpoints);
         TeamOverviewEndpoint.Map(householdEndpoints);
 
         return app;
