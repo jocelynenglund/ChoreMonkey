@@ -10,20 +10,31 @@ export async function fetchChores(householdId: string): Promise<Chore[]> {
   }
 
   const data = await response.json();
-  return (data.chores || []).map((c: Record<string, unknown>) => ({
-    id: c.choreId || c.id,
-    householdId,
-    displayName: c.displayName,
-    description: c.description || '',
-    assignedTo: c.assignedToMemberIds as string[] | undefined,
-    assignedToAll: c.assignToAll as boolean | undefined,
-    completed: false,
-    createdAt: new Date(),
-    frequency: c.frequency,
-    lastCompletedAt: c.lastCompletedAt ? new Date(c.lastCompletedAt as string) : undefined,
-    lastCompletedBy: c.lastCompletedBy as string | undefined,
-    isOptional: c.isOptional as boolean | undefined,
-  }));
+  const choreArray = Array.isArray(data) ? data : (data.chores ?? []);
+  
+  return choreArray.map((c: Record<string, unknown>) => {
+    const frequency = c.frequency as import('./types').ChoreFrequency | undefined;
+    const lastCompletedAt = c.lastCompletedAt ? new Date(c.lastCompletedAt as string) : undefined;
+    // One-time chores are "completed" once they have any completion
+    const isOneTime = !frequency || frequency.type === 'once';
+    const completed = isOneTime && lastCompletedAt != null;
+    
+    return {
+      id: (c.choreId ?? c.id) as string,
+      householdId,
+      displayName: c.displayName as string,
+      description: (c.description || '') as string,
+      assignedTo: c.assignedTo as string[] | undefined,
+      assignedToAll: c.assignedToAll as boolean | undefined,
+      completed,
+      createdAt: c.createdAt ? new Date(c.createdAt as string) : new Date(),
+      frequency,
+      lastCompletedAt,
+      lastCompletedBy: c.lastCompletedBy as string | undefined,
+      memberCompletions: c.memberCompletions as import('./types').MemberCompletion[] | undefined,
+      isOptional: c.isOptional as boolean | undefined,
+    };
+  });
 }
 
 export async function addChore(householdId: string, request: AddChoreRequest): Promise<void> {

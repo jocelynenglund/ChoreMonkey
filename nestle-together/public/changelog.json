@@ -1,6 +1,15 @@
 {
-  "generated": "2026-02-15T13:23:35.909Z",
+  "generated": "2026-02-15T13:24:26.098Z",
   "commits": [
+    {
+      "hash": "319ccc36a46da03a58a2e8276091956774ab3615",
+      "shortHash": "319ccc3",
+      "message": "fix: add missing fetchChoreHistory, fix currentPinCode type (string)",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Add missing fetchChoreHistory, fix currentPinCode type (string)"
+    },
     {
       "hash": "8374536ef4e9b806940a88f9cf752511b91888b7",
       "shortHash": "8374536",
@@ -171,15 +180,6 @@
       "author": "ItsyBOT",
       "type": "feature",
       "displayMessage": "Admin-only remove member feature"
-    },
-    {
-      "hash": "5cf9d9a5b5e537aa749deadf98a368b2dbf47e50",
-      "shortHash": "5cf9d9a",
-      "message": "fix: add @microsoft/signalr to package.json",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Add @microsoft/signalr to package.json"
     }
   ]
 }
