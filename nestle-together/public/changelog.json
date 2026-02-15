@@ -1,6 +1,15 @@
 {
-  "generated": "2026-02-15T15:07:05.922Z",
+  "generated": "2026-02-15T15:09:46.525Z",
   "commits": [
+    {
+      "hash": "57d768b9ab44c6a490b2e02bf8026245f91ee505",
+      "shortHash": "57d768b",
+      "message": "ui: Stack member badges on second row (mobile)",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "update",
+      "displayMessage": "Ui: Stack member badges on second row (mobile)"
+    },
     {
       "hash": "e747f11bf140b43a18d9e72bdfb9479af1e68b47",
       "shortHash": "e747f11",
@@ -171,15 +180,6 @@
       "author": "Jocelyn Englund",
       "type": "update",
       "displayMessage": "Update deploy.yml"
-    },
-    {
-      "hash": "1b00723a9da77f60fce7456cdfe97556086a4933",
-      "shortHash": "1b00723",
-      "message": "feat: add What's New changelog on logo click",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Add What's New changelog on logo click"
     }
   ]
 }
