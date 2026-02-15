@@ -1,0 +1,44 @@
+name: Deploy to Staging (labs)
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to deploy'
+        required: true
+        default: 'main'
+
+env:
+  NODE_VERSION: '22'
+
+jobs:
+  deploy-frontend-staging:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: nestle-together/package-lock.json
+
+      - working-directory: nestle-together
+        run: npm ci
+
+      - working-directory: nestle-together
+        env:
+          VITE_API_URL: https://itsybitsylist-api.azurewebsites.net
+        run: npm run build
+
+      - name: Deploy to Staging (labs)
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: nestle-together/dist/
+          server-dir: /labs/
