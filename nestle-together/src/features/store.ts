@@ -10,7 +10,7 @@ import * as activityApi from './activity/api';
 
 import type { Household } from './household/types';
 import type { Member, Invite } from './members/types';
-import type { Chore, ChoreFrequency } from './chores/types';
+import type { Chore, ChoreFrequency, ChoreCompletion } from './chores/types';
 import type { MyChoresResponse } from './my-chores/types';
 import type { MemberOverdue } from './overdue/types';
 import type { Activity } from './activity/types';
@@ -28,7 +28,7 @@ interface AppState {
   // Auth state
   currentHouseholdId: string | null;
   currentMemberId: string | null;
-  currentPinCode: number | null;
+  currentPinCode: string | null;
   isAuthenticated: boolean;
   isAdmin: boolean;
   
@@ -59,6 +59,7 @@ interface AppState {
   completeChore: (householdId: string, choreId: string, memberId: string, completedAt?: Date) => Promise<void>;
   assignChore: (householdId: string, choreId: string, memberIds?: string[], assignToAll?: boolean) => Promise<void>;
   deleteChore: (householdId: string, choreId: string) => Promise<boolean>;
+  fetchChoreHistory: (householdId: string, choreId: string) => Promise<ChoreCompletion[]>;
   
   // My Chores
   fetchMyChores: (householdId: string, memberId: string) => Promise<MyChoresResponse | null>;
@@ -131,7 +132,7 @@ export const useAppStore = create<AppState>()(
             set({
               currentHouseholdId: householdId,
               currentMemberId: data.memberId || null,
-              currentPinCode: parseInt(pinCode, 10),
+              currentPinCode: pinCode,
               isAuthenticated: true,
               isAdmin: data.isAdmin ?? false,
             });
@@ -223,7 +224,7 @@ export const useAppStore = create<AppState>()(
       removeMember: async (householdId, memberId) => {
         const { currentPinCode } = get();
         if (!currentPinCode) return false;
-        return membersApi.removeMember(householdId, memberId, currentPinCode);
+        return membersApi.removeMember(householdId, memberId, parseInt(currentPinCode, 10));
       },
 
       getHouseholdChores: (householdId) => choresApi.fetchChores(householdId),
@@ -270,8 +271,11 @@ export const useAppStore = create<AppState>()(
       deleteChore: async (householdId, choreId) => {
         const { currentPinCode, isAdmin } = get();
         if (!isAdmin || !currentPinCode) return false;
-        return choresApi.deleteChore(householdId, choreId, currentPinCode);
+        return choresApi.deleteChore(householdId, choreId, parseInt(currentPinCode, 10));
       },
+
+      fetchChoreHistory: (householdId, choreId) =>
+        choresApi.fetchChoreHistory(householdId, choreId),
 
       fetchMyChores: (householdId, memberId) =>
         myChoresApi.fetchMyChores(householdId, memberId),
@@ -282,7 +286,7 @@ export const useAppStore = create<AppState>()(
       fetchOverdueChores: async (householdId) => {
         const { currentPinCode, isAdmin } = get();
         if (!isAdmin || !currentPinCode) return [];
-        return overdueApi.fetchOverdueChores(householdId, currentPinCode);
+        return overdueApi.fetchOverdueChores(householdId, parseInt(currentPinCode, 10));
       },
 
       fetchActivityTimeline: (householdId, limit) =>

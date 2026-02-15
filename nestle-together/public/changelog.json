@@ -1,6 +1,15 @@
 {
-  "generated": "2026-02-15T12:55:11.181Z",
+  "generated": "2026-02-15T13:23:35.909Z",
   "commits": [
+    {
+      "hash": "8374536ef4e9b806940a88f9cf752511b91888b7",
+      "shortHash": "8374536",
+      "message": "refactor: extract frontend into vertical feature slices",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "refactor",
+      "displayMessage": "Extract frontend into vertical feature slices"
+    },
     {
       "hash": "d2663454c7274a8c4a3b1f19767bed88ced2bac1",
       "shortHash": "d266345",
@@ -171,15 +180,6 @@
       "author": "ItsyBOT",
       "type": "feature",
       "displayMessage": "Add @microsoft/signalr to package.json"
-    },
-    {
-      "hash": "b84f461b0398f6841f4b6ef41d6454051e2d3ab2",
-      "shortHash": "b84f461",
-      "message": "feat: Re-add SignalR with connection status indicator",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Re-add SignalR with connection status indicator"
     }
   ]
 }
