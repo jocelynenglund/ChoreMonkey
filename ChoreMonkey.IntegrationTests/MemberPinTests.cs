@@ -126,7 +126,8 @@ public class MemberPinTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         // Assert
         Assert.Equal(HttpStatusCode.OK, accessResponse.StatusCode);
         var result = await accessResponse.Content.ReadFromJsonAsync<AccessResponse>();
-        Assert.True(result!.IsAdmin);
+        Assert.True(result!.Success);
+        Assert.True(result.IsAdmin);
     }
 
     #region Helpers
@@ -146,7 +147,7 @@ public class MemberPinTests(ApiFixture fixture) : IClassFixture<ApiFixture>
     private record HouseholdResponse(Guid HouseholdId, Guid MemberId);
     private record SetPinResponse(bool Success);
     private record InviteResponse(Guid HouseholdId, Guid InviteId, string Link);
-    private record AccessResponse(Guid MemberId, bool IsAdmin);
+    private record AccessResponse(bool Success, Guid HouseholdId, string? HouseholdName, bool IsAdmin);
 
     #endregion
 }

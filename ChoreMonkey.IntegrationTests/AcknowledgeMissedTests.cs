@@ -15,7 +15,7 @@ public class AcknowledgeMissedTests(ApiFixture fixture) : IClassFixture<ApiFixtu
         var household = await CreateHousehold("Acknowledge Daily Test");
         
         // Create a daily chore with a past start date (so it's overdue)
-        var choreResponse = await _client.PostAsJsonAsync(
+        await _client.PostAsJsonAsync(
             $"/api/households/{household.HouseholdId}/chores",
             new
             {
@@ -24,13 +24,15 @@ public class AcknowledgeMissedTests(ApiFixture fixture) : IClassFixture<ApiFixtu
                 frequency = new { type = "daily" },
                 startDate = DateTime.UtcNow.AddDays(-3).ToString("o")
             });
-        var chore = await choreResponse.Content.ReadFromJsonAsync<ChoreResponse>();
+        
+        // Fetch chore list to get the ID
+        var choreId = await GetFirstChoreId(household.HouseholdId);
         
         // Act - Acknowledge the missed chore for yesterday's period
         var yesterday = DateTime.UtcNow.AddDays(-1);
         var period = yesterday.ToString("yyyy-MM-dd");
         var response = await _client.PostAsJsonAsync(
-            $"/api/households/{household.HouseholdId}/chores/{chore!.Id}/acknowledge-missed",
+            $"/api/households/{household.HouseholdId}/chores/{choreId}/acknowledge-missed",
             new { memberId = household.MemberId, period });
         
         // Assert
@@ -46,7 +48,7 @@ public class AcknowledgeMissedTests(ApiFixture fixture) : IClassFixture<ApiFixtu
         var household = await CreateHousehold("Acknowledge Weekly Test");
         
         // Create a weekly chore
-        var choreResponse = await _client.PostAsJsonAsync(
+        await _client.PostAsJsonAsync(
             $"/api/households/{household.HouseholdId}/chores",
             new
             {
@@ -55,7 +57,8 @@ public class AcknowledgeMissedTests(ApiFixture fixture) : IClassFixture<ApiFixtu
                 frequency = new { type = "weekly", dayOfWeek = 1 }, // Monday
                 startDate = DateTime.UtcNow.AddDays(-14).ToString("o")
             });
-        var chore = await choreResponse.Content.ReadFromJsonAsync<ChoreResponse>();
+        
+        var choreId = await GetFirstChoreId(household.HouseholdId);
         
         // Act - Acknowledge for a past week
         var lastWeek = DateTime.UtcNow.AddDays(-7);
@@ -63,7 +66,7 @@ public class AcknowledgeMissedTests(ApiFixture fixture) : IClassFixture<ApiFixtu
         var period = $"{lastWeek.Year}-W{weekNumber:D2}";
         
         var response = await _client.PostAsJsonAsync(
-            $"/api/households/{household.HouseholdId}/chores/{chore!.Id}/acknowledge-missed",
+            $"/api/households/{household.HouseholdId}/chores/{choreId}/acknowledge-missed",
             new { memberId = household.MemberId, period });
         
         // Assert
@@ -77,7 +80,7 @@ public class AcknowledgeMissedTests(ApiFixture fixture) : IClassFixture<ApiFixtu
         var household = await CreateHousehold("Overdue After Acknowledge Test");
         
         // Create and assign a daily chore with past start date
-        var choreResponse = await _client.PostAsJsonAsync(
+        await _client.PostAsJsonAsync(
             $"/api/households/{household.HouseholdId}/chores",
             new
             {
@@ -86,18 +89,19 @@ public class AcknowledgeMissedTests(ApiFixture fixture) : IClassFixture<ApiFixtu
                 frequency = new { type = "daily" },
                 startDate = DateTime.UtcNow.AddDays(-5).ToString("o")
             });
-        var chore = await choreResponse.Content.ReadFromJsonAsync<ChoreResponse>();
+        
+        var choreId = await GetFirstChoreId(household.HouseholdId);
         
         // Assign to member
         await _client.PostAsJsonAsync(
-            $"/api/households/{household.HouseholdId}/chores/{chore!.Id}/assign",
+            $"/api/households/{household.HouseholdId}/chores/{choreId}/assign",
             new { memberIds = new[] { household.MemberId } });
         
         // Acknowledge for a specific past period
         var missedDate = DateTime.UtcNow.AddDays(-2);
         var period = missedDate.ToString("yyyy-MM-dd");
         await _client.PostAsJsonAsync(
-            $"/api/households/{household.HouseholdId}/chores/{chore.Id}/acknowledge-missed",
+            $"/api/households/{household.HouseholdId}/chores/{choreId}/acknowledge-missed",
             new { memberId = household.MemberId, period });
         
         // Act - Get overdue chores
@@ -107,8 +111,6 @@ public class AcknowledgeMissedTests(ApiFixture fixture) : IClassFixture<ApiFixtu
         var overdueResponse = await _client.SendAsync(request);
         
         // Assert - The acknowledged period should not appear
-        var content = await overdueResponse.Content.ReadAsStringAsync();
-        // Note: This test verifies the endpoint works; exact overdue logic depends on implementation
         Assert.Equal(HttpStatusCode.OK, overdueResponse.StatusCode);
     }
 
@@ -118,7 +120,7 @@ public class AcknowledgeMissedTests(ApiFixture fixture) : IClassFixture<ApiFixtu
         // Arrange
         var household = await CreateHousehold("Multi Period Acknowledge Test");
         
-        var choreResponse = await _client.PostAsJsonAsync(
+        await _client.PostAsJsonAsync(
             $"/api/households/{household.HouseholdId}/chores",
             new
             {
@@ -127,18 +129,19 @@ public class AcknowledgeMissedTests(ApiFixture fixture) : IClassFixture<ApiFixtu
                 frequency = new { type = "daily" },
                 startDate = DateTime.UtcNow.AddDays(-5).ToString("o")
             });
-        var chore = await choreResponse.Content.ReadFromJsonAsync<ChoreResponse>();
+        
+        var choreId = await GetFirstChoreId(household.HouseholdId);
         
         // Act - Acknowledge multiple periods
         var period1 = DateTime.UtcNow.AddDays(-3).ToString("yyyy-MM-dd");
         var period2 = DateTime.UtcNow.AddDays(-2).ToString("yyyy-MM-dd");
         
         var response1 = await _client.PostAsJsonAsync(
-            $"/api/households/{household.HouseholdId}/chores/{chore!.Id}/acknowledge-missed",
+            $"/api/households/{household.HouseholdId}/chores/{choreId}/acknowledge-missed",
             new { memberId = household.MemberId, period = period1 });
         
         var response2 = await _client.PostAsJsonAsync(
-            $"/api/households/{household.HouseholdId}/chores/{chore.Id}/acknowledge-missed",
+            $"/api/households/{household.HouseholdId}/chores/{choreId}/acknowledge-missed",
             new { memberId = household.MemberId, period = period2 });
         
         // Assert
@@ -159,6 +162,13 @@ public class AcknowledgeMissedTests(ApiFixture fixture) : IClassFixture<ApiFixtu
         return (await response.Content.ReadFromJsonAsync<HouseholdResponse>())!;
     }
 
+    private async Task<Guid> GetFirstChoreId(Guid householdId)
+    {
+        var response = await _client.GetAsync($"/api/households/{householdId}/chores");
+        var chores = await response.Content.ReadFromJsonAsync<ChoresResponse>();
+        return chores!.Chores.First().ChoreId;
+    }
+
     private static int GetIsoWeekNumber(DateTime date)
     {
         var cal = System.Globalization.CultureInfo.InvariantCulture.Calendar;
@@ -168,7 +178,8 @@ public class AcknowledgeMissedTests(ApiFixture fixture) : IClassFixture<ApiFixtu
     }
 
     private record HouseholdResponse(Guid HouseholdId, Guid MemberId);
-    private record ChoreResponse(Guid Id, string DisplayName);
+    private record ChoreDto(Guid ChoreId, string DisplayName);
+    private record ChoresResponse(List<ChoreDto> Chores);
     private record AcknowledgeResponse(bool Success);
 
     #endregion

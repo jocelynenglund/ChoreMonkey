@@ -208,14 +208,19 @@ public class MemberProfileTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         // Arrange
         var household = await CreateHousehold("Completion Nickname Test");
         
-        // Create and complete a chore
-        var choreResponse = await _client.PostAsJsonAsync(
+        // Create a chore
+        await _client.PostAsJsonAsync(
             $"/api/households/{household.HouseholdId}/chores",
             new { displayName = "Test Chore", description = "Test" });
-        var chore = await choreResponse.Content.ReadFromJsonAsync<ChoreResponse>();
         
+        // Fetch chore list to get the ID
+        var choresResponse = await _client.GetAsync($"/api/households/{household.HouseholdId}/chores");
+        var chores = await choresResponse.Content.ReadFromJsonAsync<ChoresResponse>();
+        var choreId = chores!.Chores.First().ChoreId;
+        
+        // Complete the chore
         await _client.PostAsJsonAsync(
-            $"/api/households/{household.HouseholdId}/chores/{chore!.Id}/complete",
+            $"/api/households/{household.HouseholdId}/chores/{choreId}/complete",
             new { memberId = household.MemberId });
         
         // Change nickname AFTER completion
@@ -252,7 +257,8 @@ public class MemberProfileTests(ApiFixture fixture) : IClassFixture<ApiFixture>
     private record StatusResponse(Guid MemberId, string Status);
     private record MemberDto(Guid MemberId, string Nickname, string? Status);
     private record MembersResponse(List<MemberDto> Members);
-    private record ChoreResponse(Guid Id, string DisplayName);
+    private record ChoreDto(Guid ChoreId, string DisplayName);
+    private record ChoresResponse(List<ChoreDto> Chores);
 
     #endregion
 }
