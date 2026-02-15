@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Clock, CheckCircle2 } from 'lucide-react';
 import { MemberAvatar } from './MemberAvatar';
 import { useHouseholdStore } from '@/stores/householdStore';
+import { householdConnection } from '@/lib/signalr';
 
 interface CompletionEntry {
   choreId: string;
@@ -13,6 +14,7 @@ interface CompletionEntry {
 
 interface CompletionTimelineProps {
   householdId: string;
+  refreshKey?: number;
 }
 
 function formatTimeAgo(dateString: string): string {
@@ -31,29 +33,40 @@ function formatTimeAgo(dateString: string): string {
   return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
 }
 
-export function CompletionTimeline({ householdId }: CompletionTimelineProps) {
+export function CompletionTimeline({ householdId, refreshKey = 0 }: CompletionTimelineProps) {
   const [completions, setCompletions] = useState<CompletionEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { members } = useHouseholdStore();
 
-  useEffect(() => {
-    const fetchCompletions = async () => {
-      setIsLoading(true);
-      try {
-        const apiUrl = import.meta.env.VITE_API_URL || 'https://localhost:7422';
-        const response = await fetch(`${apiUrl}/api/households/${householdId}/completions?days=7&limit=20`);
-        if (response.ok) {
-          const data = await response.json();
-          setCompletions(data.completions ?? []);
-        }
-      } catch (error) {
-        console.error('Failed to fetch completions', error);
+  const fetchCompletions = useCallback(async () => {
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://localhost:7422';
+      const response = await fetch(`${apiUrl}/api/households/${householdId}/completions?days=7&limit=20`);
+      if (response.ok) {
+        const data = await response.json();
+        setCompletions(data.completions ?? []);
       }
-      setIsLoading(false);
-    };
-
-    fetchCompletions();
+    } catch (error) {
+      console.error('Failed to fetch completions', error);
+    }
+    setIsLoading(false);
   }, [householdId]);
+
+  // Initial fetch
+  useEffect(() => {
+    setIsLoading(true);
+    fetchCompletions();
+  }, [fetchCompletions, refreshKey]);
+
+  // Subscribe to real-time updates
+  useEffect(() => {
+    const unsubscribe = householdConnection.subscribe((event) => {
+      if (event.type === 'ChoreCompleted') {
+        fetchCompletions();
+      }
+    });
+    return unsubscribe;
+  }, [fetchCompletions]);
 
   const getMemberColor = (memberId: string) => {
     const member = members.find((m) => m.id === memberId);
