@@ -1,6 +1,44 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import { LogOut, ClipboardList } from 'lucide-react';
+
+// Smart marquee that only scrolls when text overflows
+function StatusMarquee({ text }: { text: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLSpanElement>(null);
+  const [shouldScroll, setShouldScroll] = useState(false);
+
+  useEffect(() => {
+    const measure = () => {
+      if (containerRef.current && textRef.current) {
+        const containerWidth = containerRef.current.offsetWidth;
+        const textWidth = textRef.current.offsetWidth;
+        setShouldScroll(textWidth > containerWidth - 32);
+      }
+    };
+    measure();
+    const timer = setTimeout(measure, 100);
+    return () => clearTimeout(timer);
+  }, [text]);
+
+  return (
+    <div 
+      ref={containerRef}
+      className="mt-3 py-2 bg-muted/50 rounded-md overflow-hidden"
+    >
+      <div className={`whitespace-nowrap ${shouldScroll ? 'animate-marquee' : 'px-4 text-center'}`}>
+        <span ref={textRef} className="text-sm text-muted-foreground">
+          💬 {text}
+        </span>
+        {shouldScroll && (
+          <span className="text-sm text-muted-foreground px-8">
+            💬 {text}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
 import { Button } from '@/components/ui/button';
 import { useHouseholdStore } from '@/stores/householdStore';
 import { ChoreCard } from '@/components/ChoreCard';
@@ -23,6 +61,7 @@ export default function HouseholdDashboard() {
   const [completingChore, setCompletingChore] = useState<Chore | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [hoveredMemberStatus, setHoveredMemberStatus] = useState<string | null>(null);
 
   const {
     isAuthenticated,
@@ -204,10 +243,13 @@ export default function HouseholdDashboard() {
           </div>
           <div className="flex gap-3 overflow-x-auto pb-1">
             {members.map((member) => (
-              <div
+              <button
                 key={member.id}
-                className="flex flex-col items-center gap-1 w-16 flex-shrink-0"
-                title={member.nickname}
+                className="flex flex-col items-center gap-1 w-16 flex-shrink-0 cursor-pointer"
+                title={member.status || member.nickname}
+                onClick={() => member.status && setHoveredMemberStatus(
+                  hoveredMemberStatus === member.status ? null : member.status
+                )}
               >
                 <MemberAvatar
                   nickname={member.nickname}
@@ -217,9 +259,12 @@ export default function HouseholdDashboard() {
                 <span className="text-xs text-muted-foreground truncate w-full text-center">
                   {member.nickname}
                 </span>
-              </div>
+              </button>
             ))}
           </div>
+          {hoveredMemberStatus && (
+            <StatusMarquee text={hoveredMemberStatus} />
+          )}
         </div>
 
         {/* Admin: Overdue Chores (all members) */}
