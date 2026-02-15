@@ -1,6 +1,15 @@
 {
-  "generated": "2026-02-15T13:24:26.098Z",
+  "generated": "2026-02-15T13:28:18.477Z",
   "commits": [
+    {
+      "hash": "31eacd9f47940ec5896ea1177b7ac86b1da3da9e",
+      "shortHash": "31eacd9",
+      "message": "fix: correct chore field mapping (assignedTo, assignedToAll, completed logic)",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Correct chore field mapping (assignedTo, assignedToAll, completed logic)"
+    },
     {
       "hash": "319ccc36a46da03a58a2e8276091956774ab3615",
       "shortHash": "319ccc3",
@@ -171,15 +180,6 @@
       "author": "Jocelyn Englund",
       "type": "update",
       "displayMessage": "Update deploy.yml"
-    },
-    {
-      "hash": "d405b6bee9c94a52113e547648666749522d56f9",
-      "shortHash": "d405b6b",
-      "message": "feat: admin-only remove member feature",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Admin-only remove member feature"
     }
   ]
 }

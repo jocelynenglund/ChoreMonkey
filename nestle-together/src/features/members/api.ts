@@ -2,6 +2,15 @@ import type { Member, JoinHouseholdRequest, JoinHouseholdResponse, GenerateInvit
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7422';
 
+const AVATAR_COLORS = [
+  'hsl(150 50% 50%)',
+  'hsl(15 80% 60%)',
+  'hsl(200 70% 55%)',
+  'hsl(45 90% 55%)',
+  'hsl(280 60% 60%)',
+  'hsl(340 70% 60%)',
+];
+
 export async function fetchMembers(householdId: string): Promise<Member[]> {
   const response = await fetch(`${API_BASE_URL}/api/households/${householdId}/members`);
   
@@ -10,13 +19,16 @@ export async function fetchMembers(householdId: string): Promise<Member[]> {
   }
 
   const data = await response.json();
-  return (data.members || []).map((m: Record<string, unknown>) => ({
-    id: m.memberId,
+  // API returns { members: [...] } or direct array
+  const memberArray = Array.isArray(data) ? data : (data.members ?? []);
+  
+  return memberArray.map((m: Record<string, unknown>, index: number) => ({
+    id: (m.memberId ?? m.id) as string,
     householdId,
-    nickname: m.nickname,
-    avatarColor: m.avatarColor || `hsl(${Math.random() * 360} 50% 50%)`,
-    joinedAt: new Date(),
-    status: m.status || undefined,
+    nickname: m.nickname as string,
+    avatarColor: AVATAR_COLORS[index % AVATAR_COLORS.length],
+    joinedAt: m.joinedAt ? new Date(m.joinedAt as string) : new Date(),
+    status: (m.status as string) || undefined,
   }));
 }
 

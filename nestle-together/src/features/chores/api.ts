@@ -24,7 +24,7 @@ export async function fetchChores(householdId: string): Promise<Chore[]> {
       householdId,
       displayName: c.displayName as string,
       description: (c.description || '') as string,
-      assignedTo: c.assignedTo as string[] | undefined,
+      assignedTo: (c.assignedTo as string[] | undefined)?.map(id => String(id)),
       assignedToAll: c.assignedToAll as boolean | undefined,
       completed,
       createdAt: c.createdAt ? new Date(c.createdAt as string) : new Date(),
