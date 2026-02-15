@@ -18,9 +18,9 @@ function StatusMarquee({ text }: { text: string }) {
         const textWidth = textRef.current.offsetWidth;
         const needsScroll = textWidth > containerWidth - 32;
         setShouldScroll(needsScroll);
-        // Adjust speed based on text length (roughly 50px per second)
+        // Adjust speed based on text length (roughly 100px per second)
         if (needsScroll) {
-          setAnimationDuration(Math.max(8, textWidth / 50));
+          setAnimationDuration(Math.max(4, textWidth / 100));
         }
       }
     };

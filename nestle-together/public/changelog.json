@@ -1,6 +1,15 @@
 {
-  "generated": "2026-02-15T14:55:22.099Z",
+  "generated": "2026-02-15T14:56:01.225Z",
   "commits": [
+    {
+      "hash": "5ecdb4e602952b7027154220fddcaa87793fa323",
+      "shortHash": "5ecdb4e",
+      "message": "fix: Marquee now scrolls through entire text",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Marquee now scrolls through entire text"
+    },
     {
       "hash": "74c407e19fce9c7dc7312a2da8281696f0f34673",
       "shortHash": "74c407e",
@@ -171,15 +180,6 @@
       "author": "ItsyBOT",
       "type": "feature",
       "displayMessage": "Add SignalR handlers for status and nickname changes"
-    },
-    {
-      "hash": "0dd2cc7ff5d3dfcb4f7c65d03662149411559f52",
-      "shortHash": "0dd2cc7",
-      "message": "fix: widen member container to prevent ring clipping",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Widen member container to prevent ring clipping"
     }
   ]
 }
