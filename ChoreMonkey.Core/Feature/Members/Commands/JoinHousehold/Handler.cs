@@ -55,7 +55,8 @@ internal static class JoinHouseholdEndpoint
                 return Results.BadRequest("Invalid invite");
                 
             return Results.Ok(result);
-        });
+        })
+        .RequireRateLimiting("auth");
     }
 }
 

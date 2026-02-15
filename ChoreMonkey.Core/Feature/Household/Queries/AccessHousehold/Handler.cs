@@ -75,7 +75,8 @@ internal static class AccessHouseholdEndpoint
             }
 
             return Results.Ok(result);
-        });
+        })
+        .RequireRateLimiting("auth");
     }
 }
 

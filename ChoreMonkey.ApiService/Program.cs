@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Threading.RateLimiting;
 using ChoreMonkey.Core;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -32,6 +33,34 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddChoreMonkeyCore();
 
+// Rate limiting for auth endpoints (PIN brute-force protection)
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    
+    // Auth endpoints: 5 requests per minute per IP
+    options.AddPolicy("auth", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 5,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0
+            }));
+    
+    // General API: 100 requests per minute per IP
+    options.AddPolicy("api", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 100,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0
+            }));
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline. 
@@ -39,6 +68,9 @@ app.UseExceptionHandler();
 
 // Enable CORS
 app.UseCors("ChoreMonkeyCors");
+
+// Enable rate limiting
+app.UseRateLimiter();
 
 if (app.Environment.IsDevelopment())
 {
