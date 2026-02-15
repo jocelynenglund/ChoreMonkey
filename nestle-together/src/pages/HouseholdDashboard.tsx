@@ -277,7 +277,7 @@ export default function HouseholdDashboard() {
             </h2>
             <InviteDialog onGenerate={handleGenerateInvite} />
           </div>
-          <div className="flex gap-3 overflow-x-auto pb-1">
+          <div className="flex gap-3 overflow-x-auto pb-2 pt-1 px-1 -mx-1">
             {(members ?? []).map((member) => (
               <div
                 key={member.id}
