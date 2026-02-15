@@ -1,6 +1,15 @@
 {
-  "generated": "2026-02-15T14:19:22.798Z",
+  "generated": "2026-02-15T14:55:22.099Z",
   "commits": [
+    {
+      "hash": "74c407e19fce9c7dc7312a2da8281696f0f34673",
+      "shortHash": "74c407e",
+      "message": "feat: Add ChoreDeleted SignalR handler for real-time updates",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Add ChoreDeleted SignalR handler for real-time updates"
+    },
     {
       "hash": "16d185e0dac485c06fbc2b8bf25491b9c345b079",
       "shortHash": "16d185e",
@@ -171,15 +180,6 @@
       "author": "ItsyBOT",
       "type": "fix",
       "displayMessage": "Widen member container to prevent ring clipping"
-    },
-    {
-      "hash": "ff1ab57a715284eafbfd09ae1547ed907509490b",
-      "shortHash": "ff1ab57",
-      "message": "fix: use inline styles for guaranteed text truncation",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Use inline styles for guaranteed text truncation"
     }
   ]
 }

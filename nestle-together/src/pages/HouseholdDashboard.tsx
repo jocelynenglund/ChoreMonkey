@@ -9,34 +9,53 @@ function StatusMarquee({ text }: { text: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const [shouldScroll, setShouldScroll] = useState(false);
+  const [animationDuration, setAnimationDuration] = useState(12);
 
   useEffect(() => {
     const measure = () => {
       if (containerRef.current && textRef.current) {
         const containerWidth = containerRef.current.offsetWidth;
         const textWidth = textRef.current.offsetWidth;
-        setShouldScroll(textWidth > containerWidth - 32);
+        const needsScroll = textWidth > containerWidth - 32;
+        setShouldScroll(needsScroll);
+        // Adjust speed based on text length (roughly 50px per second)
+        if (needsScroll) {
+          setAnimationDuration(Math.max(8, textWidth / 50));
+        }
       }
     };
     measure();
     const timer = setTimeout(measure, 100);
-    return () => clearTimeout(timer);
+    window.addEventListener('resize', measure);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', measure);
+    };
   }, [text]);
+
+  if (!shouldScroll) {
+    return (
+      <div className="mt-3 py-2 bg-muted/50 rounded-md px-4 text-center">
+        <span className="text-sm text-muted-foreground">💬 {text}</span>
+      </div>
+    );
+  }
 
   return (
     <div 
       ref={containerRef}
       className="mt-3 py-2 bg-muted/50 rounded-md overflow-hidden"
     >
-      <div className={`whitespace-nowrap ${shouldScroll ? 'animate-marquee' : 'px-4 text-center'}`}>
-        <span ref={textRef} className="text-sm text-muted-foreground">
+      <div 
+        className="inline-flex whitespace-nowrap animate-marquee"
+        style={{ animationDuration: `${animationDuration}s` }}
+      >
+        <span ref={textRef} className="text-sm text-muted-foreground px-4">
           💬 {text}
         </span>
-        {shouldScroll && (
-          <span className="text-sm text-muted-foreground px-8">
-            💬 {text}
-          </span>
-        )}
+        <span className="text-sm text-muted-foreground px-4">
+          💬 {text}
+        </span>
       </div>
     </div>
   );
