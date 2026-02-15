@@ -29,10 +29,6 @@ interface AppState {
   isAuthenticated: boolean;
   isAdmin: boolean;
   
-  // Time travel
-  asOf: Date | null;
-  setAsOf: (date: Date | null) => void;
-  
   // Cached data
   members: Member[];
   
@@ -84,8 +80,6 @@ export const useAppStore = create<AppState>()(
       currentPinCode: null,
       isAuthenticated: false,
       isAdmin: false,
-      asOf: null,
-      setAsOf: (date) => set({ asOf: date }),
       members: [],
 
       createHousehold: async (name, pinCode, ownerNickname = 'Admin', memberPinCode) => {
@@ -284,29 +278,25 @@ export const useAppStore = create<AppState>()(
       fetchChoreHistory: (householdId, choreId) =>
         choresApi.fetchChoreHistory(householdId, choreId),
 
-      fetchMyChores: (householdId, memberId) => {
-        const { asOf } = get();
-        return choresApi.fetchMyChores(householdId, memberId, asOf ?? undefined);
-      },
+      fetchMyChores: (householdId, memberId) =>
+        choresApi.fetchMyChores(householdId, memberId),
 
       acknowledgeMissed: (householdId, choreId, memberId, period) =>
         choresApi.acknowledgeMissed(householdId, choreId, memberId, period),
 
       fetchOverdueChores: async (householdId) => {
-        const { currentPinCode, isAdmin, asOf } = get();
+        const { currentPinCode, isAdmin } = get();
         if (!isAdmin || !currentPinCode) return [];
-        return choresApi.fetchOverdueChores(householdId, parseInt(currentPinCode, 10), asOf ?? undefined);
+        return choresApi.fetchOverdueChores(householdId, parseInt(currentPinCode, 10));
       },
 
-      fetchActivityTimeline: (householdId, limit) => {
-        const { asOf } = get();
-        return activityApi.fetchActivityTimeline(householdId, limit, asOf ?? undefined);
-      },
+      fetchActivityTimeline: (householdId, limit) =>
+        activityApi.fetchActivityTimeline(householdId, limit),
 
       fetchTeamOverview: async (householdId) => {
-        const { currentPinCode, isAdmin, asOf } = get();
+        const { currentPinCode, isAdmin } = get();
         if (!isAdmin || !currentPinCode) return [];
-        return activityApi.fetchTeamOverview(householdId, parseInt(currentPinCode, 10), asOf ?? undefined);
+        return activityApi.fetchTeamOverview(householdId, parseInt(currentPinCode, 10));
       },
     }),
     {

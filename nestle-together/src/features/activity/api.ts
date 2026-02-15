@@ -6,14 +6,10 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7422';
 
 export async function fetchActivityTimeline(
   householdId: string, 
-  limit = 20,
-  asOf?: Date
+  limit = 20
 ): Promise<Activity[]> {
-  const params = new URLSearchParams({ limit: limit.toString() });
-  if (asOf) params.set('asOf', asOf.toISOString());
-  
   const response = await fetch(
-    `${API_BASE_URL}/api/households/${householdId}/activity?${params}`
+    `${API_BASE_URL}/api/households/${householdId}/activity?limit=${limit}`
   );
   
   if (!response.ok) {
@@ -35,11 +31,9 @@ export async function fetchActivityTimeline(
 
 export async function fetchTeamOverview(
   householdId: string,
-  pinCode: number,
-  asOf?: Date
+  pinCode: number
 ): Promise<MemberOverview[]> {
-  const params = asOf ? `?asOf=${asOf.toISOString()}` : '';
-  const response = await fetch(`${API_BASE_URL}/api/households/${householdId}/team${params}`, {
+  const response = await fetch(`${API_BASE_URL}/api/households/${householdId}/team`, {
     headers: {
       'X-Pin-Code': pinCode.toString(),
     },
