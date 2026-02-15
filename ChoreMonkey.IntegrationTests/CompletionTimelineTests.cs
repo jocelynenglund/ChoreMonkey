@@ -26,8 +26,17 @@ public class CompletionTimelineTests(ApiFixture fixture) : IClassFixture<ApiFixt
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var result = await response.Content.ReadFromJsonAsync<dynamic>();
-        var completions = result!.GetProperty("completions");
-        Assert.Equal(0, completions.GetArrayLength());
+        var activities = result!.GetProperty("activities");
+        
+        // New household will have "member_joined" activity
+        // But no completions, which is what we're testing
+        var completionCount = 0;
+        for (int i = 0; i < activities.GetArrayLength(); i++)
+        {
+            if (activities[i].GetProperty("type").GetString() == "completion")
+                completionCount++;
+        }
+        Assert.Equal(0, completionCount);
     }
 
     [Fact]
@@ -79,12 +88,21 @@ public class CompletionTimelineTests(ApiFixture fixture) : IClassFixture<ApiFixt
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var result = await response.Content.ReadFromJsonAsync<dynamic>();
-        var completions = result!.GetProperty("completions");
-        Assert.Equal(2, completions.GetArrayLength());
+        var activities = result!.GetProperty("activities");
         
-        // Most recent should be first (Chore B)
-        Assert.Equal("Chore B", completions[0].GetProperty("choreName").GetString());
-        Assert.Equal("Dad", completions[0].GetProperty("completedByNickname").GetString());
+        // Filter to just completions
+        var completions = new List<System.Text.Json.JsonElement>();
+        for (int i = 0; i < activities.GetArrayLength(); i++)
+        {
+            if (activities[i].GetProperty("type").GetString() == "completion")
+                completions.Add(activities[i]);
+        }
+        
+        Assert.Equal(2, completions.Count);
+        
+        // Most recent should be first (Chore B) - check description contains names
+        Assert.Contains("Chore B", completions[0].GetProperty("description").GetString());
+        Assert.Contains("Dad", completions[0].GetProperty("description").GetString());
     }
 
     [Fact]
@@ -130,7 +148,9 @@ public class CompletionTimelineTests(ApiFixture fixture) : IClassFixture<ApiFixt
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var result = await response.Content.ReadFromJsonAsync<dynamic>();
-        var completions = result!.GetProperty("completions");
-        Assert.Equal(3, completions.GetArrayLength());
+        var activities = result!.GetProperty("activities");
+        
+        // Should have exactly 3 activities total (limit=3)
+        Assert.Equal(3, activities.GetArrayLength());
     }
 }

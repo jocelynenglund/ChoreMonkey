@@ -1,14 +1,21 @@
 import { useEffect, useState } from 'react';
-import { Clock, CheckCircle2 } from 'lucide-react';
-import { MemberAvatar } from './MemberAvatar';
+import { 
+  Clock, 
+  CheckCircle2, 
+  Users, 
+  UserPlus, 
+  PenLine, 
+  MessageSquare,
+  Plus 
+} from 'lucide-react';
 import { useHouseholdStore } from '@/stores/householdStore';
 
-interface CompletionEntry {
-  choreId: string;
-  choreName: string;
-  completedBy: string;
-  completedByNickname: string;
-  completedAt: string;
+interface ActivityEntry {
+  type: string;       // "completion", "assignment", "nickname_change", "status_change", "member_joined", "chore_created"
+  description: string;
+  timestamp: string;
+  choreId?: string;
+  memberId?: string;
 }
 
 interface CompletionTimelineProps {
@@ -31,34 +38,47 @@ function formatTimeAgo(dateString: string): string {
   return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
 }
 
+function getActivityIcon(type: string) {
+  switch (type) {
+    case 'completion':
+      return <CheckCircle2 className="h-4 w-4 text-green-500" />;
+    case 'assignment':
+      return <Users className="h-4 w-4 text-blue-500" />;
+    case 'nickname_change':
+      return <PenLine className="h-4 w-4 text-purple-500" />;
+    case 'status_change':
+      return <MessageSquare className="h-4 w-4 text-orange-500" />;
+    case 'member_joined':
+      return <UserPlus className="h-4 w-4 text-teal-500" />;
+    case 'chore_created':
+      return <Plus className="h-4 w-4 text-primary" />;
+    default:
+      return <Clock className="h-4 w-4 text-muted-foreground" />;
+  }
+}
+
 export function CompletionTimeline({ householdId }: CompletionTimelineProps) {
-  const [completions, setCompletions] = useState<CompletionEntry[]>([]);
+  const [activities, setActivities] = useState<ActivityEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { members } = useHouseholdStore();
 
   useEffect(() => {
-    const fetchCompletions = async () => {
+    const fetchActivities = async () => {
       setIsLoading(true);
       try {
         const apiUrl = import.meta.env.VITE_API_URL || 'https://localhost:7422';
         const response = await fetch(`${apiUrl}/api/households/${householdId}/completions?days=7&limit=20`);
         if (response.ok) {
           const data = await response.json();
-          setCompletions(data.completions ?? []);
+          setActivities(data.activities ?? []);
         }
       } catch (error) {
-        console.error('Failed to fetch completions', error);
+        console.error('Failed to fetch activities', error);
       }
       setIsLoading(false);
     };
 
-    fetchCompletions();
+    fetchActivities();
   }, [householdId]);
-
-  const getMemberColor = (memberId: string) => {
-    const member = members.find((m) => m.id === memberId);
-    return member?.avatarColor || 'hsl(150 50% 50%)';
-  };
 
   if (isLoading) {
     return (
@@ -68,7 +88,7 @@ export function CompletionTimeline({ householdId }: CompletionTimelineProps) {
     );
   }
 
-  if (completions.length === 0) {
+  if (activities.length === 0) {
     return (
       <div className="rounded-lg border bg-card p-4 flex items-center gap-2">
         <Clock className="h-5 w-5 text-muted-foreground" />
@@ -86,23 +106,16 @@ export function CompletionTimeline({ householdId }: CompletionTimelineProps) {
         </h3>
       </div>
       <div className="divide-y max-h-80 overflow-y-auto">
-        {completions.map((completion, idx) => (
+        {activities.map((activity, idx) => (
           <div key={idx} className="p-3 flex items-center gap-3">
-            <MemberAvatar
-              nickname={completion.completedByNickname}
-              color={getMemberColor(completion.completedBy)}
-              size="sm"
-            />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm">
-                <span className="font-medium">{completion.completedByNickname}</span>
-                <span className="text-muted-foreground"> completed </span>
-                <span className="font-medium">{completion.choreName}</span>
-              </p>
+            <div className="flex-shrink-0">
+              {getActivityIcon(activity.type)}
             </div>
-            <div className="flex items-center gap-1 text-xs text-muted-foreground flex-shrink-0">
-              <CheckCircle2 className="h-3 w-3 text-green-500" />
-              {formatTimeAgo(completion.completedAt)}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm">{activity.description}</p>
+            </div>
+            <div className="text-xs text-muted-foreground flex-shrink-0">
+              {formatTimeAgo(activity.timestamp)}
             </div>
           </div>
         ))}
