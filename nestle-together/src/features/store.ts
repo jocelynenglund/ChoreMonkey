@@ -4,18 +4,13 @@ import { persist } from 'zustand/middleware';
 import * as householdApi from './household/api';
 import * as membersApi from './members/api';
 import * as choresApi from './chores/api';
-import * as myChoresApi from './my-chores/api';
-import * as overdueApi from './overdue/api';
 import * as activityApi from './activity/api';
-import * as teamOverviewApi from './team-overview/api';
+import * as invitesApi from './invites/api';
 
 import type { Household } from './household/types';
 import type { Member, Invite } from './members/types';
-import type { Chore, ChoreFrequency, ChoreCompletion } from './chores/types';
-import type { MyChoresResponse } from './my-chores/types';
-import type { MemberOverdue } from './overdue/types';
-import type { Activity } from './activity/types';
-import type { MemberOverview } from './team-overview/types';
+import type { Chore, ChoreFrequency, ChoreCompletion, MyChoresResponse, MemberOverdue } from './chores/types';
+import type { Activity, MemberOverview } from './activity/types';
 
 const AVATAR_COLORS = [
   'hsl(150 50% 50%)',
@@ -118,6 +113,7 @@ export const useAppStore = create<AppState>()(
           set({
             currentHouseholdId: data.householdId,
             currentMemberId: data.memberId,
+            currentPinCode: pinCode,
             isAuthenticated: true,
             isAdmin: true,
             members: [member],
@@ -283,15 +279,15 @@ export const useAppStore = create<AppState>()(
         choresApi.fetchChoreHistory(householdId, choreId),
 
       fetchMyChores: (householdId, memberId) =>
-        myChoresApi.fetchMyChores(householdId, memberId),
+        choresApi.fetchMyChores(householdId, memberId),
 
       acknowledgeMissed: (householdId, choreId, memberId, period) =>
-        myChoresApi.acknowledgeMissed(householdId, choreId, memberId, period),
+        choresApi.acknowledgeMissed(householdId, choreId, memberId, period),
 
       fetchOverdueChores: async (householdId) => {
         const { currentPinCode, isAdmin } = get();
         if (!isAdmin || !currentPinCode) return [];
-        return overdueApi.fetchOverdueChores(householdId, parseInt(currentPinCode, 10));
+        return choresApi.fetchOverdueChores(householdId, parseInt(currentPinCode, 10));
       },
 
       fetchActivityTimeline: (householdId, limit) =>
@@ -300,7 +296,7 @@ export const useAppStore = create<AppState>()(
       fetchTeamOverview: async (householdId) => {
         const { currentPinCode, isAdmin } = get();
         if (!isAdmin || !currentPinCode) return [];
-        return teamOverviewApi.fetchTeamOverview(householdId, parseInt(currentPinCode, 10));
+        return activityApi.fetchTeamOverview(householdId, parseInt(currentPinCode, 10));
       },
     }),
     {

@@ -1,3 +1,4 @@
+// Core chore types
 export interface ChoreFrequency {
   type: 'daily' | 'weekly' | 'interval' | 'once';
   days?: string[];
@@ -44,4 +45,47 @@ export interface AssignChoreRequest {
   memberIds?: string[];
   assignToAll?: boolean;
   assignedByMemberId?: string;
+}
+
+// My Chores types (personal view)
+export interface MyPendingChore {
+  choreId: string;
+  displayName: string;
+  frequencyType?: string;
+  dueDescription?: string;
+}
+
+export interface MyOverdueChore {
+  choreId: string;
+  displayName: string;
+  frequencyType?: string;
+  overduePeriod: string;
+  periodKey: string;
+}
+
+export interface MyCompletedChore {
+  choreId: string;
+  displayName: string;
+  completedAt: Date;
+}
+
+export interface MyChoresResponse {
+  pending: MyPendingChore[];
+  overdue: MyOverdueChore[];
+  completed: MyCompletedChore[];
+}
+
+// Overdue types (admin view)
+export interface OverdueChore {
+  choreId: string;
+  displayName: string;
+  overduePeriod: string;
+  lastCompleted?: Date;
+}
+
+export interface MemberOverdue {
+  memberId: string;
+  nickname: string;
+  overdueCount: number;
+  chores: OverdueChore[];
 }

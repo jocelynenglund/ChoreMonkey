@@ -1,6 +1,114 @@
 {
-  "generated": "2026-02-15T15:50:50.493Z",
+  "generated": "2026-02-15T17:12:10.527Z",
   "commits": [
+    {
+      "hash": "c0561bcde165a40f7c9d2d635ea8bc1744c6a2ce",
+      "shortHash": "c0561bc",
+      "message": "test: Add coverage for MemberProfile, AcknowledgeMissed, and MemberPin endpoints",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Add coverage for MemberProfile, AcknowledgeMissed, and MemberPin endpoints"
+    },
+    {
+      "hash": "e0170ca903b4a3957d15777e3b9266d6f14bb5ed",
+      "shortHash": "e0170ca",
+      "message": "feat: Pulse only status ring (not avatar) + add clear status button",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Pulse only status ring (not avatar) + add clear status button"
+    },
+    {
+      "hash": "351f975129dc8f5cf05cf0131876a141110715c7",
+      "shortHash": "351f975",
+      "message": "fix: Disable SourceLink version suffix for clean InformationalVersion",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Disable SourceLink version suffix for clean InformationalVersion"
+    },
+    {
+      "hash": "55ed2ed3df905d16d6ebca376b3594d12ebad211",
+      "shortHash": "55ed2ed",
+      "message": "chore: Remove debug logging and fix version override in csproj",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Remove debug logging and fix version override in csproj"
+    },
+    {
+      "hash": "3592ba3915237f36ac5e0592ab62f98e4c052365",
+      "shortHash": "3592ba3",
+      "message": "debug: Add logging to SignalR event publishing",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Debug: Add logging to SignalR event publishing"
+    },
+    {
+      "hash": "c996a4f763159e19f46f251562d2b2dd4f809abb",
+      "shortHash": "c996a4f",
+      "message": "fix: API version parsing for YYYY.MM.DD.N format",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "API version parsing for YYYY.MM.DD.N format"
+    },
+    {
+      "hash": "eceff2ff0a21a8bc3318d29619addfc6d32b4ff9",
+      "shortHash": "eceff2f",
+      "message": "Update deploy.yml",
+      "date": "2026-02-15",
+      "author": "Jocelyn Englund",
+      "type": "update",
+      "displayMessage": "Update deploy.yml"
+    },
+    {
+      "hash": "19fdbf32c6ea9779882fb0b890c9b3615bb1c299",
+      "shortHash": "19fdbf3",
+      "message": "Update deploy-staging.yml",
+      "date": "2026-02-15",
+      "author": "Jocelyn Englund",
+      "type": "update",
+      "displayMessage": "Update deploy-staging.yml"
+    },
+    {
+      "hash": "6ed890908ce4fccf21717f494d4c4d1b118fc449",
+      "shortHash": "6ed8909",
+      "message": "Update deploy.yml",
+      "date": "2026-02-15",
+      "author": "Jocelyn Englund",
+      "type": "update",
+      "displayMessage": "Update deploy.yml"
+    },
+    {
+      "hash": "74eab68a677dbb57fae101412e72acdee256572d",
+      "shortHash": "74eab68",
+      "message": "Update deploy-staging.yml",
+      "date": "2026-02-15",
+      "author": "Jocelyn Englund",
+      "type": "update",
+      "displayMessage": "Update deploy-staging.yml"
+    },
+    {
+      "hash": "f3c82cfeb30087cd3244467e2820d2c16563632e",
+      "shortHash": "f3c82cf",
+      "message": "Update deploy.yml",
+      "date": "2026-02-15",
+      "author": "Jocelyn Englund",
+      "type": "update",
+      "displayMessage": "Update deploy.yml"
+    },
+    {
+      "hash": "df89b964c68d76e700322ea50529eb8742144f49",
+      "shortHash": "df89b96",
+      "message": "feat: Human-readable version format (YYYY.MM.DD.build)",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Human-readable version format (YYYY.MM.DD.build)"
+    },
     {
       "hash": "41db55038198316434f1337033a512b3e9d6fb1b",
       "shortHash": "41db550",
@@ -72,114 +180,6 @@
       "author": "ItsyBOT",
       "type": "update",
       "displayMessage": "Ui: Stack member badges on second row (mobile)"
-    },
-    {
-      "hash": "e747f11bf140b43a18d9e72bdfb9479af1e68b47",
-      "shortHash": "e747f11",
-      "message": "rename: Team Overview → Household Overview",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "update",
-      "displayMessage": "Rename: Team Overview → Household Overview"
-    },
-    {
-      "hash": "9bf01ed4ebe55efaa6f0eaf4d0b93ef20de72729",
-      "shortHash": "9bf01ed",
-      "message": "fix: Simplify marquee - always scroll, duration based on text length",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Simplify marquee - always scroll, duration based on text length"
-    },
-    {
-      "hash": "cba08a737cf142c3b33e97ceecf2df326ed4d48e",
-      "shortHash": "cba08a7",
-      "message": "fix: Marquee refs now always attached for proper measurement",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Marquee refs now always attached for proper measurement"
-    },
-    {
-      "hash": "a853e6b8743e70aab3ff521c7e62b028defbdb44",
-      "shortHash": "a853e6b",
-      "message": "fix: Mobile-friendly ChoreCard layout",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Mobile-friendly ChoreCard layout"
-    },
-    {
-      "hash": "c176cf5ba6e13e47cece7f48dd8d03c6e72f6254",
-      "shortHash": "c176cf5",
-      "message": "fix: Speed up marquee (100px/sec)",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Speed up marquee (100px/sec)"
-    },
-    {
-      "hash": "5ecdb4e602952b7027154220fddcaa87793fa323",
-      "shortHash": "5ecdb4e",
-      "message": "fix: Marquee now scrolls through entire text",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Marquee now scrolls through entire text"
-    },
-    {
-      "hash": "74c407e19fce9c7dc7312a2da8281696f0f34673",
-      "shortHash": "74c407e",
-      "message": "feat: Add ChoreDeleted SignalR handler for real-time updates",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Add ChoreDeleted SignalR handler for real-time updates"
-    },
-    {
-      "hash": "16d185e0dac485c06fbc2b8bf25491b9c345b079",
-      "shortHash": "16d185e",
-      "message": "fix: Refresh activity timeline after chore reassignment",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Refresh activity timeline after chore reassignment"
-    },
-    {
-      "hash": "6696ff34c582d5baf60ef15f0881d6e73b52a42d",
-      "shortHash": "6696ff3",
-      "message": "feat: Add chore reassignment in Team Overview",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Add chore reassignment in Team Overview"
-    },
-    {
-      "hash": "8fbd925b0475a4f78a0b66957f5f140a16ad8d79",
-      "shortHash": "8fbd925",
-      "message": "feat: Team Overview - admin view of all member chores with status",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Team Overview - admin view of all member chores with status"
-    },
-    {
-      "hash": "9cd3b602489c9572c6e74b0695056f40afcc7b64",
-      "shortHash": "9cd3b60",
-      "message": "debug: add console logging for chores API response",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Debug: add console logging for chores API response"
-    },
-    {
-      "hash": "a30590c0c8236e00df44e56ddfa1cd20ff363335",
-      "shortHash": "a30590c",
-      "message": "Update deploy-staging.yml to handle branch input",
-      "date": "2026-02-15",
-      "author": "Jocelyn Englund",
-      "type": "update",
-      "displayMessage": "Update deploy-staging.yml to handle branch input"
     }
   ]
 }

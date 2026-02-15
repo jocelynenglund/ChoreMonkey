@@ -1,4 +1,6 @@
-import type { Member, JoinHouseholdRequest, JoinHouseholdResponse, GenerateInviteResponse } from './types';
+import type { Member, JoinHouseholdRequest, JoinHouseholdResponse } from './types';
+// Re-export generateInvite from invites for backward compatibility
+export { generateInvite } from '../invites/api';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7422';
 
@@ -44,18 +46,6 @@ export async function joinHousehold(
 
   if (!response.ok) {
     throw new Error('Failed to join household');
-  }
-
-  return response.json();
-}
-
-export async function generateInvite(householdId: string): Promise<GenerateInviteResponse> {
-  const response = await fetch(`${API_BASE_URL}/api/households/${householdId}/invite`, {
-    method: 'POST',
-  });
-
-  if (!response.ok) {
-    throw new Error('Failed to generate invite');
   }
 
   return response.json();

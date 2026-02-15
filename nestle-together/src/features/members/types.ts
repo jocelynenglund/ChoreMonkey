@@ -26,8 +26,5 @@ export interface Invite {
   expiresAt: Date;
 }
 
-export interface GenerateInviteResponse {
-  householdId: string;
-  inviteId: string;
-  link: string;
-}
+// Re-export from invites for backward compatibility
+export type { GenerateInviteResponse } from '../invites/types';

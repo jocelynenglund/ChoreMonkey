@@ -17,7 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { CheckCircle2, AlertTriangle, Clock, Users, Settings2 } from 'lucide-react';
 import { useAppStore } from '@/features/store';
-import type { MemberOverview, ChoreStatus } from '@/features/team-overview/types';
+import type { MemberOverview, ChoreStatus } from '@/features/activity/types';
 import { MemberAvatar } from './MemberAvatar';
 
 interface TeamOverviewAccordionProps {

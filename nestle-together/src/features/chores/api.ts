@@ -1,6 +1,17 @@
-import type { Chore, ChoreCompletion, AddChoreRequest, AssignChoreRequest } from './types';
+import type { 
+  Chore, 
+  ChoreCompletion, 
+  AddChoreRequest, 
+  AssignChoreRequest,
+  MyChoresResponse,
+  MemberOverdue,
+  ChoreFrequency,
+  MemberCompletion,
+} from './types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7422';
+
+// ============ Chore List ============
 
 export async function fetchChores(householdId: string): Promise<Chore[]> {
   const response = await fetch(`${API_BASE_URL}/api/households/${householdId}/chores`);
@@ -13,7 +24,7 @@ export async function fetchChores(householdId: string): Promise<Chore[]> {
   const choreArray = Array.isArray(data) ? data : (data.chores ?? []);
   
   return choreArray.map((c: Record<string, unknown>) => {
-    const frequency = c.frequency as import('./types').ChoreFrequency | undefined;
+    const frequency = c.frequency as ChoreFrequency | undefined;
     const lastCompletedAt = c.lastCompletedAt ? new Date(c.lastCompletedAt as string) : undefined;
     // One-time chores are "completed" once they have any completion
     const isOneTime = !frequency || frequency.type === 'once';
@@ -31,11 +42,13 @@ export async function fetchChores(householdId: string): Promise<Chore[]> {
       frequency,
       lastCompletedAt,
       lastCompletedBy: c.lastCompletedBy as string | undefined,
-      memberCompletions: c.memberCompletions as import('./types').MemberCompletion[] | undefined,
+      memberCompletions: c.memberCompletions as MemberCompletion[] | undefined,
       isOptional: c.isOptional as boolean | undefined,
     };
   });
 }
+
+// ============ Chore Commands ============
 
 export async function addChore(householdId: string, request: AddChoreRequest): Promise<void> {
   const response = await fetch(`${API_BASE_URL}/api/households/${householdId}/chores`, {
@@ -112,6 +125,26 @@ export async function deleteChore(
   return response.ok;
 }
 
+export async function acknowledgeMissed(
+  householdId: string,
+  choreId: string,
+  memberId: string,
+  period: string
+): Promise<boolean> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/households/${householdId}/chores/${choreId}/acknowledge-missed`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ memberId, period }),
+    }
+  );
+
+  return response.ok;
+}
+
+// ============ Chore Queries ============
+
 export async function fetchChoreHistory(
   householdId: string, 
   choreId: string
@@ -129,4 +162,46 @@ export async function fetchChoreHistory(
     completedBy: c.completedByNickname || c.completedBy,
     completedAt: new Date(c.completedAt as string),
   }));
+}
+
+export async function fetchMyChores(
+  householdId: string, 
+  memberId: string
+): Promise<MyChoresResponse | null> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/households/${householdId}/my-chores?memberId=${memberId}`
+  );
+  
+  if (!response.ok) {
+    return null;
+  }
+
+  const data = await response.json();
+  return {
+    pending: data.pending || [],
+    overdue: data.overdue || [],
+    completed: (data.completed || []).map((c: Record<string, unknown>) => ({
+      ...c,
+      completedAt: new Date(c.completedAt as string),
+    })),
+  };
+}
+
+export async function fetchOverdueChores(
+  householdId: string, 
+  pinCode: number
+): Promise<MemberOverdue[]> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/households/${householdId}/overdue`,
+    {
+      headers: { 'X-Pin-Code': pinCode.toString() },
+    }
+  );
+  
+  if (!response.ok) {
+    return [];
+  }
+
+  const data = await response.json();
+  return data.memberOverdue || [];
 }
