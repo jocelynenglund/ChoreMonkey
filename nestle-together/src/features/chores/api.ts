@@ -166,10 +166,14 @@ export async function fetchChoreHistory(
 
 export async function fetchMyChores(
   householdId: string, 
-  memberId: string
+  memberId: string,
+  asOf?: Date
 ): Promise<MyChoresResponse | null> {
+  const params = new URLSearchParams({ memberId });
+  if (asOf) params.set('asOf', asOf.toISOString());
+  
   const response = await fetch(
-    `${API_BASE_URL}/api/households/${householdId}/my-chores?memberId=${memberId}`
+    `${API_BASE_URL}/api/households/${householdId}/my-chores?${params}`
   );
   
   if (!response.ok) {
@@ -189,10 +193,12 @@ export async function fetchMyChores(
 
 export async function fetchOverdueChores(
   householdId: string, 
-  pinCode: number
+  pinCode: number,
+  asOf?: Date
 ): Promise<MemberOverdue[]> {
+  const params = asOf ? `?asOf=${asOf.toISOString()}` : '';
   const response = await fetch(
-    `${API_BASE_URL}/api/households/${householdId}/overdue`,
+    `${API_BASE_URL}/api/households/${householdId}/overdue${params}`,
     {
       headers: { 'X-Pin-Code': pinCode.toString() },
     }
