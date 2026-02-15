@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { User, Pencil } from 'lucide-react';
+import { User, Pencil, X } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -102,9 +102,22 @@ export function ProfileDialog({
 
           {/* Status */}
           <div className="space-y-2">
-            <Label htmlFor="status" className="flex items-center gap-2">
-              💬 Status
-            </Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="status" className="flex items-center gap-2">
+                💬 Status
+              </Label>
+              {status && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setStatus('')}
+                  className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive"
+                >
+                  <X className="w-3 h-3 mr-1" />
+                  Clear
+                </Button>
+              )}
+            </div>
             <textarea
               id="status"
               value={status}

@@ -281,7 +281,10 @@ export default function HouseholdDashboard() {
                     hoveredMemberStatus === member.status ? null : member.status
                   )}
                 >
-                  <div className={member.status ? 'ring-2 ring-primary/50 ring-offset-2 rounded-full animate-pulse' : ''}>
+                  <div className="relative">
+                    {member.status && (
+                      <span className="absolute inset-0 rounded-full ring-2 ring-primary/50 ring-offset-2 animate-pulse" />
+                    )}
                     <MemberAvatar
                       nickname={member.nickname}
                       color={member.avatarColor}
