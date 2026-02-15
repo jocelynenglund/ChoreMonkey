@@ -1,6 +1,15 @@
 {
-  "generated": "2026-02-15T15:34:40.146Z",
+  "generated": "2026-02-15T15:41:00.672Z",
   "commits": [
+    {
+      "hash": "7514996e61d8054a046dea3a373e43f991ddc09e",
+      "shortHash": "7514996",
+      "message": "fix: Send request body with removedByMemberId in removeMember API",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Send request body with removedByMemberId in removeMember API"
+    },
     {
       "hash": "d8e222181e64e8d1d555acff9402bf3cd91cac9e",
       "shortHash": "d8e2221",
@@ -171,15 +180,6 @@
       "author": "ItsyBOT",
       "type": "fix",
       "displayMessage": "Filter deleted chores from overdue list"
-    },
-    {
-      "hash": "31eacd9f47940ec5896ea1177b7ac86b1da3da9e",
-      "shortHash": "31eacd9",
-      "message": "fix: correct chore field mapping (assignedTo, assignedToAll, completed logic)",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Correct chore field mapping (assignedTo, assignedToAll, completed logic)"
     }
   ]
 }

@@ -332,6 +332,7 @@ export default function HouseholdDashboard() {
           <TeamOverviewAccordion 
             householdId={household.id} 
             onAssignmentChange={() => setRefreshKey(k => k + 1)}
+            refreshKey={refreshKey}
           />
         </div>
 

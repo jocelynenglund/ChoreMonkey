@@ -23,6 +23,7 @@ import { MemberAvatar } from './MemberAvatar';
 interface TeamOverviewAccordionProps {
   householdId: string;
   onAssignmentChange?: () => void;
+  refreshKey?: number;
 }
 
 interface EditingChore {
@@ -31,7 +32,7 @@ interface EditingChore {
   currentAssignees: string[];
 }
 
-export function TeamOverviewAccordion({ householdId, onAssignmentChange }: TeamOverviewAccordionProps) {
+export function TeamOverviewAccordion({ householdId, onAssignmentChange, refreshKey }: TeamOverviewAccordionProps) {
   const [teamData, setTeamData] = useState<MemberOverview[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [editingChore, setEditingChore] = useState<EditingChore | null>(null);
@@ -55,7 +56,7 @@ export function TeamOverviewAccordion({ householdId, onAssignmentChange }: TeamO
 
   useEffect(() => {
     loadTeam();
-  }, [householdId, fetchTeamOverview]);
+  }, [householdId, fetchTeamOverview, refreshKey]);
 
   const handleEditChore = (chore: ChoreStatus) => {
     // Find all members currently assigned to this chore
