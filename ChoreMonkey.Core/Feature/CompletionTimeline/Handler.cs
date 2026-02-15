@@ -17,7 +17,19 @@ public record CompletionEntry(
     DateTimeOffset CompletedAt
 );
 
-public record GetCompletionTimelineResponse(List<CompletionEntry> Completions);
+public record ActivityEntry(
+    string Type,           // "completion" | "member_joined"
+    DateTimeOffset Timestamp,
+    Guid? ChoreId,
+    string? ChoreName,
+    Guid MemberId,
+    string MemberNickname
+);
+
+public record GetCompletionTimelineResponse(
+    List<CompletionEntry> Completions,
+    List<ActivityEntry>? Activities = null
+);
 
 internal class Handler(IEventStore store)
 {
@@ -58,7 +70,38 @@ internal class Handler(IEventStore store)
             ))
             .ToList();
 
-        return new GetCompletionTimelineResponse(completions);
+        // Build unified activity feed (completions + joins)
+        var completionActivities = choreEvents
+            .OfType<ChoreCompleted>()
+            .Where(c => c.CompletedAt >= cutoff)
+            .Select(c => new ActivityEntry(
+                "completion",
+                c.CompletedAt,
+                c.ChoreId,
+                choreNames.GetValueOrDefault(c.ChoreId, "Unknown"),
+                c.CompletedByMemberId,
+                memberNicknames.GetValueOrDefault(c.CompletedByMemberId, "Unknown")
+            ));
+
+        var joinActivities = householdEvents
+            .OfType<MemberJoinedHousehold>()
+            .Where(m => DateTime.TryParse(m.TimestampUtc, out var ts) && ts >= cutoff)
+            .Select(m => new ActivityEntry(
+                "member_joined",
+                DateTime.TryParse(m.TimestampUtc, out var ts) ? ts : DateTime.UtcNow,
+                null,
+                null,
+                m.MemberId,
+                m.Nickname
+            ));
+
+        var activities = completionActivities
+            .Concat(joinActivities)
+            .OrderByDescending(a => a.Timestamp)
+            .Take(maxItems)
+            .ToList();
+
+        return new GetCompletionTimelineResponse(completions, activities);
     }
 }
 
