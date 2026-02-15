@@ -1,6 +1,15 @@
 {
-  "generated": "2026-02-15T14:58:48.708Z",
+  "generated": "2026-02-15T15:02:52.253Z",
   "commits": [
+    {
+      "hash": "cba08a737cf142c3b33e97ceecf2df326ed4d48e",
+      "shortHash": "cba08a7",
+      "message": "fix: Marquee refs now always attached for proper measurement",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Marquee refs now always attached for proper measurement"
+    },
     {
       "hash": "a853e6b8743e70aab3ff521c7e62b028defbdb44",
       "shortHash": "a853e6b",
@@ -171,15 +180,6 @@
       "author": "ItsyBOT",
       "type": "fix",
       "displayMessage": "Update overdue chores to use current nicknames"
-    },
-    {
-      "hash": "3bbb86a1e8242de414dea9dc119cf3127db6a186",
-      "shortHash": "3bbb86a",
-      "message": "feat: add member_removed to activity timeline",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Add member_removed to activity timeline"
     }
   ]
 }

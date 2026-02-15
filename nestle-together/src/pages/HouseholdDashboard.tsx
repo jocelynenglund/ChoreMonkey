@@ -4,53 +4,23 @@ import { LogOut, ClipboardList } from 'lucide-react';
 import { useHouseholdRealtime } from '@/hooks/useHouseholdRealtime';
 import { ConnectionStatus } from '@/components/ConnectionStatus';
 
-// Smart marquee that only scrolls when text overflows
+// Marquee that scrolls long text
 function StatusMarquee({ text }: { text: string }) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const textRef = useRef<HTMLSpanElement>(null);
-  const [shouldScroll, setShouldScroll] = useState(false);
-  const [animationDuration, setAnimationDuration] = useState(8);
-
-  useEffect(() => {
-    const measure = () => {
-      if (containerRef.current && textRef.current) {
-        const containerWidth = containerRef.current.offsetWidth;
-        const textWidth = textRef.current.scrollWidth;
-        const needsScroll = textWidth > containerWidth - 16;
-        setShouldScroll(needsScroll);
-        // Adjust speed based on text length (roughly 100px per second)
-        if (needsScroll) {
-          setAnimationDuration(Math.max(4, textWidth / 100));
-        }
-      }
-    };
-    // Measure after render
-    requestAnimationFrame(() => {
-      measure();
-      // And again after a short delay for fonts to load
-      setTimeout(measure, 200);
-    });
-    window.addEventListener('resize', measure);
-    return () => window.removeEventListener('resize', measure);
-  }, [text]);
+  // Calculate duration based on text length (roughly 80px per second)
+  const duration = Math.max(6, text.length * 0.12);
 
   return (
-    <div 
-      ref={containerRef}
-      className="mt-3 py-2 bg-muted/50 rounded-md overflow-hidden"
-    >
+    <div className="mt-3 py-2 bg-muted/50 rounded-md overflow-hidden">
       <div 
-        className={shouldScroll ? "inline-flex whitespace-nowrap animate-marquee" : "px-4 text-center"}
-        style={shouldScroll ? { animationDuration: `${animationDuration}s` } : undefined}
+        className="inline-flex whitespace-nowrap animate-marquee"
+        style={{ animationDuration: `${duration}s` }}
       >
-        <span ref={textRef} className={`text-sm text-muted-foreground ${shouldScroll ? 'px-4' : ''}`}>
+        <span className="text-sm text-muted-foreground px-4">
           💬 {text}
         </span>
-        {shouldScroll && (
-          <span className="text-sm text-muted-foreground px-4">
-            💬 {text}
-          </span>
-        )}
+        <span className="text-sm text-muted-foreground px-4">
+          💬 {text}
+        </span>
       </div>
     </div>
   );
