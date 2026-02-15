@@ -1,16 +1,18 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Clock, CheckCircle2, UserPlus } from 'lucide-react';
+import { Clock, CheckCircle2, UserPlus, UserCheck } from 'lucide-react';
 import { MemberAvatar } from './MemberAvatar';
 import { useHouseholdStore } from '@/stores/householdStore';
 import { householdConnection } from '@/lib/signalr';
 
 interface ActivityEntry {
-  type: 'completion' | 'member_joined';
+  type: 'completion' | 'member_joined' | 'chore_assigned';
   timestamp: string;
   choreId?: string;
   choreName?: string;
-  memberId: string;
-  memberNickname: string;
+  memberId?: string;
+  memberNickname?: string;
+  assignedToNicknames?: string[];
+  assignedToAll?: boolean;
 }
 
 interface CompletionTimelineProps {
@@ -75,7 +77,7 @@ export function CompletionTimeline({ householdId, refreshKey = 0 }: CompletionTi
   // Subscribe to real-time updates
   useEffect(() => {
     const unsubscribe = householdConnection.subscribe((event) => {
-      if (event.type === 'ChoreCompleted' || event.type === 'MemberJoined') {
+      if (event.type === 'ChoreCompleted' || event.type === 'MemberJoined' || event.type === 'ChoreAssigned') {
         fetchActivities();
       }
     });
@@ -115,11 +117,17 @@ export function CompletionTimeline({ householdId, refreshKey = 0 }: CompletionTi
       <div className="divide-y max-h-80 overflow-y-auto">
         {activities.map((activity, idx) => (
           <div key={idx} className="p-3 flex items-center gap-3">
-            <MemberAvatar
-              nickname={activity.memberNickname}
-              color={getMemberColor(activity.memberId)}
-              size="sm"
-            />
+            {activity.type === 'chore_assigned' ? (
+              <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
+                <UserCheck className="h-4 w-4 text-purple-500" />
+              </div>
+            ) : (
+              <MemberAvatar
+                nickname={activity.memberNickname || '?'}
+                color={getMemberColor(activity.memberId || '')}
+                size="sm"
+              />
+            )}
             <div className="flex-1 min-w-0">
               {activity.type === 'completion' ? (
                 <p className="text-sm">
@@ -127,18 +135,30 @@ export function CompletionTimeline({ householdId, refreshKey = 0 }: CompletionTi
                   <span className="text-muted-foreground"> completed </span>
                   <span className="font-medium">{activity.choreName}</span>
                 </p>
-              ) : (
+              ) : activity.type === 'member_joined' ? (
                 <p className="text-sm">
                   <span className="font-medium">{activity.memberNickname}</span>
                   <span className="text-muted-foreground"> joined the household</span>
+                </p>
+              ) : (
+                <p className="text-sm">
+                  <span className="font-medium">{activity.choreName}</span>
+                  <span className="text-muted-foreground"> assigned to </span>
+                  <span className="font-medium">
+                    {activity.assignedToAll 
+                      ? 'everyone' 
+                      : activity.assignedToNicknames?.join(', ') || 'unknown'}
+                  </span>
                 </p>
               )}
             </div>
             <div className="flex items-center gap-1 text-xs text-muted-foreground flex-shrink-0">
               {activity.type === 'completion' ? (
                 <CheckCircle2 className="h-3 w-3 text-green-500" />
-              ) : (
+              ) : activity.type === 'member_joined' ? (
                 <UserPlus className="h-3 w-3 text-blue-500" />
+              ) : (
+                <UserCheck className="h-3 w-3 text-purple-500" />
               )}
               {formatTimeAgo(activity.timestamp)}
             </div>

@@ -18,12 +18,14 @@ public record CompletionEntry(
 );
 
 public record ActivityEntry(
-    string Type,           // "completion" | "member_joined"
+    string Type,           // "completion" | "member_joined" | "chore_assigned"
     DateTimeOffset Timestamp,
     Guid? ChoreId,
     string? ChoreName,
-    Guid MemberId,
-    string MemberNickname
+    Guid? MemberId,
+    string? MemberNickname,
+    string[]? AssignedToNicknames = null,  // For assignments
+    bool? AssignedToAll = null
 );
 
 public record GetCompletionTimelineResponse(
@@ -95,8 +97,31 @@ internal class Handler(IEventStore store)
                 m.Nickname
             ));
 
+        var assignmentActivities = choreEvents
+            .OfType<ChoreAssigned>()
+            .Where(a => DateTime.TryParse(a.TimestampUtc, out var ts) && ts >= cutoff)
+            .Select(a => {
+                var assignedNicknames = a.AssignToAll 
+                    ? new[] { "everyone" }
+                    : a.AssignedToMemberIds?
+                        .Select(id => memberNicknames.GetValueOrDefault(id, "Unknown"))
+                        .ToArray() ?? Array.Empty<string>();
+                
+                return new ActivityEntry(
+                    "chore_assigned",
+                    DateTime.TryParse(a.TimestampUtc, out var ts) ? ts : DateTime.UtcNow,
+                    a.ChoreId,
+                    choreNames.GetValueOrDefault(a.ChoreId, "Unknown"),
+                    null,
+                    null,
+                    assignedNicknames,
+                    a.AssignToAll
+                );
+            });
+
         var activities = completionActivities
             .Concat(joinActivities)
+            .Concat(assignmentActivities)
             .OrderByDescending(a => a.Timestamp)
             .Take(maxItems)
             .ToList();
