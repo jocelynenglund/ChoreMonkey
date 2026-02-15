@@ -8,7 +8,8 @@ export type HouseholdEvent =
   | { type: 'ChoreAssigned'; choreId: string; householdId: string; assignedToMemberIds: string[]; assignToAll: boolean }
   | { type: 'ChoreDeleted'; choreId: string; householdId: string; deletedByMemberId: string }
   | { type: 'MemberJoined'; memberId: string; householdId: string; nickname: string }
-  | { type: 'MemberNicknameChanged'; memberId: string; householdId: string; oldNickname: string; newNickname: string };
+  | { type: 'MemberNicknameChanged'; memberId: string; householdId: string; oldNickname: string; newNickname: string }
+  | { type: 'MemberStatusChanged'; memberId: string; householdId: string; status: string };
 
 type EventHandler = (event: HouseholdEvent) => void;
 
@@ -93,7 +94,7 @@ class HouseholdConnection {
   private registerEventHandlers(): void {
     if (!this.connection) return;
 
-    const events = ['ChoreCompleted', 'ChoreCreated', 'ChoreAssigned', 'ChoreDeleted', 'MemberJoined', 'MemberNicknameChanged'] as const;
+    const events = ['ChoreCompleted', 'ChoreCreated', 'ChoreAssigned', 'ChoreDeleted', 'MemberJoined', 'MemberNicknameChanged', 'MemberStatusChanged'] as const;
     
     for (const eventType of events) {
       this.connection.on(eventType, (data: Record<string, unknown>) => {

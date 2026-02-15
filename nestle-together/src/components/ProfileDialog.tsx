@@ -18,6 +18,7 @@ interface ProfileDialogProps {
   householdId: string;
   memberId: string;
   currentNickname: string;
+  currentStatus?: string;
   avatarColor: string;
 }
 
@@ -26,31 +27,38 @@ export function ProfileDialog({
   onOpenChange, 
   householdId, 
   memberId, 
-  currentNickname, 
+  currentNickname,
+  currentStatus = '',
   avatarColor 
 }: ProfileDialogProps) {
   const [nickname, setNickname] = useState(currentNickname);
+  const [status, setStatus] = useState(currentStatus);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   
-  const { changeNickname } = useHouseholdStore();
+  const { changeNickname, changeStatus } = useHouseholdStore();
 
   const handleSave = async () => {
-    if (!nickname.trim() || nickname.trim() === currentNickname) {
-      onOpenChange(false);
-      return;
-    }
-
     setIsLoading(true);
     setMessage(null);
     
-    const success = await changeNickname(householdId, memberId, nickname.trim());
+    let success = true;
+    
+    // Update nickname if changed
+    if (nickname.trim() && nickname.trim() !== currentNickname) {
+      success = await changeNickname(householdId, memberId, nickname.trim());
+    }
+    
+    // Update status if changed
+    if (success && status !== currentStatus) {
+      success = await changeStatus(householdId, memberId, status.trim());
+    }
     
     if (success) {
-      setMessage({ type: 'success', text: 'Nickname updated!' });
+      setMessage({ type: 'success', text: 'Profile updated!' });
       setTimeout(() => onOpenChange(false), 1000);
     } else {
-      setMessage({ type: 'error', text: 'Failed to update nickname' });
+      setMessage({ type: 'error', text: 'Failed to update profile' });
     }
     
     setIsLoading(false);
@@ -90,6 +98,24 @@ export function ProfileDialog({
               className="text-center"
               maxLength={20}
             />
+          </div>
+
+          {/* Status */}
+          <div className="space-y-2">
+            <Label htmlFor="status" className="flex items-center gap-2">
+              💬 Status
+            </Label>
+            <Input
+              id="status"
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              placeholder="What's on your mind?"
+              className="text-center"
+              maxLength={50}
+            />
+            <p className="text-xs text-muted-foreground text-center">
+              Hover over your avatar to see it scroll!
+            </p>
           </div>
 
           {/* Message */}

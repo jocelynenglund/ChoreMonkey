@@ -180,4 +180,14 @@
     50% { transform: scale(1.02); }
     100% { transform: scale(1); opacity: 1; }
   }
+
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .animate-marquee {
+    display: inline-block;
+    animation: marquee 8s linear infinite;
+  }
 }

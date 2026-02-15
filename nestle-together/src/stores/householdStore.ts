@@ -28,6 +28,7 @@ interface HouseholdState {
   assignChore: (householdId: string, choreId: string, memberIds?: string[], assignToAll?: boolean) => Promise<void>;
   deleteChore: (householdId: string, choreId: string) => Promise<boolean>;
   changeNickname: (householdId: string, memberId: string, newNickname: string) => Promise<boolean>;
+  changeStatus: (householdId: string, memberId: string, status: string) => Promise<boolean>;
   setCurrentMember: (memberId: string) => void;
   logout: () => void;
 
@@ -421,6 +422,33 @@ export const useHouseholdStore = create<HouseholdState>()(
         }
       },
 
+      changeStatus: async (householdId, memberId, status) => {
+        try {
+          const response = await fetch(
+            `${API_BASE_URL}/api/households/${householdId}/members/${memberId}/status`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ status }),
+            }
+          );
+
+          if (response.ok) {
+            // Update local member data
+            set((state) => ({
+              members: state.members.map((m) =>
+                m.id === memberId ? { ...m, status } : m
+              ),
+            }));
+            return true;
+          }
+          return false;
+        } catch (error) {
+          console.error('Failed to change status', error);
+          return false;
+        }
+      },
+
       setCurrentMember: (memberId) => {
         set({ currentMemberId: memberId });
       },
@@ -572,6 +600,7 @@ export const useHouseholdStore = create<HouseholdState>()(
             nickname: m.nickname as string,
             avatarColor: AVATAR_COLORS[index % AVATAR_COLORS.length],
             joinedAt: m.joinedAt ? new Date(m.joinedAt as string) : new Date(),
+            status: m.status as string | undefined,
           }));
 
           set((state) => ({

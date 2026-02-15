@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Routing;
 namespace ChoreMonkey.Core.Feature.ListMembers;
 
 public record ListMembersQuery(Guid HouseholdId);
-public record MemberDto(Guid MemberId, string Nickname);
+public record MemberDto(Guid MemberId, string Nickname, string? Status = null);
 public record ListMembersResponse(List<MemberDto> Members);
 
 internal class Handler(IEventStore store)
@@ -29,10 +29,19 @@ internal class Handler(IEventStore store)
                 g => g.OrderByDescending(e => e.TimestampUtc).First().NewNickname
             );
         
+        // Get latest status per member
+        var statusChanges = events.OfType<MemberStatusChanged>()
+            .GroupBy(e => e.MemberId)
+            .ToDictionary(
+                g => g.Key,
+                g => g.OrderByDescending(e => e.TimestampUtc).First().Status
+            );
+        
         var members = joinedMembers
             .Select(e => new MemberDto(
                 e.MemberId, 
-                nicknameChanges.GetValueOrDefault(e.MemberId, e.Nickname)
+                nicknameChanges.GetValueOrDefault(e.MemberId, e.Nickname),
+                statusChanges.GetValueOrDefault(e.MemberId)
             ))
             .ToList();
         

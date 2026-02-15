@@ -23,6 +23,7 @@ export default function HouseholdDashboard() {
   const [completingChore, setCompletingChore] = useState<Chore | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [hoveredMemberStatus, setHoveredMemberStatus] = useState<string | null>(null);
 
   const {
     isAuthenticated,
@@ -201,6 +202,19 @@ export default function HouseholdDashboard() {
       <main className="max-w-3xl mx-auto px-4 pt-6">
         {/* Members Strip */}
         <div className="card-elevated p-4 mb-6">
+          {/* Status Marquee */}
+          {hoveredMemberStatus && (
+            <div className="overflow-hidden mb-3 py-1 bg-muted/50 rounded-md">
+              <div className="animate-marquee whitespace-nowrap">
+                <span className="text-sm text-muted-foreground px-4">
+                  💬 {hoveredMemberStatus}
+                </span>
+                <span className="text-sm text-muted-foreground px-4">
+                  💬 {hoveredMemberStatus}
+                </span>
+              </div>
+            </div>
+          )}
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-semibold text-sm text-muted-foreground">
               Family Members
@@ -211,8 +225,13 @@ export default function HouseholdDashboard() {
             {members.map((member) => (
               <div
                 key={member.id}
-                className="flex flex-col items-center gap-1 w-16 flex-shrink-0"
+                className="flex flex-col items-center gap-1 w-16 flex-shrink-0 cursor-pointer"
                 title={member.nickname}
+                onMouseEnter={() => member.status && setHoveredMemberStatus(member.status)}
+                onMouseLeave={() => setHoveredMemberStatus(null)}
+                onClick={() => member.status && setHoveredMemberStatus(
+                  hoveredMemberStatus === member.status ? null : member.status
+                )}
               >
                 <MemberAvatar
                   nickname={member.nickname}
@@ -222,6 +241,9 @@ export default function HouseholdDashboard() {
                 <span className="text-xs text-muted-foreground truncate w-full text-center">
                   {member.nickname}
                 </span>
+                {member.status && (
+                  <span className="text-[10px] text-muted-foreground">💬</span>
+                )}
               </div>
             ))}
           </div>
@@ -325,6 +347,7 @@ export default function HouseholdDashboard() {
           householdId={household.id}
           memberId={currentMember.id}
           currentNickname={currentMember.nickname}
+          currentStatus={currentMember.status}
           avatarColor={currentMember.avatarColor}
         />
       )}
