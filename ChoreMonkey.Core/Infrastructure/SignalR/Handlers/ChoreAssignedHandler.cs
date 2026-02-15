@@ -22,6 +22,7 @@ public class ChoreAssignedHandler(IHubContext<HouseholdHub> hubContext)
                 notification.HouseholdId,
                 notification.AssignedToMemberIds,
                 notification.AssignToAll,
+                notification.AssignedByMemberId,
                 notification.TimestampUtc
             }, cancellationToken);
     }

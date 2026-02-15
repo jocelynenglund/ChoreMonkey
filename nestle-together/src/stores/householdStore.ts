@@ -348,11 +348,16 @@ export const useHouseholdStore = create<HouseholdState>()(
       },
 
       assignChore: async (householdId, choreId, memberIds, assignToAll = false) => {
+        const { currentMemberId } = get();
         try {
           await fetch(`${API_BASE_URL}/api/households/${householdId}/chores/${choreId}/assign`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ memberIds: memberIds || null, assignToAll }),
+            body: JSON.stringify({ 
+              memberIds: memberIds || null, 
+              assignToAll,
+              assignedByMemberId: currentMemberId 
+            }),
           });
 
           set((state) => ({

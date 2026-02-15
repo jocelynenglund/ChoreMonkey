@@ -15,6 +15,8 @@ interface ActivityEntry {
   assignedToAll?: boolean;
   oldNickname?: string;
   newNickname?: string;
+  assignedByNickname?: string;
+  isClaimed?: boolean;
 }
 
 interface CompletionTimelineProps {
@@ -148,13 +150,29 @@ export function CompletionTimeline({ householdId, refreshKey = 0 }: CompletionTi
                 </p>
               ) : activity.type === 'chore_assigned' ? (
                 <p className="text-sm">
-                  <span className="font-medium">{activity.choreName}</span>
-                  <span className="text-muted-foreground"> assigned to </span>
-                  <span className="font-medium">
-                    {activity.assignedToAll 
-                      ? 'everyone' 
-                      : activity.assignedToNicknames?.join(', ') || 'unknown'}
-                  </span>
+                  {activity.isClaimed ? (
+                    <>
+                      <span className="font-medium">{activity.assignedByNickname}</span>
+                      <span className="text-muted-foreground"> claimed </span>
+                      <span className="font-medium">{activity.choreName}</span>
+                    </>
+                  ) : (
+                    <>
+                      {activity.assignedByNickname && (
+                        <>
+                          <span className="font-medium">{activity.assignedByNickname}</span>
+                          <span className="text-muted-foreground"> assigned </span>
+                        </>
+                      )}
+                      <span className="font-medium">{activity.choreName}</span>
+                      <span className="text-muted-foreground"> to </span>
+                      <span className="font-medium">
+                        {activity.assignedToAll 
+                          ? 'everyone' 
+                          : activity.assignedToNicknames?.join(', ') || 'unknown'}
+                      </span>
+                    </>
+                  )}
                 </p>
               ) : (
                 <p className="text-sm">

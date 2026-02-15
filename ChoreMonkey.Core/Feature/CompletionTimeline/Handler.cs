@@ -27,7 +27,9 @@ public record ActivityEntry(
     string[]? AssignedToNicknames = null,  // For assignments
     bool? AssignedToAll = null,
     string? OldNickname = null,            // For nickname changes
-    string? NewNickname = null
+    string? NewNickname = null,
+    string? AssignedByNickname = null,     // Who assigned
+    bool? IsClaimed = null                  // Self-assigned
 );
 
 public record GetCompletionTimelineResponse(
@@ -109,15 +111,29 @@ internal class Handler(IEventStore store)
                         .Select(id => memberNicknames.GetValueOrDefault(id, "Unknown"))
                         .ToArray() ?? Array.Empty<string>();
                 
+                var assignerNickname = a.AssignedByMemberId.HasValue 
+                    ? memberNicknames.GetValueOrDefault(a.AssignedByMemberId.Value, null)
+                    : null;
+                
+                // Check if this is a self-claim (single assignee who is also the assigner)
+                var isClaimed = !a.AssignToAll 
+                    && a.AssignedToMemberIds?.Length == 1 
+                    && a.AssignedByMemberId.HasValue
+                    && a.AssignedToMemberIds[0] == a.AssignedByMemberId.Value;
+                
                 return new ActivityEntry(
                     "chore_assigned",
                     DateTime.TryParse(a.TimestampUtc, out var ts) ? ts : DateTime.UtcNow,
                     a.ChoreId,
                     choreNames.GetValueOrDefault(a.ChoreId, "Unknown"),
-                    null,
-                    null,
+                    a.AssignedByMemberId,
+                    assignerNickname,
                     assignedNicknames,
-                    a.AssignToAll
+                    a.AssignToAll,
+                    null,
+                    null,
+                    assignerNickname,
+                    isClaimed
                 );
             });
 
