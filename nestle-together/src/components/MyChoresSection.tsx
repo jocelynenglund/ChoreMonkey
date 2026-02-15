@@ -18,6 +18,20 @@ interface MyChoreSectionProps {
   onCompleteChore?: (choreId: string) => void;
 }
 
+function formatCompletedTime(date: Date): string {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const completedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  
+  if (completedDate.getTime() === today.getTime()) {
+    // Today - show time
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  } else {
+    // Past days - show short date
+    return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+  }
+}
+
 export function MyChoresSection({ householdId, memberId, onCompleteChore }: MyChoreSectionProps) {
   const [myChores, setMyChores] = useState<MyChoresResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -194,10 +208,7 @@ export function MyChoresSection({ householdId, memberId, onCompleteChore }: MyCh
                     </span>
                     <span className="text-xs text-muted-foreground">
                       {chore.completedAt instanceof Date 
-                        ? chore.completedAt.toLocaleTimeString([], { 
-                            hour: '2-digit', 
-                            minute: '2-digit' 
-                          })
+                        ? formatCompletedTime(chore.completedAt)
                         : ''}
                     </span>
                   </li>
