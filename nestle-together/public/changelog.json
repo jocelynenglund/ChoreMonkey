@@ -1,6 +1,15 @@
 {
-  "generated": "2026-02-15T15:41:00.672Z",
+  "generated": "2026-02-15T15:47:59.868Z",
   "commits": [
+    {
+      "hash": "ae04981eef3f262231ce973dae29853a9e8edfec",
+      "shortHash": "ae04981",
+      "message": "fix: TeamOverviewAccordion refreshes on SignalR events via refreshKey prop",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "TeamOverviewAccordion refreshes on SignalR events via refreshKey prop"
+    },
     {
       "hash": "7514996e61d8054a046dea3a373e43f991ddc09e",
       "shortHash": "7514996",
@@ -171,15 +180,6 @@
       "author": "ItsyBOT",
       "type": "fix",
       "displayMessage": "Proper member/chore ID mapping with avatar colors"
-    },
-    {
-      "hash": "f07e51d7234473657bc83297f9aafac0c305e8d8",
-      "shortHash": "f07e51d",
-      "message": "fix: filter deleted chores from overdue list",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Filter deleted chores from overdue list"
     }
   ]
 }

@@ -18,4 +18,9 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  define: {
+    __BUILD_VERSION__: JSON.stringify(process.env.BUILD_VERSION || 'dev'),
+    __BUILD_TIME__: JSON.stringify(process.env.BUILD_TIME || new Date().toISOString()),
+    __GIT_SHA__: JSON.stringify(process.env.GIT_SHA || 'local'),
+  },
 }));
