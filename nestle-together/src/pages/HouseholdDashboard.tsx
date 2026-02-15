@@ -284,7 +284,7 @@ export default function HouseholdDashboard() {
                 className="flex flex-col items-center gap-1 w-16 flex-shrink-0 relative group"
               >
                 <button
-                  className="flex flex-col items-center gap-1 cursor-pointer"
+                  className="flex flex-col items-center gap-1 cursor-pointer w-full"
                   title={member.status || member.nickname}
                   onClick={() => member.status && setHoveredMemberStatus(
                     hoveredMemberStatus === member.status ? null : member.status
@@ -295,7 +295,7 @@ export default function HouseholdDashboard() {
                     color={member.avatarColor}
                     size="md"
                   />
-                  <span className="text-xs text-muted-foreground truncate w-full text-center">
+                  <span className="text-xs text-muted-foreground truncate max-w-full text-center block">
                     {member.nickname}
                   </span>
                 </button>
