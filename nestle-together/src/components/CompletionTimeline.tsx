@@ -5,12 +5,13 @@ import { useHouseholdStore } from '@/stores/householdStore';
 import { householdConnection } from '@/lib/signalr';
 
 interface ActivityEntry {
-  type: 'completion' | 'member_joined' | 'chore_assigned' | 'nickname_changed' | 'status_changed';
+  type: 'completion' | 'member_joined' | 'chore_assigned' | 'nickname_changed' | 'status_changed' | 'chore_created';
   timestamp: string;
   choreId?: string;
   choreName?: string;
   memberId?: string;
   memberNickname?: string;
+  text?: string;  // Pre-rendered text from ActivityRecorded (preferred)
   assignedToNicknames?: string[];
   assignedToAll?: boolean;
   oldNickname?: string;
@@ -142,7 +143,10 @@ export function CompletionTimeline({ householdId, refreshKey = 0 }: CompletionTi
               />
             )}
             <div className="flex-1 min-w-0">
-              {activity.type === 'completion' ? (
+              {/* Use pre-rendered text if available (from ActivityRecorded), otherwise fall back to legacy rendering */}
+              {activity.text ? (
+                <p className="text-sm">{activity.text}</p>
+              ) : activity.type === 'completion' ? (
                 <p className="text-sm">
                   <span className="font-medium">{activity.memberNickname}</span>
                   <span className="text-muted-foreground"> completed </span>

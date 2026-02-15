@@ -9,6 +9,11 @@ namespace ChoreMonkey.Core.Infrastructure;
 /// </summary>
 public class PublishingEventStore(IEventStore inner, IMediator mediator) : IEventStore
 {
+    /// <summary>
+    /// The underlying event store (useful for automations to avoid circular publishing)
+    /// </summary>
+    public IEventStore Inner => inner;
+
     public async Task<long> StartStreamAsync(StreamId streamId, string? streamType, IEnumerable<IStoreableEvent> events)
     {
         var eventList = events.ToList();

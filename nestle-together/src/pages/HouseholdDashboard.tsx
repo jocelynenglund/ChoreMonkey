@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import { LogOut, ClipboardList } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,39 @@ import { SettingsDialog } from '@/components/SettingsDialog';
 import { MyChoresSection } from '@/components/MyChoresSection';
 import { ProfileDialog } from '@/components/ProfileDialog';
 import type { Household, Chore, ChoreFrequency } from '@/types/household';
+
+// Smart marquee that only scrolls when text overflows
+function StatusMarquee({ text }: { text: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLSpanElement>(null);
+  const [shouldScroll, setShouldScroll] = useState(false);
+
+  useEffect(() => {
+    if (containerRef.current && textRef.current) {
+      const containerWidth = containerRef.current.offsetWidth;
+      const textWidth = textRef.current.scrollWidth;
+      setShouldScroll(textWidth > containerWidth - 40); // 40px for padding + emoji
+    }
+  }, [text]);
+
+  return (
+    <div 
+      ref={containerRef}
+      className="mt-3 py-2 bg-muted/50 rounded-md overflow-hidden"
+    >
+      <div className={shouldScroll ? "animate-marquee whitespace-nowrap" : "px-4"}>
+        <span ref={textRef} className="text-sm text-muted-foreground">
+          💬 {text}
+        </span>
+        {shouldScroll && (
+          <span className="text-sm text-muted-foreground px-8">
+            💬 {text}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function HouseholdDashboard() {
   const { id } = useParams<{ id: string }>();
@@ -234,13 +267,9 @@ export default function HouseholdDashboard() {
               </div>
             ))}
           </div>
-          {/* Status Display - at bottom */}
+          {/* Status Display - at bottom (scrolls if text overflows) */}
           {hoveredMemberStatus && (
-            <div className="mt-3 py-2 px-4 bg-muted/50 rounded-md">
-              <p className="text-sm text-muted-foreground">
-                💬 {hoveredMemberStatus}
-              </p>
-            </div>
+            <StatusMarquee text={hoveredMemberStatus} />
           )}
         </div>
 

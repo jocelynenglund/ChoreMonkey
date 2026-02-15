@@ -111,10 +111,10 @@ export function ProfileDialog({
               onChange={(e) => setStatus(e.target.value)}
               placeholder="What's on your mind?"
               className="text-center"
-              maxLength={50}
+              maxLength={200}
             />
             <p className="text-xs text-muted-foreground text-center">
-              Hover over your avatar to see it scroll!
+              {status.length}/200 • Long statuses will scroll
             </p>
           </div>
 
