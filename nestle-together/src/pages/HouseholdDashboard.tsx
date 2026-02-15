@@ -202,19 +202,6 @@ export default function HouseholdDashboard() {
       <main className="max-w-3xl mx-auto px-4 pt-6">
         {/* Members Strip */}
         <div className="card-elevated p-4 mb-6">
-          {/* Status Marquee */}
-          {hoveredMemberStatus && (
-            <div className="overflow-hidden mb-3 py-1 bg-muted/50 rounded-md">
-              <div className="animate-marquee whitespace-nowrap">
-                <span className="text-sm text-muted-foreground px-4">
-                  💬 {hoveredMemberStatus}
-                </span>
-                <span className="text-sm text-muted-foreground px-4">
-                  💬 {hoveredMemberStatus}
-                </span>
-              </div>
-            </div>
-          )}
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-semibold text-sm text-muted-foreground">
               Family Members
@@ -247,6 +234,19 @@ export default function HouseholdDashboard() {
               </div>
             ))}
           </div>
+          {/* Status Marquee - at bottom */}
+          {hoveredMemberStatus && (
+            <div className="overflow-hidden mt-3 py-1 bg-muted/50 rounded-md">
+              <div className="animate-marquee whitespace-nowrap">
+                <span className="text-sm text-muted-foreground px-4">
+                  💬 {hoveredMemberStatus}
+                </span>
+                <span className="text-sm text-muted-foreground px-4">
+                  💬 {hoveredMemberStatus}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Admin: Overdue Chores (all members) */}
