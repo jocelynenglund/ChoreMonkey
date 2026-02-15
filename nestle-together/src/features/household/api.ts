@@ -40,8 +40,8 @@ export async function getHousehold(householdId: string): Promise<Household | nul
   const data = await response.json();
   return {
     id: data.householdId || data.id,
-    name: data.name,
+    name: data.householdName || data.name || 'My Household',
     pinCode: '',
-    createdAt: new Date(data.createdAt),
+    createdAt: data.createdAt ? new Date(data.createdAt) : new Date(),
   };
 }

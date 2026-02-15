@@ -1,6 +1,15 @@
 {
-  "generated": "2026-02-15T15:09:46.525Z",
+  "generated": "2026-02-15T15:13:14.029Z",
   "commits": [
+    {
+      "hash": "175d4fa3f5d21da72fc0a3da226afc8b4911af8e",
+      "shortHash": "175d4fa",
+      "message": "fix: changeNickname API - send 'nickname' not 'newNickname'",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "ChangeNickname API - send 'nickname' not 'newNickname'"
+    },
     {
       "hash": "57d768b9ab44c6a490b2e02bf8026245f91ee505",
       "shortHash": "57d768b",
@@ -171,15 +180,6 @@
       "author": "ItsyBOT",
       "type": "fix",
       "displayMessage": "Show date instead of time for past day completions"
-    },
-    {
-      "hash": "992156f55d84ac21128c5b2506a329c5b47fb3e3",
-      "shortHash": "992156f",
-      "message": "Update deploy.yml",
-      "date": "2026-02-15",
-      "author": "Jocelyn Englund",
-      "type": "update",
-      "displayMessage": "Update deploy.yml"
     }
   ]
 }
