@@ -29,6 +29,9 @@ export function useHouseholdRealtime({
       onChoreCreated: () => refresh(),
       onChoreAssigned: () => refresh(),
       onMemberJoined: () => refresh(),
+      onMemberRemoved: () => refresh(),
+      onMemberStatusChanged: () => refresh(),
+      onMemberNicknameChanged: () => refresh(),
     };
 
     householdConnection.setEventHandlers(handlers);
