@@ -22,6 +22,10 @@ using ChoreMonkey.Core.Feature.SetAdminPin;
 using ChoreMonkey.Core.Feature.SetMemberPin;
 using ChoreMonkey.Core.Feature.MyChores;
 using ChoreMonkey.Core.Feature.AcknowledgeMissed;
+using ChoreMonkey.Core.Feature.ChangeMemberNickname;
+using ChoreMonkey.Core.Feature.ChangeMemberStatus;
+using ChoreMonkey.Core.Infrastructure;
+using ChoreMonkey.Core.Infrastructure.SignalR;
 
 namespace ChoreMonkey.Core;
 
@@ -32,9 +36,20 @@ public static class Initialization
         // Use environment variable for data path, default to ./data for local dev
         var dataPath = Environment.GetEnvironmentVariable("EVENTSTORE_PATH") 
             ?? Path.Combine(Directory.GetCurrentDirectory(), "data");
-        return services.AddFileEventStore(dataPath)
-            .InstallFeatures();
-
+        
+        // Add MediatR for event publishing
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<HouseholdHub>());
+        
+        // Add FileEventStore first (will be decorated)
+        services.AddFileEventStore(dataPath);
+        
+        // Decorate with PublishingEventStore to broadcast events via MediatR
+        services.Decorate<IEventStore, PublishingEventStore>();
+        
+        // Add SignalR
+        services.AddSignalR();
+        
+        return services.InstallFeatures();
     }
     public static IServiceCollection InstallFeatures(this IServiceCollection services)
     {
@@ -57,6 +72,8 @@ public static class Initialization
         services.AddScoped<Feature.DeleteChore.Handler>();
         services.AddScoped<Feature.SetAdminPin.Handler>();
         services.AddScoped<Feature.SetMemberPin.Handler>();
+        services.AddScoped<Feature.ChangeMemberNickname.Handler>();
+        services.AddScoped<Feature.ChangeMemberStatus.Handler>();
         return services;
     }
     public static IEndpointRouteBuilder MapChoreMonkeyEndpoints(this IEndpointRouteBuilder app)
@@ -83,8 +100,15 @@ public static class Initialization
         DeleteChoreEndpoint.Map(householdEndpoints);
         SetAdminPinEndpoint.Map(householdEndpoints);
         SetMemberPinEndpoint.Map(householdEndpoints);
+        ChangeMemberNicknameEndpoint.Map(householdEndpoints);
+        ChangeMemberStatusEndpoint.Map(householdEndpoints);
 
         return app;
     }
 
+    public static IEndpointRouteBuilder MapChoreMonkeyHub(this IEndpointRouteBuilder app)
+    {
+        app.MapHub<HouseholdHub>("/hubs/household");
+        return app;
+    }
 }

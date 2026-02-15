@@ -17,7 +17,26 @@ public record CompletionEntry(
     DateTimeOffset CompletedAt
 );
 
-public record GetCompletionTimelineResponse(List<CompletionEntry> Completions);
+public record ActivityEntry(
+    string Type,           // "completion" | "member_joined" | "chore_assigned" | "nickname_changed" | "status_changed"
+    DateTimeOffset Timestamp,
+    Guid? ChoreId,
+    string? ChoreName,
+    Guid? MemberId,
+    string? MemberNickname,
+    string[]? AssignedToNicknames = null,  // For assignments
+    bool? AssignedToAll = null,
+    string? OldNickname = null,            // For nickname changes
+    string? NewNickname = null,
+    string? AssignedByNickname = null,     // Who assigned
+    bool? IsClaimed = null,                // Self-assigned
+    string? Status = null                  // For status changes
+);
+
+public record GetCompletionTimelineResponse(
+    List<CompletionEntry> Completions,
+    List<ActivityEntry>? Activities = null
+);
 
 internal class Handler(IEventStore store)
 {
@@ -58,7 +77,112 @@ internal class Handler(IEventStore store)
             ))
             .ToList();
 
-        return new GetCompletionTimelineResponse(completions);
+        // Build unified activity feed (completions + joins)
+        var completionActivities = choreEvents
+            .OfType<ChoreCompleted>()
+            .Where(c => c.CompletedAt >= cutoff)
+            .Select(c => new ActivityEntry(
+                "completion",
+                c.CompletedAt,
+                c.ChoreId,
+                choreNames.GetValueOrDefault(c.ChoreId, "Unknown"),
+                c.CompletedByMemberId,
+                memberNicknames.GetValueOrDefault(c.CompletedByMemberId, "Unknown")
+            ));
+
+        var joinActivities = householdEvents
+            .OfType<MemberJoinedHousehold>()
+            .Where(m => DateTime.TryParse(m.TimestampUtc, out var ts) && ts >= cutoff)
+            .Select(m => new ActivityEntry(
+                "member_joined",
+                DateTime.TryParse(m.TimestampUtc, out var ts) ? ts : DateTime.UtcNow,
+                null,
+                null,
+                m.MemberId,
+                m.Nickname
+            ));
+
+        var assignmentActivities = choreEvents
+            .OfType<ChoreAssigned>()
+            .Where(a => DateTime.TryParse(a.TimestampUtc, out var ts) && ts >= cutoff)
+            .Select(a => {
+                var assignedNicknames = a.AssignToAll 
+                    ? new[] { "everyone" }
+                    : a.AssignedToMemberIds?
+                        .Select(id => memberNicknames.GetValueOrDefault(id, "Unknown"))
+                        .ToArray() ?? Array.Empty<string>();
+                
+                var assignerNickname = a.AssignedByMemberId.HasValue 
+                    ? memberNicknames.GetValueOrDefault(a.AssignedByMemberId.Value, null)
+                    : null;
+                
+                // Check if this is a self-claim (single assignee who is also the assigner)
+                var isClaimed = !a.AssignToAll 
+                    && a.AssignedToMemberIds?.Length == 1 
+                    && a.AssignedByMemberId.HasValue
+                    && a.AssignedToMemberIds[0] == a.AssignedByMemberId.Value;
+                
+                return new ActivityEntry(
+                    "chore_assigned",
+                    DateTime.TryParse(a.TimestampUtc, out var ts) ? ts : DateTime.UtcNow,
+                    a.ChoreId,
+                    choreNames.GetValueOrDefault(a.ChoreId, "Unknown"),
+                    a.AssignedByMemberId,
+                    assignerNickname,
+                    assignedNicknames,
+                    a.AssignToAll,
+                    null,
+                    null,
+                    assignerNickname,
+                    isClaimed
+                );
+            });
+
+        var nicknameActivities = householdEvents
+            .OfType<MemberNicknameChanged>()
+            .Where(n => DateTime.TryParse(n.TimestampUtc, out var ts) && ts >= cutoff)
+            .Select(n => new ActivityEntry(
+                "nickname_changed",
+                DateTime.TryParse(n.TimestampUtc, out var ts) ? ts : DateTime.UtcNow,
+                null,
+                null,
+                n.MemberId,
+                n.NewNickname,
+                null,
+                null,
+                n.OldNickname,
+                n.NewNickname
+            ));
+
+        var statusActivities = householdEvents
+            .OfType<MemberStatusChanged>()
+            .Where(s => DateTime.TryParse(s.TimestampUtc, out var ts) && ts >= cutoff)
+            .Select(s => new ActivityEntry(
+                "status_changed",
+                DateTime.TryParse(s.TimestampUtc, out var ts) ? ts : DateTime.UtcNow,
+                null,
+                null,
+                s.MemberId,
+                memberNicknames.GetValueOrDefault(s.MemberId, "Unknown"),
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                s.Status
+            ));
+
+        var activities = completionActivities
+            .Concat(joinActivities)
+            .Concat(assignmentActivities)
+            .Concat(nicknameActivities)
+            .Concat(statusActivities)
+            .OrderByDescending(a => a.Timestamp)
+            .Take(maxItems)
+            .ToList();
+
+        return new GetCompletionTimelineResponse(completions, activities);
     }
 }
 

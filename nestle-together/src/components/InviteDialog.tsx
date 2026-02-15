@@ -52,7 +52,7 @@ export function InviteDialog({ onGenerate }: InviteDialogProps) {
           Invite
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl">Invite Family Member</DialogTitle>
         </DialogHeader>

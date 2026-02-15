@@ -4,5 +4,6 @@ public record ChoreAssigned(
     Guid ChoreId,
     Guid HouseholdId,
     Guid[]? AssignedToMemberIds = null,
-    bool AssignToAll = false
+    bool AssignToAll = false,
+    Guid? AssignedByMemberId = null
 ) : EventBase;

@@ -3,6 +3,7 @@ import { useParams, Navigate } from 'react-router-dom';
 import { LogOut, ClipboardList } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useHouseholdStore } from '@/stores/householdStore';
+import { useHouseholdRealtime } from '@/hooks/useHouseholdRealtime';
 import { ChoreCard } from '@/components/ChoreCard';
 import { AddChoreDialog } from '@/components/AddChoreDialog';
 import { CompleteChoreDialog } from '@/components/CompleteChoreDialog';
@@ -12,15 +13,17 @@ import { OverdueAccordion } from '@/components/OverdueAccordion';
 import { CompletionTimeline } from '@/components/CompletionTimeline';
 import { SettingsDialog } from '@/components/SettingsDialog';
 import { MyChoresSection } from '@/components/MyChoresSection';
+import { ProfileDialog } from '@/components/ProfileDialog';
 import type { Household, Chore, ChoreFrequency } from '@/types/household';
 
 export default function HouseholdDashboard() {
   const { id } = useParams<{ id: string }>();
   const [household, setHousehold] = useState<Household | null>(null);
-  const [chores, setChores] = useState<Chore[]>([]);
   const [isDataLoading, setIsDataLoading] = useState(true);
   const [completingChore, setCompletingChore] = useState<Chore | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [hoveredMemberStatus, setHoveredMemberStatus] = useState<string | null>(null);
 
   const {
     isAuthenticated,
@@ -37,24 +40,30 @@ export default function HouseholdDashboard() {
     generateInvite,
     logout,
     isAdmin,
+    chores: storeChores,
   } = useHouseholdStore();
+
+  // Connect to SignalR for real-time updates
+  useHouseholdRealtime(id || null);
 
   const members = getHouseholdMembers(id || '');
   const currentMember = members.find((m) => m.id === currentMemberId);
+  
+  // Get chores from store (updates when SignalR events trigger refetch)
+  const chores = storeChores.filter((c) => c.householdId === id);
 
   useEffect(() => {
     const fetchData = async () => {
       if (!id) return;
       setIsDataLoading(true);
 
-      const [fetchedHousehold, fetchedChores] = await Promise.all([
+      const [fetchedHousehold] = await Promise.all([
         getHousehold(id),
         getHouseholdChores(id),
         fetchHouseholdMembers(id),
       ]);
 
       setHousehold(fetchedHousehold);
-      setChores(fetchedChores);
       setIsDataLoading(false);
     };
 
@@ -164,11 +173,16 @@ export default function HouseholdDashboard() {
 
             <div className="flex items-center gap-2">
               {currentMember && (
-                <MemberAvatar
-                  nickname={currentMember.nickname}
-                  color={currentMember.avatarColor}
-                  size="sm"
-                />
+                <button
+                  onClick={() => setProfileOpen(true)}
+                  className="rounded-full hover:ring-2 hover:ring-primary/50 transition-all"
+                >
+                  <MemberAvatar
+                    nickname={currentMember.nickname}
+                    color={currentMember.avatarColor}
+                    size="sm"
+                  />
+                </button>
               )}
               <SettingsDialog householdId={household.id} />
               <Button
@@ -198,8 +212,13 @@ export default function HouseholdDashboard() {
             {members.map((member) => (
               <div
                 key={member.id}
-                className="flex flex-col items-center gap-1 w-16 flex-shrink-0"
+                className="flex flex-col items-center gap-1 w-16 flex-shrink-0 cursor-pointer"
                 title={member.nickname}
+                onMouseEnter={() => member.status && setHoveredMemberStatus(member.status)}
+                onMouseLeave={() => setHoveredMemberStatus(null)}
+                onClick={() => member.status && setHoveredMemberStatus(
+                  hoveredMemberStatus === member.status ? null : member.status
+                )}
               >
                 <MemberAvatar
                   nickname={member.nickname}
@@ -209,9 +228,20 @@ export default function HouseholdDashboard() {
                 <span className="text-xs text-muted-foreground truncate w-full text-center">
                   {member.nickname}
                 </span>
+                {member.status && (
+                  <span className="text-[10px] text-muted-foreground">💬</span>
+                )}
               </div>
             ))}
           </div>
+          {/* Status Display - at bottom */}
+          {hoveredMemberStatus && (
+            <div className="mt-3 py-2 px-4 bg-muted/50 rounded-md">
+              <p className="text-sm text-muted-foreground">
+                💬 {hoveredMemberStatus}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Admin: Overdue Chores (all members) */}
@@ -303,6 +333,19 @@ export default function HouseholdDashboard() {
         onOpenChange={(open) => !open && setCompletingChore(null)}
         onComplete={handleCompleteChore}
       />
+
+      {/* Profile Dialog */}
+      {currentMember && household && (
+        <ProfileDialog
+          open={profileOpen}
+          onOpenChange={setProfileOpen}
+          householdId={household.id}
+          memberId={currentMember.id}
+          currentNickname={currentMember.nickname}
+          currentStatus={currentMember.status}
+          avatarColor={currentMember.avatarColor}
+        />
+      )}
     </div>
   );
 }

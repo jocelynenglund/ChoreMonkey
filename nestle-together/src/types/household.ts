@@ -18,6 +18,7 @@ export interface Member {
   nickname: string;
   avatarColor: string;
   joinedAt: Date;
+  status?: string;
 }
 
 export interface ChoreFrequency {

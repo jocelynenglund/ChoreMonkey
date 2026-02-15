@@ -11,7 +11,8 @@ public record AssignChoreCommand(
     Guid HouseholdId, 
     Guid ChoreId, 
     Guid[]? MemberIds = null,
-    bool AssignToAll = false);
+    bool AssignToAll = false,
+    Guid? AssignedByMemberId = null);
     
 public record AssignChoreResponse(
     Guid ChoreId, 
@@ -28,7 +29,8 @@ internal class Handler(IEventStore store)
             request.ChoreId, 
             request.HouseholdId, 
             request.MemberIds,
-            request.AssignToAll);
+            request.AssignToAll,
+            request.AssignedByMemberId);
             
         await store.AppendToStreamAsync(streamId, assignedEvent, ExpectedVersion.Any);
         
@@ -50,7 +52,8 @@ internal static class AssignChoreEndpoint
                 householdId, 
                 choreId, 
                 request.MemberIds,
-                request.AssignToAll);
+                request.AssignToAll,
+                request.AssignedByMemberId);
             var result = await handler.HandleAsync(command);
             return Results.Ok(result);
         });
@@ -59,4 +62,5 @@ internal static class AssignChoreEndpoint
 
 public record AssignChoreRequest(
     Guid[]? MemberIds = null,
-    bool AssignToAll = false);
+    bool AssignToAll = false,
+    Guid? AssignedByMemberId = null);
