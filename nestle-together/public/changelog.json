@@ -1,6 +1,15 @@
 {
-  "generated": "2026-02-15T14:57:44.766Z",
+  "generated": "2026-02-15T14:58:48.708Z",
   "commits": [
+    {
+      "hash": "a853e6b8743e70aab3ff521c7e62b028defbdb44",
+      "shortHash": "a853e6b",
+      "message": "fix: Mobile-friendly ChoreCard layout",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Mobile-friendly ChoreCard layout"
+    },
     {
       "hash": "c176cf5ba6e13e47cece7f48dd8d03c6e72f6254",
       "shortHash": "c176cf5",
@@ -171,15 +180,6 @@
       "author": "ItsyBOT",
       "type": "feature",
       "displayMessage": "Add member_removed to activity timeline"
-    },
-    {
-      "hash": "44516d42ee2dfe3aa63e5cd1bea3096177fde317",
-      "shortHash": "44516d4",
-      "message": "fix: add padding to scroll container for ring overflow",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Add padding to scroll container for ring overflow"
     }
   ]
 }

@@ -9,14 +9,14 @@ function StatusMarquee({ text }: { text: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const [shouldScroll, setShouldScroll] = useState(false);
-  const [animationDuration, setAnimationDuration] = useState(12);
+  const [animationDuration, setAnimationDuration] = useState(8);
 
   useEffect(() => {
     const measure = () => {
       if (containerRef.current && textRef.current) {
         const containerWidth = containerRef.current.offsetWidth;
-        const textWidth = textRef.current.offsetWidth;
-        const needsScroll = textWidth > containerWidth - 32;
+        const textWidth = textRef.current.scrollWidth;
+        const needsScroll = textWidth > containerWidth - 16;
         setShouldScroll(needsScroll);
         // Adjust speed based on text length (roughly 100px per second)
         if (needsScroll) {
@@ -24,22 +24,15 @@ function StatusMarquee({ text }: { text: string }) {
         }
       }
     };
-    measure();
-    const timer = setTimeout(measure, 100);
+    // Measure after render
+    requestAnimationFrame(() => {
+      measure();
+      // And again after a short delay for fonts to load
+      setTimeout(measure, 200);
+    });
     window.addEventListener('resize', measure);
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener('resize', measure);
-    };
+    return () => window.removeEventListener('resize', measure);
   }, [text]);
-
-  if (!shouldScroll) {
-    return (
-      <div className="mt-3 py-2 bg-muted/50 rounded-md px-4 text-center">
-        <span className="text-sm text-muted-foreground">💬 {text}</span>
-      </div>
-    );
-  }
 
   return (
     <div 
@@ -47,15 +40,17 @@ function StatusMarquee({ text }: { text: string }) {
       className="mt-3 py-2 bg-muted/50 rounded-md overflow-hidden"
     >
       <div 
-        className="inline-flex whitespace-nowrap animate-marquee"
-        style={{ animationDuration: `${animationDuration}s` }}
+        className={shouldScroll ? "inline-flex whitespace-nowrap animate-marquee" : "px-4 text-center"}
+        style={shouldScroll ? { animationDuration: `${animationDuration}s` } : undefined}
       >
-        <span ref={textRef} className="text-sm text-muted-foreground px-4">
+        <span ref={textRef} className={`text-sm text-muted-foreground ${shouldScroll ? 'px-4' : ''}`}>
           💬 {text}
         </span>
-        <span className="text-sm text-muted-foreground px-4">
-          💬 {text}
-        </span>
+        {shouldScroll && (
+          <span className="text-sm text-muted-foreground px-4">
+            💬 {text}
+          </span>
+        )}
       </div>
     </div>
   );
