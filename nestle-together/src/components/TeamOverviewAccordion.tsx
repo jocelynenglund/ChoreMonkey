@@ -134,7 +134,7 @@ export function TeamOverviewAccordion({ householdId, onAssignmentChange }: TeamO
         <div className="p-4 border-b">
           <h3 className="font-semibold flex items-center gap-2">
             <Users className="h-5 w-5 text-blue-500" />
-            Team Overview
+            Household Overview
             {totalOverdue > 0 && (
               <Badge variant="destructive" className="ml-2">
                 {totalOverdue} overdue

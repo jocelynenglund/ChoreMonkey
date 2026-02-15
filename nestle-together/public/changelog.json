@@ -1,6 +1,15 @@
 {
-  "generated": "2026-02-15T15:02:52.253Z",
+  "generated": "2026-02-15T15:05:57.072Z",
   "commits": [
+    {
+      "hash": "9bf01ed4ebe55efaa6f0eaf4d0b93ef20de72729",
+      "shortHash": "9bf01ed",
+      "message": "fix: Simplify marquee - always scroll, duration based on text length",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Simplify marquee - always scroll, duration based on text length"
+    },
     {
       "hash": "cba08a737cf142c3b33e97ceecf2df326ed4d48e",
       "shortHash": "cba08a7",
@@ -171,15 +180,6 @@
       "author": "ItsyBOT",
       "type": "feature",
       "displayMessage": "Add MemberLookup query slice for reusable member names"
-    },
-    {
-      "hash": "4d4b4150c424e74990217e8ba317e4929eba5a4c",
-      "shortHash": "4d4b415",
-      "message": "fix: update overdue chores to use current nicknames",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Update overdue chores to use current nicknames"
     }
   ]
 }
