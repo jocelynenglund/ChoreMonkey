@@ -68,7 +68,7 @@ export function OverdueAccordion({ householdId }: OverdueAccordionProps) {
         </h3>
       </div>
       <Accordion type="multiple" className="w-full">
-        {memberOverdue.map((member) => (
+        {(memberOverdue ?? []).map((member) => (
           <AccordionItem key={member.memberId} value={member.memberId}>
             <AccordionTrigger className="px-4 hover:no-underline">
               <div className="flex items-center gap-3 w-full">
@@ -90,13 +90,13 @@ export function OverdueAccordion({ householdId }: OverdueAccordionProps) {
               </div>
             </AccordionTrigger>
             <AccordionContent className="px-4 pb-4">
-              {member.chores.length === 0 ? (
+              {(member.chores?.length ?? 0) === 0 ? (
                 <p className="text-sm text-muted-foreground py-2">
                   All chores completed! Great job! 🌟
                 </p>
               ) : (
                 <ul className="space-y-2">
-                  {member.chores.map((chore) => (
+                  {(member.chores ?? []).map((chore) => (
                     <li
                       key={chore.choreId}
                       className="flex items-center justify-between py-2 px-3 bg-red-50 rounded-md border border-red-100"

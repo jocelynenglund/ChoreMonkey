@@ -198,7 +198,7 @@ export default function HouseholdDashboard() {
                   {household.name}
                 </h1>
                 <p className="text-xs text-muted-foreground">
-                  {members.length} member{members.length !== 1 ? 's' : ''}
+                  {members?.length ?? 0} member{(members?.length ?? 0) !== 1 ? 's' : ''}
                 </p>
               </div>
             </div>
@@ -242,7 +242,7 @@ export default function HouseholdDashboard() {
             <InviteDialog onGenerate={handleGenerateInvite} />
           </div>
           <div className="flex gap-3 overflow-x-auto pb-1">
-            {members.map((member) => (
+            {(members ?? []).map((member) => (
               <button
                 key={member.id}
                 className="flex flex-col items-center gap-1 w-16 flex-shrink-0 cursor-pointer"
@@ -292,16 +292,16 @@ export default function HouseholdDashboard() {
         )}
 
         {/* Other Chores (not assigned to me) */}
-        {otherChores.length > 0 && (
+        {(otherChores?.length ?? 0) > 0 && (
           <div className="mt-8">
             <div className="flex items-center gap-2 mb-3">
               <h3 className="font-semibold text-muted-foreground">📋 Other Chores</h3>
               <span className="px-2 py-0.5 rounded-full bg-muted text-muted-foreground text-xs font-medium">
-                {otherChores.length}
+                {otherChores?.length ?? 0}
               </span>
             </div>
             <div className="space-y-3">
-              {otherChores.map((chore) => (
+              {(otherChores ?? []).map((chore) => (
                 <ChoreCard
                   key={chore.id}
                   chore={chore}
@@ -318,16 +318,16 @@ export default function HouseholdDashboard() {
         )}
 
         {/* Bonus Chores */}
-        {bonusChores.length > 0 && (
+        {(bonusChores?.length ?? 0) > 0 && (
           <div className="mt-8">
             <div className="flex items-center gap-2 mb-3">
               <h3 className="font-semibold text-amber-600">🌟 Bonus Chores</h3>
               <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-xs font-medium">
-                {bonusChores.length}
+                {bonusChores?.length ?? 0}
               </span>
             </div>
             <div className="space-y-3">
-              {bonusChores.map((chore) => (
+              {(bonusChores ?? []).map((chore) => (
                 <ChoreCard
                   key={chore.id}
                   chore={chore}

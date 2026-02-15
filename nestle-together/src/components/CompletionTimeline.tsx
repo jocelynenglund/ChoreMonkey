@@ -106,7 +106,7 @@ export function CompletionTimeline({ householdId }: CompletionTimelineProps) {
         </h3>
       </div>
       <div className="divide-y max-h-80 overflow-y-auto">
-        {activities.map((activity, idx) => (
+        {(activities ?? []).map((activity, idx) => (
           <div key={idx} className="p-3 flex items-center gap-3">
             <div className="flex-shrink-0">
               {getActivityIcon(activity.type)}
