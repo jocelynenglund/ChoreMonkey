@@ -18,7 +18,6 @@ import type { Household, Chore, ChoreFrequency } from '@/types/household';
 export default function HouseholdDashboard() {
   const { id } = useParams<{ id: string }>();
   const [household, setHousehold] = useState<Household | null>(null);
-  const [chores, setChores] = useState<Chore[]>([]);
   const [isDataLoading, setIsDataLoading] = useState(true);
   const [completingChore, setCompletingChore] = useState<Chore | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -38,6 +37,7 @@ export default function HouseholdDashboard() {
     generateInvite,
     logout,
     isAdmin,
+    chores: storeChores,
   } = useHouseholdStore();
 
   // Connect to SignalR for real-time updates
@@ -45,20 +45,22 @@ export default function HouseholdDashboard() {
 
   const members = getHouseholdMembers(id || '');
   const currentMember = members.find((m) => m.id === currentMemberId);
+  
+  // Get chores from store (updates when SignalR events trigger refetch)
+  const chores = storeChores.filter((c) => c.householdId === id);
 
   useEffect(() => {
     const fetchData = async () => {
       if (!id) return;
       setIsDataLoading(true);
 
-      const [fetchedHousehold, fetchedChores] = await Promise.all([
+      const [fetchedHousehold] = await Promise.all([
         getHousehold(id),
         getHouseholdChores(id),
         fetchHouseholdMembers(id),
       ]);
 
       setHousehold(fetchedHousehold);
-      setChores(fetchedChores);
       setIsDataLoading(false);
     };
 
