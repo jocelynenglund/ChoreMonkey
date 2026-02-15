@@ -85,8 +85,15 @@ export default function HouseholdDashboard() {
     chores: storeChores,
   } = useHouseholdStore();
 
-  // Connect to SignalR for real-time updates (optional - app works without it)
-  const { isConnected: realtimeConnected, refresh: refreshData } = useHouseholdRealtime(id || null);
+  // SignalR disabled temporarily - causing crashes on free tier
+  // const { isConnected: realtimeConnected, refresh: refreshData } = useHouseholdRealtime(id || null);
+  const realtimeConnected = false;
+  const refreshData = () => {
+    if (id) {
+      getHouseholdChores(id);
+      fetchHouseholdMembers(id);
+    }
+  };
 
   const members = getHouseholdMembers(id || '');
   const currentMember = members.find((m) => m.id === currentMemberId);
