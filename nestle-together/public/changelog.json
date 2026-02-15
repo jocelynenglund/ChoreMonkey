@@ -1,6 +1,15 @@
 {
-  "generated": "2026-02-15T13:57:33.043Z",
+  "generated": "2026-02-15T14:10:22.602Z",
   "commits": [
+    {
+      "hash": "8fbd925b0475a4f78a0b66957f5f140a16ad8d79",
+      "shortHash": "8fbd925",
+      "message": "feat: Team Overview - admin view of all member chores with status",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Team Overview - admin view of all member chores with status"
+    },
     {
       "hash": "9cd3b602489c9572c6e74b0695056f40afcc7b64",
       "shortHash": "9cd3b60",
@@ -171,15 +180,6 @@
       "author": "ItsyBOT",
       "type": "fix",
       "displayMessage": "Force fixed width on member containers to prevent overflow"
-    },
-    {
-      "hash": "9b674757cd4d7a94b5c811a362bdc870fbda90c3",
-      "shortHash": "9b67475",
-      "message": "fix: proper text truncation with explicit width and overflow",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Proper text truncation with explicit width and overflow"
     }
   ]
 }
