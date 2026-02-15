@@ -20,14 +20,22 @@ import type { Household, Chore, ChoreFrequency } from '@/types/household';
 function StatusMarquee({ text }: { text: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
-  const [shouldScroll, setShouldScroll] = useState(false);
+  const [shouldScroll, setShouldScroll] = useState<boolean | null>(null);
 
   useEffect(() => {
-    if (containerRef.current && textRef.current) {
-      const containerWidth = containerRef.current.offsetWidth;
-      const textWidth = textRef.current.scrollWidth;
-      setShouldScroll(textWidth > containerWidth - 40); // 40px for padding + emoji
-    }
+    // Measure after render
+    const measure = () => {
+      if (containerRef.current && textRef.current) {
+        const containerWidth = containerRef.current.offsetWidth;
+        const textWidth = textRef.current.offsetWidth;
+        setShouldScroll(textWidth > containerWidth - 32);
+      }
+    };
+    
+    // Measure immediately and after a short delay (for fonts/layout)
+    measure();
+    const timer = setTimeout(measure, 100);
+    return () => clearTimeout(timer);
   }, [text]);
 
   return (
@@ -35,7 +43,7 @@ function StatusMarquee({ text }: { text: string }) {
       ref={containerRef}
       className="mt-3 py-2 bg-muted/50 rounded-md overflow-hidden"
     >
-      <div className={shouldScroll ? "animate-marquee whitespace-nowrap" : "px-4"}>
+      <div className={`whitespace-nowrap ${shouldScroll ? 'animate-marquee' : 'px-4 text-center'}`}>
         <span ref={textRef} className="text-sm text-muted-foreground">
           💬 {text}
         </span>
