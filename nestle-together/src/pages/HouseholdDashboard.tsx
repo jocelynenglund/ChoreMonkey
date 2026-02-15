@@ -281,8 +281,8 @@ export default function HouseholdDashboard() {
             {(members ?? []).map((member) => (
               <div
                 key={member.id}
-                className="relative group"
-                style={{ width: '64px', minWidth: '64px', maxWidth: '64px' }}
+                className="relative group flex-shrink-0"
+                style={{ width: '72px', minWidth: '72px' }}
               >
                 <button
                   className="flex flex-col items-center gap-1 cursor-pointer w-full"
@@ -302,7 +302,7 @@ export default function HouseholdDashboard() {
                     className="text-xs text-muted-foreground text-center"
                     style={{ 
                       display: 'block',
-                      width: '64px',
+                      width: '72px',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap'
