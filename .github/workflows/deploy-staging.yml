@@ -1,6 +1,10 @@
 name: Deploy to Staging (labs)
 
 on:
+  push:
+    branches:
+      - 'feature/**'
+      - 'refactor/**'
   workflow_dispatch:
     inputs:
       branch:
@@ -18,7 +22,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.inputs.branch }}
+          ref: ${{ github.event.inputs.branch || github.ref }}
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
