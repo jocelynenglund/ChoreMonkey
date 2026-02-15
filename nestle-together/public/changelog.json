@@ -1,6 +1,33 @@
 {
-  "generated": "2026-02-15T09:54:04.133Z",
+  "generated": "2026-02-15T12:55:11.181Z",
   "commits": [
+    {
+      "hash": "d2663454c7274a8c4a3b1f19767bed88ced2bac1",
+      "shortHash": "d266345",
+      "message": "fix: show date instead of time for past day completions",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Show date instead of time for past day completions"
+    },
+    {
+      "hash": "992156f55d84ac21128c5b2506a329c5b47fb3e3",
+      "shortHash": "992156f",
+      "message": "Update deploy.yml",
+      "date": "2026-02-15",
+      "author": "Jocelyn Englund",
+      "type": "update",
+      "displayMessage": "Update deploy.yml"
+    },
+    {
+      "hash": "1b00723a9da77f60fce7456cdfe97556086a4933",
+      "shortHash": "1b00723",
+      "message": "feat: add What's New changelog on logo click",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Add What's New changelog on logo click"
+    },
     {
       "hash": "715562cb015503211d7fb5b38c158426d38a9098",
       "shortHash": "715562c",
@@ -153,33 +180,6 @@
       "author": "ItsyBOT",
       "type": "feature",
       "displayMessage": "Re-add SignalR with connection status indicator"
-    },
-    {
-      "hash": "990f294533cb396aa5a6a08b148871d1cca34b68",
-      "shortHash": "990f294",
-      "message": "fix: handle null status from API",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Handle null status from API"
-    },
-    {
-      "hash": "bd3e3ce1e9bef027537e8ffd4ad8e917501f7184",
-      "shortHash": "bd3e3ce",
-      "message": "fix: guard all remaining array operations",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Guard all remaining array operations"
-    },
-    {
-      "hash": "4e55084a20d92f24ed6d407ad554c9004d087708",
-      "shortHash": "4e55084",
-      "message": "fix: add comprehensive null guards for all array operations",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Add comprehensive null guards for all array operations"
     }
   ]
 }
