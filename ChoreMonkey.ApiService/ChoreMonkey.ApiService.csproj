@@ -4,9 +4,6 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <!-- Embed git info into assembly -->
-    <SourceRevisionId Condition="'$(SourceRevisionId)' == ''">local</SourceRevisionId>
-    <InformationalVersion>$(SourceRevisionId)</InformationalVersion>
   </PropertyGroup>
 
   <ItemGroup>

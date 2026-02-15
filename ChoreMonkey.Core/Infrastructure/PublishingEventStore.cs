@@ -64,16 +64,7 @@ public class PublishingEventStore(IEventStore inner, IPublisher publisher) : IEv
     {
         if (@event is INotification notification)
         {
-            try
-            {
-                Console.WriteLine($"[SignalR] Publishing event: {notification.GetType().Name}");
-                await publisher.Publish(notification);
-                Console.WriteLine($"[SignalR] Published event: {notification.GetType().Name}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[SignalR] Error publishing {notification.GetType().Name}: {ex.Message}");
-            }
+            await publisher.Publish(notification);
         }
     }
 
