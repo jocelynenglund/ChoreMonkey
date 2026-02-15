@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using Xunit;
 
-namespace ChoreMonkey.IntegrationTests;
+namespace ChoreMonkey.IntegrationTests.Activity;
 
 public class TeamOverviewTests(ApiFixture fixture) : IClassFixture<ApiFixture>
 {

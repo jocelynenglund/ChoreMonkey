@@ -1,4 +1,4 @@
-namespace ChoreMonkey.IntegrationTests;
+namespace ChoreMonkey.IntegrationTests.Household;
 
 [Collection(nameof(ApiCollection))]
 public class HouseholdTests(ApiFixture fixture)

@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 
-namespace ChoreMonkey.IntegrationTests;
+namespace ChoreMonkey.IntegrationTests.Activity;
 
 public class CompletionTimelineTests(ApiFixture fixture) : IClassFixture<ApiFixture>
 {

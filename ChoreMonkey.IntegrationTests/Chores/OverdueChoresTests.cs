@@ -1,4 +1,4 @@
-namespace ChoreMonkey.IntegrationTests;
+namespace ChoreMonkey.IntegrationTests.Chores;
 
 [Collection(nameof(ApiCollection))]
 public class OverdueChoresTests(ApiFixture fixture)

@@ -1,4 +1,4 @@
-namespace ChoreMonkey.IntegrationTests;
+namespace ChoreMonkey.IntegrationTests.Invites;
 
 [Collection(nameof(ApiCollection))]
 public class InviteTests(ApiFixture fixture)

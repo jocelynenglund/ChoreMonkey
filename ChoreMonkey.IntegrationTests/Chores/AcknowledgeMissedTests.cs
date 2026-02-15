@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 
-namespace ChoreMonkey.IntegrationTests;
+namespace ChoreMonkey.IntegrationTests.Chores;
 
 public class AcknowledgeMissedTests(ApiFixture fixture) : IClassFixture<ApiFixture>
 {
