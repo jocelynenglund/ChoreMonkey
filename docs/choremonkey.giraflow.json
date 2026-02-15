@@ -656,7 +656,7 @@
         {
           "name": "Invalid PIN rejected",
           "steps": [
-            { "type": "command", "when": { "choreId": "c-001", "adminPin": 0000 }, "fails": "Invalid PIN" }
+            { "type": "command", "when": { "choreId": "c-001", "adminPin": 9999 }, "fails": "Invalid PIN" }
           ]
         }
       ]
