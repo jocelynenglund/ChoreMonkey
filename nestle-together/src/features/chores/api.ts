@@ -10,7 +10,9 @@ export async function fetchChores(householdId: string): Promise<Chore[]> {
   }
 
   const data = await response.json();
+  console.log('[DEBUG] Raw chores API response:', data);
   const choreArray = Array.isArray(data) ? data : (data.chores ?? []);
+  console.log('[DEBUG] Chore array:', choreArray);
   
   return choreArray.map((c: Record<string, unknown>) => {
     const frequency = c.frequency as import('./types').ChoreFrequency | undefined;
@@ -24,7 +26,7 @@ export async function fetchChores(householdId: string): Promise<Chore[]> {
       householdId,
       displayName: c.displayName as string,
       description: (c.description || '') as string,
-      assignedTo: (c.assignedTo as string[] | undefined)?.map(id => String(id)),
+      assignedTo: c.assignedTo as string[] | undefined,
       assignedToAll: c.assignedToAll as boolean | undefined,
       completed,
       createdAt: c.createdAt ? new Date(c.createdAt as string) : new Date(),
