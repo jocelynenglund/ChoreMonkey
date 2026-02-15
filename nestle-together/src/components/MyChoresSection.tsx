@@ -59,9 +59,9 @@ export function MyChoresSection({ householdId, memberId, onCompleteChore }: MyCh
     );
   }
 
-  const hasOverdue = myChores.overdue.length > 0;
-  const hasPending = myChores.pending.length > 0;
-  const hasCompleted = myChores.completed.length > 0;
+  const hasOverdue = (myChores.overdue?.length ?? 0) > 0;
+  const hasPending = (myChores.pending?.length ?? 0) > 0;
+  const hasCompleted = (myChores.completed?.length ?? 0) > 0;
   const allDone = !hasOverdue && !hasPending;
 
   return (
@@ -87,11 +87,11 @@ export function MyChoresSection({ householdId, memberId, onCompleteChore }: MyCh
               <AlertTriangle className="h-5 w-5 text-red-600" />
               <h3 className="font-semibold text-red-800">Overdue</h3>
               <Badge variant="destructive" className="ml-auto">
-                {myChores.overdue.length}
+                {myChores.overdue?.length ?? 0}
               </Badge>
             </div>
             <ul className="space-y-2">
-              {myChores.overdue.map((chore) => (
+              {(myChores.overdue ?? []).map((chore) => (
                 <li
                   key={`${chore.choreId}-${chore.periodKey}`}
                   className="flex items-center justify-between p-3 bg-white rounded-md border border-red-200"
@@ -139,11 +139,11 @@ export function MyChoresSection({ householdId, memberId, onCompleteChore }: MyCh
               <Clock className="h-5 w-5 text-amber-600" />
               <h3 className="font-semibold">To Do</h3>
               <Badge variant="secondary" className="ml-auto">
-                {myChores.pending.length}
+                {myChores.pending?.length ?? 0}
               </Badge>
             </div>
             <ul className="space-y-2">
-              {myChores.pending.map((chore) => (
+              {(myChores.pending ?? []).map((chore) => (
                 <li
                   key={chore.choreId}
                   className="flex items-center justify-between p-3 bg-muted/50 rounded-md cursor-pointer hover:bg-muted transition-colors"
@@ -178,13 +178,13 @@ export function MyChoresSection({ householdId, memberId, onCompleteChore }: MyCh
                 <CheckCircle2 className="h-5 w-5 text-green-600" />
                 <span className="font-semibold">Completed</span>
                 <Badge variant="secondary" className="ml-2 bg-green-100 text-green-700">
-                  {myChores.completed.length}
+                  {myChores.completed?.length ?? 0}
                 </Badge>
               </div>
             </AccordionTrigger>
             <AccordionContent className="px-4 pb-4">
               <ul className="space-y-2">
-                {myChores.completed.map((chore) => (
+                {(myChores.completed ?? []).map((chore) => (
                   <li
                     key={chore.choreId}
                     className="flex items-center justify-between p-2 text-sm"

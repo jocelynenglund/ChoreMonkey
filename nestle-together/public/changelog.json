@@ -1,6 +1,33 @@
 {
-  "generated": "2026-02-15T06:40:16.852Z",
+  "generated": "2026-02-15T07:13:51.266Z",
   "commits": [
+    {
+      "hash": "fbcd66e8d392d393597151bed60b2513c6ffeb5d",
+      "shortHash": "fbcd66e",
+      "message": "feat: activity read model as JSON files with rebuild endpoint",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Activity read model as JSON files with rebuild endpoint"
+    },
+    {
+      "hash": "4c8797fc894320aacff0440ed9d63a3195a54016",
+      "shortHash": "4c8797f",
+      "message": "feat: status input as textarea",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Status input as textarea"
+    },
+    {
+      "hash": "06920cb08043aecf078abab26e79184cf910ce19",
+      "shortHash": "06920cb",
+      "message": "feat: What's New changelog from git history",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "What's New changelog from git history"
+    },
     {
       "hash": "dd7551da1cfc6ba7945009494898a15843da5187",
       "shortHash": "dd7551d",
@@ -153,33 +180,6 @@
       "author": "ItsyBOT",
       "type": "feature",
       "displayMessage": "Weekly-anyday frequency + personal completion view"
-    },
-    {
-      "hash": "cd4044f2ed6c900b928bd57d58066c993c5630bf",
-      "shortHash": "cd4044f",
-      "message": "fix: 'Everyone' chores appear in My Chores section",
-      "date": "2026-02-14",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "'Everyone' chores appear in My Chores section"
-    },
-    {
-      "hash": "139705309caf109ab61b0718480186f75d330f7e",
-      "shortHash": "1397053",
-      "message": "feat: Add 'My Chores' section at top of dashboard",
-      "date": "2026-02-14",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Add 'My Chores' section at top of dashboard"
-    },
-    {
-      "hash": "c219b87ec641a57e99fbaf98032738b6d41ffba5",
-      "shortHash": "c219b87",
-      "message": "feat: Add completion timeline read model and UI",
-      "date": "2026-02-14",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Add completion timeline read model and UI"
     }
   ]
 }
