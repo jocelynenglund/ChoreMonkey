@@ -193,10 +193,12 @@ export function MyChoresSection({ householdId, memberId, onCompleteChore }: MyCh
                       {chore.displayName}
                     </span>
                     <span className="text-xs text-muted-foreground">
-                      {chore.completedAt.toLocaleTimeString([], { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                      })}
+                      {chore.completedAt instanceof Date 
+                        ? chore.completedAt.toLocaleTimeString([], { 
+                            hour: '2-digit', 
+                            minute: '2-digit' 
+                          })
+                        : ''}
                     </span>
                   </li>
                 ))}

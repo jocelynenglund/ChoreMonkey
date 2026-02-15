@@ -1,6 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import { LogOut, ClipboardList } from 'lucide-react';
+import { useHouseholdRealtime } from '@/hooks/useHouseholdRealtime';
+import { ConnectionStatus } from '@/components/ConnectionStatus';
 
 // Smart marquee that only scrolls when text overflows
 function StatusMarquee({ text }: { text: string }) {
@@ -62,6 +64,7 @@ export default function HouseholdDashboard() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [profileOpen, setProfileOpen] = useState(false);
   const [hoveredMemberStatus, setHoveredMemberStatus] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const {
     isAuthenticated,
@@ -82,6 +85,31 @@ export default function HouseholdDashboard() {
 
   const members = getHouseholdMembers(id || '') || [];
   const currentMember = currentMemberId ? members.find((m) => m.id === currentMemberId) : undefined;
+
+  // Refresh all data
+  const refreshData = useCallback(async () => {
+    if (!id) return;
+    setIsRefreshing(true);
+    try {
+      const [fetchedHousehold, fetchedChores] = await Promise.all([
+        getHousehold(id),
+        getHouseholdChores(id),
+        fetchHouseholdMembers(id),
+      ]);
+      setHousehold(fetchedHousehold);
+      setChores(fetchedChores);
+      setRefreshKey((k) => k + 1);
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [id, getHousehold, getHouseholdChores, fetchHouseholdMembers]);
+
+  // Real-time updates via SignalR
+  const { connectionState, reconnect } = useHouseholdRealtime({
+    householdId: id ?? null,
+    onRefreshNeeded: refreshData,
+    enabled: isAuthenticated && currentHouseholdId === id,
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -204,6 +232,12 @@ export default function HouseholdDashboard() {
             </div>
 
             <div className="flex items-center gap-2">
+              <ConnectionStatus
+                connectionState={connectionState}
+                onRefresh={refreshData}
+                onReconnect={reconnect}
+                isRefreshing={isRefreshing}
+              />
               {currentMember && (
                 <button
                   onClick={() => setProfileOpen(true)}

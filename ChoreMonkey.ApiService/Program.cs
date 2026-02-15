@@ -45,6 +45,7 @@ if (app.Environment.IsDevelopment())
 app.MapDefaultEndpoints();
 
 app.MapChoreMonkeyEndpoints();
+app.MapChoreMonkeyHub();
 
 // Debug endpoint to check data path
 app.MapGet("/api/debug/config", () => {

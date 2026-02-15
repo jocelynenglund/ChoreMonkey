@@ -24,6 +24,8 @@ using ChoreMonkey.Core.Feature.MyChores;
 using ChoreMonkey.Core.Feature.AcknowledgeMissed;
 using ChoreMonkey.Core.Feature.ChangeMemberNickname;
 using ChoreMonkey.Core.Feature.ChangeMemberStatus;
+using ChoreMonkey.Core.Infrastructure;
+using ChoreMonkey.Core.Infrastructure.SignalR;
 
 namespace ChoreMonkey.Core;
 
@@ -34,9 +36,34 @@ public static class Initialization
         // Use environment variable for data path, default to ./data for local dev
         var dataPath = Environment.GetEnvironmentVariable("EVENTSTORE_PATH") 
             ?? Path.Combine(Directory.GetCurrentDirectory(), "data");
-        return services.AddFileEventStore(dataPath)
-            .InstallFeatures();
-
+        
+        // Add MediatR for event broadcasting
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<HouseholdHub>());
+        
+        // Add SignalR
+        services.AddSignalR();
+        
+        // Add FileEventStore with PublishingEventStore decorator
+        services.AddFileEventStore(dataPath);
+        
+        // Manually decorate IEventStore with PublishingEventStore
+        var innerDescriptor = services.FirstOrDefault(d => d.ServiceType == typeof(FileEventStore.IEventStore));
+        if (innerDescriptor != null)
+        {
+            services.Remove(innerDescriptor);
+            services.AddScoped<FileEventStore.IEventStore>(sp =>
+            {
+                var inner = innerDescriptor.ImplementationType != null 
+                    ? (FileEventStore.IEventStore)ActivatorUtilities.CreateInstance(sp, innerDescriptor.ImplementationType)
+                    : innerDescriptor.ImplementationFactory != null
+                        ? (FileEventStore.IEventStore)innerDescriptor.ImplementationFactory(sp)
+                        : throw new InvalidOperationException("Cannot create IEventStore");
+                var publisher = sp.GetRequiredService<MediatR.IPublisher>();
+                return new PublishingEventStore(inner, publisher);
+            });
+        }
+        
+        return services.InstallFeatures();
     }
     public static IServiceCollection InstallFeatures(this IServiceCollection services)
     {
@@ -93,4 +120,9 @@ public static class Initialization
         return app;
     }
 
+    public static IEndpointRouteBuilder MapChoreMonkeyHub(this IEndpointRouteBuilder app)
+    {
+        app.MapHub<HouseholdHub>("/hubs/household");
+        return app;
+    }
 }
