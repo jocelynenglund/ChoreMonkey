@@ -1,6 +1,15 @@
 {
-  "generated": "2026-02-15T15:47:59.868Z",
+  "generated": "2026-02-15T15:50:50.493Z",
   "commits": [
+    {
+      "hash": "41db55038198316434f1337033a512b3e9d6fb1b",
+      "shortHash": "41db550",
+      "message": "feat: Add build versioning for API and frontend",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Add build versioning for API and frontend"
+    },
     {
       "hash": "ae04981eef3f262231ce973dae29853a9e8edfec",
       "shortHash": "ae04981",
@@ -171,15 +180,6 @@
       "author": "Jocelyn Englund",
       "type": "update",
       "displayMessage": "Update deploy-staging.yml to handle branch input"
-    },
-    {
-      "hash": "af9c0ddd0e3728af151ce7ae4dbd9178fc157455",
-      "shortHash": "af9c0dd",
-      "message": "fix: proper member/chore ID mapping with avatar colors",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Proper member/chore ID mapping with avatar colors"
     }
   ]
 }

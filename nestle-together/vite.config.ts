@@ -19,7 +19,13 @@ export default defineConfig(({ mode }) => ({
     },
   },
   define: {
-    __BUILD_VERSION__: JSON.stringify(process.env.BUILD_VERSION || 'dev'),
+    __BUILD_VERSION__: JSON.stringify(
+      process.env.BUILD_VERSION || 
+      (() => {
+        const now = new Date();
+        return `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')}.dev`;
+      })()
+    ),
     __BUILD_TIME__: JSON.stringify(process.env.BUILD_TIME || new Date().toISOString()),
     __GIT_SHA__: JSON.stringify(process.env.GIT_SHA || 'local'),
   },

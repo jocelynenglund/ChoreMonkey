@@ -52,16 +52,20 @@ app.MapChoreMonkeyHub();
 
 // Version endpoint
 app.MapGet("/api/version", () => {
-    var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-    var infoVersion = assembly.GetCustomAttribute<System.Reflection.AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "unknown";
+    var assembly = Assembly.GetExecutingAssembly();
+    var infoVersion = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "unknown";
     // InformationalVersion may contain git SHA or "version+sha" format
     var gitSha = infoVersion.Contains('+') ? infoVersion.Split('+').Last() : infoVersion;
-    var version = assembly.GetName().Version?.ToString() ?? "1.0.0";
-    var buildTime = System.IO.File.GetLastWriteTimeUtc(assembly.Location).ToString("o");
+    if (gitSha.Length > 7) gitSha = gitSha[..7];
+    
+    var buildTime = File.GetLastWriteTimeUtc(assembly.Location);
+    // Human-readable version: YYYY.MM.DD.sha
+    var version = $"{buildTime:yyyy.MM.dd}.{gitSha}";
+    
     return Results.Ok(new { 
         version,
-        buildTime,
-        gitSha = gitSha.Length > 7 ? gitSha[..7] : gitSha,
+        buildTime = buildTime.ToString("o"),
+        gitSha,
         component = "api"
     });
 });

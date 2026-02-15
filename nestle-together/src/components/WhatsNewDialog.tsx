@@ -62,6 +62,7 @@ export function WhatsNewDialog({ variant = 'icon', open: controlledOpen, onOpenC
 
   // Frontend version from build-time injection
   const frontendVersion = {
+    version: typeof __BUILD_VERSION__ !== 'undefined' ? __BUILD_VERSION__ : 'dev',
     gitSha: typeof __GIT_SHA__ !== 'undefined' ? __GIT_SHA__ : 'local',
     buildTime: typeof __BUILD_TIME__ !== 'undefined' ? __BUILD_TIME__ : 'unknown',
   };
@@ -113,18 +114,18 @@ export function WhatsNewDialog({ variant = 'icon', open: controlledOpen, onOpenC
           </DialogTitle>
           {/* Version info */}
           <div className="flex flex-wrap gap-3 pt-2 text-xs text-muted-foreground">
-            <div className="flex items-center gap-1.5" title={`Built: ${frontendVersion.buildTime}`}>
+            <div className="flex items-center gap-1.5" title={`SHA: ${frontendVersion.gitSha}\nBuilt: ${frontendVersion.buildTime}`}>
               <Monitor className="w-3.5 h-3.5" />
               <span>Web:</span>
               <code className="bg-muted px-1.5 py-0.5 rounded font-mono">
-                {frontendVersion.gitSha.slice(0, 7)}
+                {frontendVersion.version}
               </code>
             </div>
-            <div className="flex items-center gap-1.5" title={apiVersion?.buildTime ? `Built: ${apiVersion.buildTime}` : ''}>
+            <div className="flex items-center gap-1.5" title={apiVersion ? `SHA: ${apiVersion.gitSha}\nBuilt: ${apiVersion.buildTime}` : ''}>
               <Server className="w-3.5 h-3.5" />
               <span>API:</span>
               <code className="bg-muted px-1.5 py-0.5 rounded font-mono">
-                {apiVersion?.gitSha?.slice(0, 7) || '...'}
+                {apiVersion?.version || '...'}
               </code>
             </div>
           </div>
