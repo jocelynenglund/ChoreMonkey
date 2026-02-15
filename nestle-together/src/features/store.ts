@@ -113,6 +113,7 @@ export const useAppStore = create<AppState>()(
           set({
             currentHouseholdId: data.householdId,
             currentMemberId: data.memberId,
+            currentPinCode: pinCode,
             isAuthenticated: true,
             isAdmin: true,
             members: [member],
