@@ -281,7 +281,7 @@ export default function HouseholdDashboard() {
             {(members ?? []).map((member) => (
               <div
                 key={member.id}
-                className="flex flex-col items-center gap-1 w-16 flex-shrink-0 relative group"
+                className="flex flex-col items-center gap-1 w-16 min-w-16 max-w-16 flex-shrink-0 relative group overflow-hidden"
               >
                 <button
                   className="flex flex-col items-center gap-1 cursor-pointer w-full"
