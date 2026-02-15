@@ -39,7 +39,7 @@ ChoreMonkey/
 - Node.js 22+
 - GitHub Packages access for FileEventStore
 
-### Backend
+### Backend (Aspire)
 
 ```bash
 # Configure NuGet (one time)
@@ -48,9 +48,14 @@ dotnet nuget update source github \
   --password YOUR_GITHUB_TOKEN \
   --store-password-in-clear-text
 
-# Run
+# Run with Aspire (recommended)
+dotnet run --project ChoreMonkey.AppHost
+
+# Or run API directly
 dotnet run --project ChoreMonkey.ApiService
 ```
+
+The Aspire dashboard opens at https://localhost:17130 with telemetry, logs, and traces.
 
 ### Frontend
 
