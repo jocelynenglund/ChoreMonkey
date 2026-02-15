@@ -29,39 +29,50 @@ public class PublishingEventStore(IEventStore inner, IPublisher publisher) : IEv
     public async Task<long> AppendToStreamAsync(StreamId streamId, IStoreableEvent @event, ExpectedVersion expectedVersion)
     {
         var version = await inner.AppendToStreamAsync(streamId, @event, expectedVersion);
-        
-        // Publish event for SignalR handlers (fire and forget, don't block the request)
-        if (@event is INotification notification)
-        {
-            _ = Task.Run(async () =>
-            {
-                try
-                {
-                    await publisher.Publish(notification);
-                }
-                catch
-                {
-                    // Ignore publishing errors - SignalR broadcast is best-effort
-                }
-            });
-        }
-        
+        await PublishEventAsync(@event);
         return version;
     }
 
-    public Task<long> AppendToStreamAsync(StreamId streamId, string? correlationId, IStoreableEvent @event, ExpectedVersion expectedVersion)
+    public async Task<long> AppendToStreamAsync(StreamId streamId, string? correlationId, IStoreableEvent @event, ExpectedVersion expectedVersion)
     {
-        return inner.AppendToStreamAsync(streamId, correlationId, @event, expectedVersion);
+        var version = await inner.AppendToStreamAsync(streamId, correlationId, @event, expectedVersion);
+        await PublishEventAsync(@event);
+        return version;
     }
 
-    public Task<long> AppendToStreamAsync(StreamId streamId, IEnumerable<IStoreableEvent> events, ExpectedVersion expectedVersion)
+    public async Task<long> AppendToStreamAsync(StreamId streamId, IEnumerable<IStoreableEvent> events, ExpectedVersion expectedVersion)
     {
-        return inner.AppendToStreamAsync(streamId, events, expectedVersion);
+        var version = await inner.AppendToStreamAsync(streamId, events, expectedVersion);
+        foreach (var @event in events)
+        {
+            await PublishEventAsync(@event);
+        }
+        return version;
     }
 
-    public Task<long> AppendToStreamAsync(StreamId streamId, string? correlationId, IEnumerable<IStoreableEvent> events, ExpectedVersion expectedVersion)
+    public async Task<long> AppendToStreamAsync(StreamId streamId, string? correlationId, IEnumerable<IStoreableEvent> events, ExpectedVersion expectedVersion)
     {
-        return inner.AppendToStreamAsync(streamId, correlationId, events, expectedVersion);
+        var version = await inner.AppendToStreamAsync(streamId, correlationId, events, expectedVersion);
+        foreach (var @event in events)
+        {
+            await PublishEventAsync(@event);
+        }
+        return version;
+    }
+    
+    private async Task PublishEventAsync(IStoreableEvent @event)
+    {
+        if (@event is INotification notification)
+        {
+            try
+            {
+                await publisher.Publish(notification);
+            }
+            catch
+            {
+                // Ignore publishing errors - SignalR broadcast is best-effort
+            }
+        }
     }
 
     // Fetch methods
