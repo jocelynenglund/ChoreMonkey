@@ -54,6 +54,7 @@ import { SettingsDialog } from '@/components/SettingsDialog';
 import { MyChoresSection } from '@/components/MyChoresSection';
 import { ProfileDialog } from '@/components/ProfileDialog';
 import { RemoveMemberDialog } from '@/components/RemoveMemberDialog';
+import { WhatsNewDialog } from '@/components/WhatsNewDialog';
 import type { Household, Chore, ChoreFrequency } from '@/types/household';
 
 export default function HouseholdDashboard() {
@@ -66,6 +67,7 @@ export default function HouseholdDashboard() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [hoveredMemberStatus, setHoveredMemberStatus] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [whatsNewOpen, setWhatsNewOpen] = useState(false);
 
   const {
     isAuthenticated,
@@ -220,9 +222,13 @@ export default function HouseholdDashboard() {
         <div className="max-w-3xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl gradient-monkey flex items-center justify-center">
+              <button
+                onClick={() => setWhatsNewOpen(true)}
+                className="w-10 h-10 rounded-xl gradient-monkey flex items-center justify-center hover:scale-105 transition-transform"
+                title="What's New"
+              >
                 <span className="text-xl">🐵</span>
-              </div>
+              </button>
               <div>
                 <h1 className="font-bold text-lg leading-tight">
                   {household.name}
@@ -435,6 +441,13 @@ export default function HouseholdDashboard() {
           avatarColor={currentMember.avatarColor}
         />
       )}
+
+      {/* What's New Dialog */}
+      <WhatsNewDialog
+        variant="controlled"
+        open={whatsNewOpen}
+        onOpenChange={setWhatsNewOpen}
+      />
     </div>
   );
 }
