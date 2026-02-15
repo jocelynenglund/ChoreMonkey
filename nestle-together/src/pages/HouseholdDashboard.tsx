@@ -297,7 +297,7 @@ export default function HouseholdDashboard() {
                       size="md"
                     />
                   </div>
-                  <span className="text-xs text-muted-foreground truncate max-w-full text-center block">
+                  <span className="text-xs text-muted-foreground text-center block w-16 overflow-hidden text-ellipsis whitespace-nowrap">
                     {member.nickname}
                   </span>
                 </button>
