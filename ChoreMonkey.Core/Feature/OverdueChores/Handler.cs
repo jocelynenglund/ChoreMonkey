@@ -49,9 +49,27 @@ internal class Handler(IEventStore store)
         
         var today = DateTime.UtcNow.Date;
         
-        // Get all members
+        // Get all members with current nicknames
         var members = householdEvents.OfType<MemberJoinedHousehold>()
             .ToDictionary(e => e.MemberId, e => e.Nickname);
+        
+        // Apply nickname changes
+        foreach (var change in householdEvents.OfType<MemberNicknameChanged>())
+        {
+            if (members.ContainsKey(change.MemberId))
+            {
+                members[change.MemberId] = change.NewNickname;
+            }
+        }
+        
+        // Remove removed members
+        var removedMemberIds = householdEvents.OfType<MemberRemoved>()
+            .Select(e => e.MemberId)
+            .ToHashSet();
+        foreach (var removedId in removedMemberIds)
+        {
+            members.Remove(removedId);
+        }
         
         // Get all chores with frequencies
         var chores = choreEvents.OfType<ChoreCreated>()
