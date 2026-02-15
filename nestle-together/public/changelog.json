@@ -1,6 +1,24 @@
 {
-  "generated": "2026-02-15T07:13:51.266Z",
+  "generated": "2026-02-15T07:28:03.463Z",
   "commits": [
+    {
+      "hash": "39b10bb1dbf43c4ee07e6451e14e36fcc14417f2",
+      "shortHash": "39b10bb",
+      "message": "fix: SignalR race condition - prevent concurrent connect/disconnect",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "SignalR race condition - prevent concurrent connect/disconnect"
+    },
+    {
+      "hash": "87d456577fc7f889bb64d0495fc71de9ee8252f4",
+      "shortHash": "87d4565",
+      "message": "fix: add defensive null checks for all .length accesses",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Add defensive null checks for all .length accesses"
+    },
     {
       "hash": "fbcd66e8d392d393597151bed60b2513c6ffeb5d",
       "shortHash": "fbcd66e",
@@ -162,24 +180,6 @@
       "author": "ItsyBOT",
       "type": "fix",
       "displayMessage": "Correct og-image dimensions + cache bust"
-    },
-    {
-      "hash": "d22f0c0b22d81706e2ef03628c2af6291744a609",
-      "shortHash": "d22f0c0",
-      "message": "feat: Add social preview image (og-image.jpg)",
-      "date": "2026-02-14",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Add social preview image (og-image.jpg)"
-    },
-    {
-      "hash": "ac246a60903173e2d25c75e688f65db5a79f17a6",
-      "shortHash": "ac246a6",
-      "message": "feat: Weekly-anyday frequency + personal completion view",
-      "date": "2026-02-14",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Weekly-anyday frequency + personal completion view"
     }
   ]
 }

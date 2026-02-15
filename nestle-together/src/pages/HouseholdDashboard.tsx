@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
-import { LogOut, ClipboardList } from 'lucide-react';
+import { LogOut, ClipboardList, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useHouseholdStore } from '@/stores/householdStore';
 import { useHouseholdRealtime } from '@/hooks/useHouseholdRealtime';
@@ -85,8 +85,8 @@ export default function HouseholdDashboard() {
     chores: storeChores,
   } = useHouseholdStore();
 
-  // Connect to SignalR for real-time updates
-  useHouseholdRealtime(id || null);
+  // Connect to SignalR for real-time updates (optional - app works without it)
+  const { isConnected: realtimeConnected, refresh: refreshData } = useHouseholdRealtime(id || null);
 
   const members = getHouseholdMembers(id || '');
   const currentMember = members.find((m) => m.id === currentMemberId);
@@ -225,6 +225,16 @@ export default function HouseholdDashboard() {
                     size="sm"
                   />
                 </button>
+              )}
+              {!realtimeConnected && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={refreshData}
+                  title="Refresh data"
+                >
+                  <RefreshCw className="w-5 h-5" />
+                </Button>
               )}
               <WhatsNewDialog />
               <SettingsDialog householdId={household.id} />

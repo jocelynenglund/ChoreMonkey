@@ -1,16 +1,29 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import { householdConnection, type HouseholdEvent } from '@/lib/signalr';
 import { useHouseholdStore } from '@/stores/householdStore';
 
 /**
  * Hook that connects to SignalR for real-time household updates.
- * Call this in the HouseholdDashboard component.
+ * SignalR is optional - app works without it, just no live updates.
  */
 export function useHouseholdRealtime(householdId: string | null) {
+  const [isConnected, setIsConnected] = useState(false);
+  const [connectionFailed, setConnectionFailed] = useState(false);
+  
   const fetchHouseholdChores = useHouseholdStore((s) => s.fetchHouseholdChores);
   const fetchHouseholdMembers = useHouseholdStore((s) => s.fetchHouseholdMembers);
   const currentMemberId = useHouseholdStore((s) => s.currentMemberId);
   const fetchMyChores = useHouseholdStore((s) => s.fetchMyChores);
+
+  // Manual refresh function
+  const refresh = useCallback(() => {
+    if (!householdId) return;
+    fetchHouseholdChores(householdId);
+    fetchHouseholdMembers(householdId);
+    if (currentMemberId) {
+      fetchMyChores(householdId, currentMemberId);
+    }
+  }, [householdId, currentMemberId, fetchHouseholdChores, fetchHouseholdMembers, fetchMyChores]);
 
   // Handle incoming events
   const handleEvent = useCallback(
@@ -24,9 +37,7 @@ export function useHouseholdRealtime(householdId: string | null) {
         case 'ChoreCreated':
         case 'ChoreAssigned':
         case 'ChoreDeleted':
-          // Refresh chore list
           fetchHouseholdChores(householdId);
-          // Also refresh my chores if we have a current member
           if (currentMemberId) {
             fetchMyChores(householdId, currentMemberId);
           }
@@ -35,7 +46,6 @@ export function useHouseholdRealtime(householdId: string | null) {
         case 'MemberJoined':
         case 'MemberNicknameChanged':
         case 'MemberStatusChanged':
-          // Refresh member list
           fetchHouseholdMembers(householdId);
           break;
       }
@@ -43,21 +53,36 @@ export function useHouseholdRealtime(householdId: string | null) {
     [householdId, currentMemberId, fetchHouseholdChores, fetchHouseholdMembers, fetchMyChores]
   );
 
-  // Connect to SignalR when household changes
+  // Connect to SignalR when household changes (non-blocking)
   useEffect(() => {
     if (!householdId) {
       householdConnection.disconnect();
+      setIsConnected(false);
       return;
     }
 
-    // Connect and subscribe to events
-    householdConnection.connect(householdId).catch((error) => {
-      console.error('[Realtime] Failed to connect:', error);
-    });
+    let cancelled = false;
+
+    // Try to connect, but don't block the app if it fails
+    householdConnection.connect(householdId)
+      .then(() => {
+        if (!cancelled) {
+          setIsConnected(true);
+          setConnectionFailed(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setConnectionFailed(true);
+          setIsConnected(false);
+          // App continues to work without real-time updates
+        }
+      });
 
     const unsubscribe = householdConnection.subscribe(handleEvent);
 
     return () => {
+      cancelled = true;
       unsubscribe();
     };
   }, [householdId, handleEvent]);
@@ -70,6 +95,8 @@ export function useHouseholdRealtime(householdId: string | null) {
   }, []);
 
   return {
-    isConnected: householdConnection.isConnected,
+    isConnected,
+    connectionFailed,
+    refresh,
   };
 }
