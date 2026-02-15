@@ -108,7 +108,7 @@ export function ChoreCard({
   };
 
   const handleAssignToAll = () => {
-    const allMemberIds = members.map(m => m.id);
+    const allMemberIds = (members ?? []).map(m => m.id);
     setSelectedMembers(allMemberIds);
     setAssignToAll(true);
     onAssign(allMemberIds, true);
@@ -199,8 +199,8 @@ export function ChoreCard({
             {/* Multi-user completion status */}
             {isRecurring && (chore.assignedToAll || assignedMembers.length > 1) && chore.memberCompletions && (
               <div className="flex items-center gap-2 mt-2 flex-wrap">
-                {chore.memberCompletions.map(mc => {
-                  const member = members.find(m => m.id === mc.memberId);
+                {(chore.memberCompletions ?? []).map(mc => {
+                  const member = (members ?? []).find(m => m.id === mc.memberId);
                   if (!member) return null;
                   return (
                     <div 
@@ -267,7 +267,7 @@ export function ChoreCard({
                   Everyone
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                {members.map((member) => (
+                {(members ?? []).map((member) => (
                   <DropdownMenuCheckboxItem
                     key={member.id}
                     checked={selectedMembers.includes(member.id)}
@@ -308,8 +308,8 @@ export function ChoreCard({
               <p className="text-sm text-muted-foreground italic">No completions yet</p>
             ) : (
               <div className="space-y-2 max-h-48 overflow-y-auto">
-                {history.slice(0, 10).map((completion, idx) => {
-                  const member = members.find(m => m.id === completion.completedBy);
+                {(history ?? []).slice(0, 10).map((completion, idx) => {
+                  const member = (members ?? []).find(m => m.id === completion.completedBy);
                   return (
                     <div 
                       key={idx} 

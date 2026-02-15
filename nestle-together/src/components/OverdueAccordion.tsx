@@ -43,7 +43,7 @@ export function OverdueAccordion({ householdId }: OverdueAccordionProps) {
     );
   }
 
-  const hasAnyOverdue = memberOverdue.some((m) => m.overdueCount > 0);
+  const hasAnyOverdue = (memberOverdue ?? []).some((m) => m.overdueCount > 0);
 
   if (!hasAnyOverdue) {
     return (

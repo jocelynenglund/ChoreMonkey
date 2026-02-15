@@ -130,10 +130,10 @@ export default function HouseholdDashboard() {
   };
 
   // Other chores: not assigned to me, not optional, not completed
-  const otherChores = chores.filter((c) => !c.isOptional && !isAssignedToMe(c) && !c.completed);
+  const otherChores = (chores ?? []).filter((c) => !c.isOptional && !isAssignedToMe(c) && !c.completed);
   
   // Bonus chores: optional and not completed
-  const bonusChores = chores.filter((c) => c.isOptional && !c.completed);
+  const bonusChores = (chores ?? []).filter((c) => c.isOptional && !c.completed);
 
   const handleAddChore = async (displayName: string, description: string, frequency?: ChoreFrequency, isOptional?: boolean, startDate?: Date) => {
     const newChore = await addChore(household.id, displayName, description, frequency, isOptional, startDate);
@@ -154,7 +154,7 @@ export default function HouseholdDashboard() {
 
   const openCompleteDialog = (choreOrId: Chore | string) => {
     if (typeof choreOrId === 'string') {
-      const chore = chores.find((c) => c.id === choreOrId);
+      const chore = (chores ?? []).find((c) => c.id === choreOrId);
       if (chore) setCompletingChore(chore);
     } else {
       setCompletingChore(choreOrId);
