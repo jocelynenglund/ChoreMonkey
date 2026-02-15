@@ -10,7 +10,7 @@ namespace ChoreMonkey.Core.Feature.CompletionTimeline;
 public record GetCompletionTimelineQuery(Guid HouseholdId, int? Limit = 50, int? Days = 7);
 
 public record ActivityEntry(
-    string Type,           // "completion", "assignment", "nickname_change", "status_change", "member_joined", "chore_created"
+    string Type,           // "completion", "assignment", "nickname_change", "status_change", "member_joined", "member_removed", "chore_created"
     string Description,    // Human-readable description
     DateTimeOffset Timestamp,
     Guid? ChoreId = null,
@@ -156,6 +156,20 @@ internal class Handler(IEventStore store)
                 $"New chore added: {e.DisplayName}",
                 ts,
                 e.ChoreId
+            ));
+        }
+
+        // Member removed
+        foreach (var e in householdEvents.OfType<MemberRemoved>())
+        {
+            var ts = ParseTimestamp(e.TimestampUtc);
+            if (ts < cutoff) continue;
+            
+            activities.Add(new ActivityEntry(
+                "member_removed",
+                $"{e.Nickname} was removed from the household",
+                ts,
+                MemberId: e.MemberId
             ));
         }
 

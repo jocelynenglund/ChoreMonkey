@@ -3,7 +3,8 @@ import {
   Clock, 
   CheckCircle2, 
   Users, 
-  UserPlus, 
+  UserPlus,
+  UserMinus,
   PenLine, 
   MessageSquare,
   Plus 
@@ -11,7 +12,7 @@ import {
 import { useHouseholdStore } from '@/stores/householdStore';
 
 interface ActivityEntry {
-  type: string;       // "completion", "assignment", "nickname_change", "status_change", "member_joined", "chore_created"
+  type: string;       // "completion", "assignment", "nickname_change", "status_change", "member_joined", "member_removed", "chore_created"
   description: string;
   timestamp: string;
   choreId?: string;
@@ -50,6 +51,8 @@ function getActivityIcon(type: string) {
       return <MessageSquare className="h-4 w-4 text-orange-500" />;
     case 'member_joined':
       return <UserPlus className="h-4 w-4 text-teal-500" />;
+    case 'member_removed':
+      return <UserMinus className="h-4 w-4 text-red-500" />;
     case 'chore_created':
       return <Plus className="h-4 w-4 text-primary" />;
     default:
