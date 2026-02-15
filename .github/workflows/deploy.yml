@@ -13,6 +13,8 @@ env:
 jobs:
   build-and-deploy-api:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.BUILD_VERSION }}
     
     steps:
       - uses: actions/checkout@v4
@@ -28,11 +30,15 @@ jobs:
             --password ${{ secrets.NUGET_AUTH_TOKEN }} \
             --store-password-in-clear-text
 
+      - name: Set version
+        id: version
+        run: echo "BUILD_VERSION=$(date -u +%Y.%m.%d).${{ github.run_number }}" >> $GITHUB_OUTPUT
+
       - run: dotnet restore
           
-      - run: dotnet build --configuration Release --no-restore -p:SourceRevisionId=${{ github.sha }}
+      - run: dotnet build --configuration Release --no-restore -p:InformationalVersion=${{ steps.version.outputs.BUILD_VERSION }}
       
-      - run: dotnet publish ChoreMonkey.ApiService/ChoreMonkey.ApiService.csproj -c Release -o ./publish -p:SourceRevisionId=${{ github.sha }}
+      - run: dotnet publish ChoreMonkey.ApiService/ChoreMonkey.ApiService.csproj -c Release -o ./publish -p:InformationalVersion=${{ steps.version.outputs.BUILD_VERSION }}
 
       - uses: azure/webapps-deploy@v3
         with:
@@ -42,6 +48,7 @@ jobs:
 
   build-and-deploy-frontend:
     runs-on: ubuntu-latest
+    needs: build-and-deploy-api
     
     steps:
       - uses: actions/checkout@v4
@@ -60,7 +67,7 @@ jobs:
       - name: Build frontend
         working-directory: nestle-together
         run: |
-          export BUILD_VERSION=$(date -u +%Y.%m.%d).${{ github.run_number }}
+          export BUILD_VERSION=${{ needs.build-and-deploy-api.outputs.version }}
           export BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
           export GIT_SHA=${{ github.sha }}
           export VITE_API_URL=https://itsybitsylist-api.azurewebsites.net
