@@ -14,6 +14,7 @@ import { CompletionTimeline } from '@/components/CompletionTimeline';
 import { SettingsDialog } from '@/components/SettingsDialog';
 import { MyChoresSection } from '@/components/MyChoresSection';
 import { ProfileDialog } from '@/components/ProfileDialog';
+import { WhatsNewDialog } from '@/components/WhatsNewDialog';
 import type { Household, Chore, ChoreFrequency } from '@/types/household';
 
 // Smart marquee that only scrolls when text overflows
@@ -225,6 +226,7 @@ export default function HouseholdDashboard() {
                   />
                 </button>
               )}
+              <WhatsNewDialog />
               <SettingsDialog householdId={household.id} />
               <Button
                 variant="ghost"

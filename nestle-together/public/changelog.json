@@ -1,0 +1,185 @@
+{
+  "generated": "2026-02-15T06:40:16.852Z",
+  "commits": [
+    {
+      "hash": "dd7551da1cfc6ba7945009494898a15843da5187",
+      "shortHash": "dd7551d",
+      "message": "Fix status marquee: measure correctly, center short text",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Fix status marquee: measure correctly, center short text"
+    },
+    {
+      "hash": "4e6611278be68a3e0479cc2cb443b6cfa9c646fd",
+      "shortHash": "4e66112",
+      "message": "Activity Recording Automation - Immutable Activity History (#17)",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "update",
+      "displayMessage": "Activity Recording Automation - Immutable Activity History (#17)"
+    },
+    {
+      "hash": "19ff3df37fd75a49706bea19f527884cda254afb",
+      "shortHash": "19ff3df",
+      "message": "SignalR Real-Time Updates + Profile Editor (#16)",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "update",
+      "displayMessage": "SignalR Real-Time Updates + Profile Editor (#16)"
+    },
+    {
+      "hash": "4d9b47929aead15815879638c1452887e3638218",
+      "shortHash": "4d9b479",
+      "message": "feat: Separate current/previous period tracking + acknowledge missed",
+      "date": "2026-02-14",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Separate current/previous period tracking + acknowledge missed"
+    },
+    {
+      "hash": "95cb1f977f4a921438f3e335bf54baf6ef49263e",
+      "shortHash": "95cb1f9",
+      "message": "fix: Include all members in memberCompletions when AssignToAll",
+      "date": "2026-02-14",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Include all members in memberCompletions when AssignToAll"
+    },
+    {
+      "hash": "b5986fcf1abbab93fdaa0fba4ca05e980c749fae",
+      "shortHash": "b5986fc",
+      "message": "refactor: Replace dashboard chore sections with MyChoresSection",
+      "date": "2026-02-14",
+      "author": "ItsyBOT",
+      "type": "refactor",
+      "displayMessage": "Replace dashboard chore sections with MyChoresSection"
+    },
+    {
+      "hash": "ed83b3dbbfd125a47c8bbc47e5af8c85f0fbaa06",
+      "shortHash": "ed83b3d",
+      "message": "feat: Add MyChoresSection frontend component",
+      "date": "2026-02-14",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Add MyChoresSection frontend component"
+    },
+    {
+      "hash": "4d4aa9b5f2b92ba25def594f7a26ad8f3071b0a7",
+      "shortHash": "4d4aa9b",
+      "message": "feat: Add My Chores personal read model",
+      "date": "2026-02-14",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Add My Chores personal read model"
+    },
+    {
+      "hash": "4f0b507663748c9f87c6152ca027c049d3896672",
+      "shortHash": "4f0b507",
+      "message": "feat: Overdue grace period + admin-only access",
+      "date": "2026-02-14",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Overdue grace period + admin-only access"
+    },
+    {
+      "hash": "69d6c22e409af786226bd7adc2f49f7f50195961",
+      "shortHash": "69d6c22",
+      "message": "ci: restore deploy workflow",
+      "date": "2026-02-14",
+      "author": "ItsyBOT",
+      "type": "update",
+      "displayMessage": "Ci: restore deploy workflow"
+    },
+    {
+      "hash": "43ae1452033e0af6b7d4231b8d98a04d15528693",
+      "shortHash": "43ae145",
+      "message": "fix: Truncate long member names with ellipsis",
+      "date": "2026-02-14",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Truncate long member names with ellipsis"
+    },
+    {
+      "hash": "988885e89d61f51740fa26f6772775c9fda4c131",
+      "shortHash": "988885e",
+      "message": "feat: Add start date to chores for testing overdue",
+      "date": "2026-02-14",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Add start date to chores for testing overdue"
+    },
+    {
+      "hash": "f8cf73c47c7335f047bb17785af237b849ce687d",
+      "shortHash": "f8cf73c",
+      "message": "feat: Settings dialog to change admin/member PINs",
+      "date": "2026-02-14",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Settings dialog to change admin/member PINs"
+    },
+    {
+      "hash": "e27474586a96165e3a8df15bdb521dddb15cb734",
+      "shortHash": "e274745",
+      "message": "feat: Admin/member access control with separate PINs",
+      "date": "2026-02-14",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Admin/member access control with separate PINs"
+    },
+    {
+      "hash": "0711361e652e5ba0cb59ab0667054953bf574041",
+      "shortHash": "0711361",
+      "message": "fix: Correct og-image dimensions + cache bust",
+      "date": "2026-02-14",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Correct og-image dimensions + cache bust"
+    },
+    {
+      "hash": "d22f0c0b22d81706e2ef03628c2af6291744a609",
+      "shortHash": "d22f0c0",
+      "message": "feat: Add social preview image (og-image.jpg)",
+      "date": "2026-02-14",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Add social preview image (og-image.jpg)"
+    },
+    {
+      "hash": "ac246a60903173e2d25c75e688f65db5a79f17a6",
+      "shortHash": "ac246a6",
+      "message": "feat: Weekly-anyday frequency + personal completion view",
+      "date": "2026-02-14",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Weekly-anyday frequency + personal completion view"
+    },
+    {
+      "hash": "cd4044f2ed6c900b928bd57d58066c993c5630bf",
+      "shortHash": "cd4044f",
+      "message": "fix: 'Everyone' chores appear in My Chores section",
+      "date": "2026-02-14",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "'Everyone' chores appear in My Chores section"
+    },
+    {
+      "hash": "139705309caf109ab61b0718480186f75d330f7e",
+      "shortHash": "1397053",
+      "message": "feat: Add 'My Chores' section at top of dashboard",
+      "date": "2026-02-14",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Add 'My Chores' section at top of dashboard"
+    },
+    {
+      "hash": "c219b87ec641a57e99fbaf98032738b6d41ffba5",
+      "shortHash": "c219b87",
+      "message": "feat: Add completion timeline read model and UI",
+      "date": "2026-02-14",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Add completion timeline read model and UI"
+    }
+  ]
+}

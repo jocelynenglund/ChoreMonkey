@@ -6,6 +6,8 @@
   "scripts": {
     "start": "vite",
     "dev": "vite",
+    "changelog": "node scripts/generate-changelog.js",
+    "prebuild": "npm run changelog",
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
