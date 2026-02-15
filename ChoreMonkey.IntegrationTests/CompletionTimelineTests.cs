@@ -130,7 +130,10 @@ public class CompletionTimelineTests(ApiFixture fixture) : IClassFixture<ApiFixt
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var result = await response.Content.ReadFromJsonAsync<dynamic>();
-        var completions = result!.GetProperty("completions");
-        Assert.Equal(3, completions.GetArrayLength());
+        var activities = result!.GetProperty("activities");
+        
+        // Limit applies to activities, not completions specifically
+        // (activities include completions, assignments, etc.)
+        Assert.Equal(3, activities.GetArrayLength());
     }
 }

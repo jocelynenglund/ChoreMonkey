@@ -24,7 +24,9 @@ using ChoreMonkey.Core.Feature.MyChores;
 using ChoreMonkey.Core.Feature.AcknowledgeMissed;
 using ChoreMonkey.Core.Feature.ChangeMemberNickname;
 using ChoreMonkey.Core.Feature.ChangeMemberStatus;
+using ChoreMonkey.Core.Feature.RebuildActivities;
 using ChoreMonkey.Core.Infrastructure;
+using ChoreMonkey.Core.Infrastructure.ReadModels;
 using ChoreMonkey.Core.Infrastructure.SignalR;
 
 namespace ChoreMonkey.Core;
@@ -48,6 +50,10 @@ public static class Initialization
         
         // Add SignalR
         services.AddSignalR();
+        
+        // Add Activity Read Model
+        services.Configure<ActivityReadModelOptions>(options => options.BasePath = dataPath);
+        services.AddSingleton<IActivityReadModel, ActivityReadModel>();
         
         return services.InstallFeatures();
     }
@@ -74,6 +80,7 @@ public static class Initialization
         services.AddScoped<Feature.SetMemberPin.Handler>();
         services.AddScoped<Feature.ChangeMemberNickname.Handler>();
         services.AddScoped<Feature.ChangeMemberStatus.Handler>();
+        services.AddScoped<Feature.RebuildActivities.Handler>();
         return services;
     }
     public static IEndpointRouteBuilder MapChoreMonkeyEndpoints(this IEndpointRouteBuilder app)
@@ -102,6 +109,7 @@ public static class Initialization
         SetMemberPinEndpoint.Map(householdEndpoints);
         ChangeMemberNicknameEndpoint.Map(householdEndpoints);
         ChangeMemberStatusEndpoint.Map(householdEndpoints);
+        RebuildActivitiesEndpoint.Map(householdEndpoints);
 
         return app;
     }

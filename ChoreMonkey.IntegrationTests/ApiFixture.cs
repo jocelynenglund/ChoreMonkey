@@ -3,6 +3,7 @@ using FileEventStore.Session;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using ChoreMonkey.Core.Infrastructure.ReadModels;
 
 namespace ChoreMonkey.IntegrationTests;
 
@@ -38,6 +39,11 @@ public class ApiFixture : IAsyncLifetime
 
                     // Re-register with our temp path
                     services.AddFileEventStore(_tempDataPath);
+                    
+                    // Re-configure ActivityReadModel to use the same temp path
+                    services.RemoveAll<IActivityReadModel>();
+                    services.Configure<ActivityReadModelOptions>(options => options.BasePath = _tempDataPath);
+                    services.AddSingleton<IActivityReadModel, ActivityReadModel>();
                 });
             });
 

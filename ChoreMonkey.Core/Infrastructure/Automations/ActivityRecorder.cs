@@ -1,12 +1,13 @@
 using ChoreMonkey.Events;
 using ChoreMonkey.Core.Domain;
+using ChoreMonkey.Core.Infrastructure.ReadModels;
 using FileEventStore;
 using MediatR;
 
 namespace ChoreMonkey.Core.Infrastructure.Automations;
 
 /// <summary>
-/// Records activities as immutable events when things happen in a household.
+/// Records activities to the read model when things happen in a household.
 /// This captures nicknames and chore names at the time of the action, so they
 /// don't change when members update their profiles later.
 /// </summary>
@@ -19,14 +20,14 @@ public class ActivityRecorder :
     INotificationHandler<ChoreCreated>
 {
     private readonly IEventStore _store;
+    private readonly IActivityReadModel _activityReadModel;
 
-    public ActivityRecorder(IEventStore store)
+    public ActivityRecorder(IEventStore store, IActivityReadModel activityReadModel)
     {
         // Use raw store to avoid circular publishing
         _store = store is PublishingEventStore pub ? pub.Inner : store;
+        _activityReadModel = activityReadModel;
     }
-
-    private static string ActivityStreamId(Guid householdId) => $"activities-{householdId}";
 
     private async Task<Dictionary<Guid, string>> GetMemberNicknames(Guid householdId)
     {
@@ -60,36 +61,26 @@ public class ActivityRecorder :
         var memberName = nicknames.GetValueOrDefault(notification.CompletedByMemberId, "Someone");
         var choreName = choreNames.GetValueOrDefault(notification.ChoreId, "a chore");
 
-        var activity = new ActivityRecorded(
-            ActivityId: Guid.NewGuid(),
-            HouseholdId: notification.HouseholdId,
+        await _activityReadModel.AppendActivityAsync(notification.HouseholdId, new ActivityItem(
             Type: "completion",
+            TimestampUtc: notification.CompletedAt.ToString("O"),
             Text: $"{memberName} completed {choreName}",
-            ActorId: notification.CompletedByMemberId,
-            ActorNickname: memberName,
             ChoreId: notification.ChoreId,
             ChoreName: choreName,
-            ExtraJson: null
-        );
-
-        await AppendActivity(notification.HouseholdId, activity);
+            ActorId: notification.CompletedByMemberId,
+            ActorNickname: memberName
+        ));
     }
 
     public async Task Handle(MemberJoinedHousehold notification, CancellationToken cancellationToken)
     {
-        var activity = new ActivityRecorded(
-            ActivityId: Guid.NewGuid(),
-            HouseholdId: notification.HouseholdId,
+        await _activityReadModel.AppendActivityAsync(notification.HouseholdId, new ActivityItem(
             Type: "member_joined",
+            TimestampUtc: notification.TimestampUtc,
             Text: $"{notification.Nickname} joined the household",
             ActorId: notification.MemberId,
-            ActorNickname: notification.Nickname,
-            ChoreId: null,
-            ChoreName: null,
-            ExtraJson: null
-        );
-
-        await AppendActivity(notification.HouseholdId, activity);
+            ActorNickname: notification.Nickname
+        ));
     }
 
     public async Task Handle(ChoreAssigned notification, CancellationToken cancellationToken)
@@ -129,36 +120,26 @@ public class ActivityRecorder :
                 : $"{choreName} was assigned to {assignees}";
         }
 
-        var activity = new ActivityRecorded(
-            ActivityId: Guid.NewGuid(),
-            HouseholdId: notification.HouseholdId,
+        await _activityReadModel.AppendActivityAsync(notification.HouseholdId, new ActivityItem(
             Type: "chore_assigned",
+            TimestampUtc: notification.TimestampUtc,
             Text: text,
-            ActorId: notification.AssignedByMemberId,
-            ActorNickname: assignerName,
             ChoreId: notification.ChoreId,
             ChoreName: choreName,
-            ExtraJson: null
-        );
-
-        await AppendActivity(notification.HouseholdId, activity);
+            ActorId: notification.AssignedByMemberId,
+            ActorNickname: assignerName
+        ));
     }
 
     public async Task Handle(MemberNicknameChanged notification, CancellationToken cancellationToken)
     {
-        var activity = new ActivityRecorded(
-            ActivityId: Guid.NewGuid(),
-            HouseholdId: notification.HouseholdId,
+        await _activityReadModel.AppendActivityAsync(notification.HouseholdId, new ActivityItem(
             Type: "nickname_changed",
+            TimestampUtc: notification.TimestampUtc,
             Text: $"{notification.OldNickname} is now {notification.NewNickname}",
             ActorId: notification.MemberId,
-            ActorNickname: notification.NewNickname,
-            ChoreId: null,
-            ChoreName: null,
-            ExtraJson: System.Text.Json.JsonSerializer.Serialize(new { notification.OldNickname, notification.NewNickname })
-        );
-
-        await AppendActivity(notification.HouseholdId, activity);
+            ActorNickname: notification.NewNickname
+        ));
     }
 
     public async Task Handle(MemberStatusChanged notification, CancellationToken cancellationToken)
@@ -166,50 +147,23 @@ public class ActivityRecorder :
         var nicknames = await GetMemberNicknames(notification.HouseholdId);
         var memberName = nicknames.GetValueOrDefault(notification.MemberId, "Someone");
 
-        var activity = new ActivityRecorded(
-            ActivityId: Guid.NewGuid(),
-            HouseholdId: notification.HouseholdId,
+        await _activityReadModel.AppendActivityAsync(notification.HouseholdId, new ActivityItem(
             Type: "status_changed",
+            TimestampUtc: notification.TimestampUtc,
             Text: $"{memberName}: {notification.Status}",
             ActorId: notification.MemberId,
-            ActorNickname: memberName,
-            ChoreId: null,
-            ChoreName: null,
-            ExtraJson: System.Text.Json.JsonSerializer.Serialize(new { notification.Status })
-        );
-
-        await AppendActivity(notification.HouseholdId, activity);
+            ActorNickname: memberName
+        ));
     }
 
     public async Task Handle(ChoreCreated notification, CancellationToken cancellationToken)
     {
-        var activity = new ActivityRecorded(
-            ActivityId: Guid.NewGuid(),
-            HouseholdId: notification.HouseholdId,
+        await _activityReadModel.AppendActivityAsync(notification.HouseholdId, new ActivityItem(
             Type: "chore_created",
+            TimestampUtc: notification.TimestampUtc,
             Text: $"New chore: {notification.DisplayName}",
-            ActorId: null,
-            ActorNickname: null,
             ChoreId: notification.ChoreId,
-            ChoreName: notification.DisplayName,
-            ExtraJson: null
-        );
-
-        await AppendActivity(notification.HouseholdId, activity);
-    }
-
-    private async Task AppendActivity(Guid householdId, ActivityRecorded activity)
-    {
-        var streamId = ActivityStreamId(householdId);
-        
-        try
-        {
-            await _store.AppendToStreamAsync(streamId, new[] { activity }, ExpectedVersion.Any);
-        }
-        catch
-        {
-            // First activity - start the stream
-            await _store.StartStreamAsync(streamId, new[] { activity });
-        }
+            ChoreName: notification.DisplayName
+        ));
     }
 }
