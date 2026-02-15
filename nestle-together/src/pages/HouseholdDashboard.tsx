@@ -13,6 +13,7 @@ import { OverdueAccordion } from '@/components/OverdueAccordion';
 import { CompletionTimeline } from '@/components/CompletionTimeline';
 import { SettingsDialog } from '@/components/SettingsDialog';
 import { MyChoresSection } from '@/components/MyChoresSection';
+import { ProfileDialog } from '@/components/ProfileDialog';
 import type { Household, Chore, ChoreFrequency } from '@/types/household';
 
 export default function HouseholdDashboard() {
@@ -21,6 +22,7 @@ export default function HouseholdDashboard() {
   const [isDataLoading, setIsDataLoading] = useState(true);
   const [completingChore, setCompletingChore] = useState<Chore | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   const {
     isAuthenticated,
@@ -170,11 +172,16 @@ export default function HouseholdDashboard() {
 
             <div className="flex items-center gap-2">
               {currentMember && (
-                <MemberAvatar
-                  nickname={currentMember.nickname}
-                  color={currentMember.avatarColor}
-                  size="sm"
-                />
+                <button
+                  onClick={() => setProfileOpen(true)}
+                  className="rounded-full hover:ring-2 hover:ring-primary/50 transition-all"
+                >
+                  <MemberAvatar
+                    nickname={currentMember.nickname}
+                    color={currentMember.avatarColor}
+                    size="sm"
+                  />
+                </button>
               )}
               <SettingsDialog householdId={household.id} />
               <Button
@@ -309,6 +316,18 @@ export default function HouseholdDashboard() {
         onOpenChange={(open) => !open && setCompletingChore(null)}
         onComplete={handleCompleteChore}
       />
+
+      {/* Profile Dialog */}
+      {currentMember && household && (
+        <ProfileDialog
+          open={profileOpen}
+          onOpenChange={setProfileOpen}
+          householdId={household.id}
+          memberId={currentMember.id}
+          currentNickname={currentMember.nickname}
+          avatarColor={currentMember.avatarColor}
+        />
+      )}
     </div>
   );
 }

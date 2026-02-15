@@ -1,11 +1,11 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Clock, CheckCircle2, UserPlus, UserCheck } from 'lucide-react';
+import { Clock, CheckCircle2, UserPlus, UserCheck, Pencil } from 'lucide-react';
 import { MemberAvatar } from './MemberAvatar';
 import { useHouseholdStore } from '@/stores/householdStore';
 import { householdConnection } from '@/lib/signalr';
 
 interface ActivityEntry {
-  type: 'completion' | 'member_joined' | 'chore_assigned';
+  type: 'completion' | 'member_joined' | 'chore_assigned' | 'nickname_changed';
   timestamp: string;
   choreId?: string;
   choreName?: string;
@@ -13,6 +13,8 @@ interface ActivityEntry {
   memberNickname?: string;
   assignedToNicknames?: string[];
   assignedToAll?: boolean;
+  oldNickname?: string;
+  newNickname?: string;
 }
 
 interface CompletionTimelineProps {
@@ -77,7 +79,7 @@ export function CompletionTimeline({ householdId, refreshKey = 0 }: CompletionTi
   // Subscribe to real-time updates
   useEffect(() => {
     const unsubscribe = householdConnection.subscribe((event) => {
-      if (event.type === 'ChoreCompleted' || event.type === 'MemberJoined' || event.type === 'ChoreAssigned') {
+      if (event.type === 'ChoreCompleted' || event.type === 'MemberJoined' || event.type === 'ChoreAssigned' || event.type === 'MemberNicknameChanged') {
         fetchActivities();
       }
     });
@@ -121,6 +123,10 @@ export function CompletionTimeline({ householdId, refreshKey = 0 }: CompletionTi
               <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
                 <UserCheck className="h-4 w-4 text-purple-500" />
               </div>
+            ) : activity.type === 'nickname_changed' ? (
+              <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
+                <Pencil className="h-4 w-4 text-orange-500" />
+              </div>
             ) : (
               <MemberAvatar
                 nickname={activity.memberNickname || '?'}
@@ -140,7 +146,7 @@ export function CompletionTimeline({ householdId, refreshKey = 0 }: CompletionTi
                   <span className="font-medium">{activity.memberNickname}</span>
                   <span className="text-muted-foreground"> joined the household</span>
                 </p>
-              ) : (
+              ) : activity.type === 'chore_assigned' ? (
                 <p className="text-sm">
                   <span className="font-medium">{activity.choreName}</span>
                   <span className="text-muted-foreground"> assigned to </span>
@@ -150,6 +156,12 @@ export function CompletionTimeline({ householdId, refreshKey = 0 }: CompletionTi
                       : activity.assignedToNicknames?.join(', ') || 'unknown'}
                   </span>
                 </p>
+              ) : (
+                <p className="text-sm">
+                  <span className="font-medium">{activity.oldNickname}</span>
+                  <span className="text-muted-foreground"> is now </span>
+                  <span className="font-medium">{activity.newNickname}</span>
+                </p>
               )}
             </div>
             <div className="flex items-center gap-1 text-xs text-muted-foreground flex-shrink-0">
@@ -157,8 +169,10 @@ export function CompletionTimeline({ householdId, refreshKey = 0 }: CompletionTi
                 <CheckCircle2 className="h-3 w-3 text-green-500" />
               ) : activity.type === 'member_joined' ? (
                 <UserPlus className="h-3 w-3 text-blue-500" />
-              ) : (
+              ) : activity.type === 'chore_assigned' ? (
                 <UserCheck className="h-3 w-3 text-purple-500" />
+              ) : (
+                <Pencil className="h-3 w-3 text-orange-500" />
               )}
               {formatTimeAgo(activity.timestamp)}
             </div>

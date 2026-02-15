@@ -18,14 +18,16 @@ public record CompletionEntry(
 );
 
 public record ActivityEntry(
-    string Type,           // "completion" | "member_joined" | "chore_assigned"
+    string Type,           // "completion" | "member_joined" | "chore_assigned" | "nickname_changed"
     DateTimeOffset Timestamp,
     Guid? ChoreId,
     string? ChoreName,
     Guid? MemberId,
     string? MemberNickname,
     string[]? AssignedToNicknames = null,  // For assignments
-    bool? AssignedToAll = null
+    bool? AssignedToAll = null,
+    string? OldNickname = null,            // For nickname changes
+    string? NewNickname = null
 );
 
 public record GetCompletionTimelineResponse(
@@ -119,9 +121,26 @@ internal class Handler(IEventStore store)
                 );
             });
 
+        var nicknameActivities = householdEvents
+            .OfType<MemberNicknameChanged>()
+            .Where(n => DateTime.TryParse(n.TimestampUtc, out var ts) && ts >= cutoff)
+            .Select(n => new ActivityEntry(
+                "nickname_changed",
+                DateTime.TryParse(n.TimestampUtc, out var ts) ? ts : DateTime.UtcNow,
+                null,
+                null,
+                n.MemberId,
+                n.NewNickname,
+                null,
+                null,
+                n.OldNickname,
+                n.NewNickname
+            ));
+
         var activities = completionActivities
             .Concat(joinActivities)
             .Concat(assignmentActivities)
+            .Concat(nicknameActivities)
             .OrderByDescending(a => a.Timestamp)
             .Take(maxItems)
             .ToList();
