@@ -19,6 +19,8 @@ builder.Services.AddCors(options =>
         policy.WithOrigins(
                 "http://labs.itsybit.se",
                 "https://labs.itsybit.se",
+                "http://choremonkey.itsybit.se",
+                "https://choremonkey.itsybit.se",
                 "http://localhost:5173",
                 "https://localhost:5173")
               .AllowAnyMethod()
