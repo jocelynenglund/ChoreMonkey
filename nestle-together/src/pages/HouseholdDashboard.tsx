@@ -3,6 +3,7 @@ import { useParams, Navigate } from 'react-router-dom';
 import { LogOut, ClipboardList } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useHouseholdStore } from '@/stores/householdStore';
+import { useHouseholdRealtime } from '@/hooks/useHouseholdRealtime';
 import { ChoreCard } from '@/components/ChoreCard';
 import { AddChoreDialog } from '@/components/AddChoreDialog';
 import { CompleteChoreDialog } from '@/components/CompleteChoreDialog';
@@ -38,6 +39,9 @@ export default function HouseholdDashboard() {
     logout,
     isAdmin,
   } = useHouseholdStore();
+
+  // Connect to SignalR for real-time updates
+  useHouseholdRealtime(id || null);
 
   const members = getHouseholdMembers(id || '');
   const currentMember = members.find((m) => m.id === currentMemberId);
