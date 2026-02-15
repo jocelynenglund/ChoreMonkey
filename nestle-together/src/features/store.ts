@@ -226,10 +226,10 @@ export const useAppStore = create<AppState>()(
       changeStatus: (householdId, memberId, status) =>
         membersApi.changeStatus(householdId, memberId, status),
 
-      removeMember: async (householdId, memberId, _removedByMemberId, pinCode) => {
+      removeMember: async (householdId, memberId, removedByMemberId, pinCode) => {
         const pin = pinCode || get().currentPinCode;
         if (!pin) return false;
-        return membersApi.removeMember(householdId, memberId, parseInt(pin, 10));
+        return membersApi.removeMember(householdId, memberId, parseInt(pin, 10), removedByMemberId);
       },
 
       getHouseholdChores: (householdId) => choresApi.fetchChores(householdId),

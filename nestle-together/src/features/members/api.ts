@@ -98,13 +98,18 @@ export async function changeStatus(
 export async function removeMember(
   householdId: string, 
   memberId: string, 
-  pinCode: number
+  pinCode: number,
+  removedByMemberId?: string
 ): Promise<boolean> {
   const response = await fetch(
     `${API_BASE_URL}/api/households/${householdId}/members/${memberId}/remove`,
     {
       method: 'POST',
-      headers: { 'X-Pin-Code': pinCode.toString() },
+      headers: { 
+        'Content-Type': 'application/json',
+        'X-Pin-Code': pinCode.toString(),
+      },
+      body: JSON.stringify({ removedByMemberId: removedByMemberId || '' }),
     }
   );
 

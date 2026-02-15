@@ -1,6 +1,24 @@
 {
-  "generated": "2026-02-15T15:26:42.918Z",
+  "generated": "2026-02-15T15:34:40.146Z",
   "commits": [
+    {
+      "hash": "d8e222181e64e8d1d555acff9402bf3cd91cac9e",
+      "shortHash": "d8e2221",
+      "message": "fix: Ensure all AppendToStreamAsync overloads publish SignalR events",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Ensure all AppendToStreamAsync overloads publish SignalR events"
+    },
+    {
+      "hash": "d0a25ed0393e2d1128ab8389591b79d052a00704",
+      "shortHash": "d0a25ed",
+      "message": "feat: Add PIN confirmation to Remove Member dialog",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Add PIN confirmation to Remove Member dialog"
+    },
     {
       "hash": "57448217d7c9be92307671a5a48a4ea538f6c765",
       "shortHash": "5744821",
@@ -162,24 +180,6 @@
       "author": "ItsyBOT",
       "type": "fix",
       "displayMessage": "Correct chore field mapping (assignedTo, assignedToAll, completed logic)"
-    },
-    {
-      "hash": "319ccc36a46da03a58a2e8276091956774ab3615",
-      "shortHash": "319ccc3",
-      "message": "fix: add missing fetchChoreHistory, fix currentPinCode type (string)",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Add missing fetchChoreHistory, fix currentPinCode type (string)"
-    },
-    {
-      "hash": "8374536ef4e9b806940a88f9cf752511b91888b7",
-      "shortHash": "8374536",
-      "message": "refactor: extract frontend into vertical feature slices",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "refactor",
-      "displayMessage": "Extract frontend into vertical feature slices"
     }
   ]
 }
