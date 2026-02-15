@@ -1,7 +1,9 @@
 using ChoreMonkey.Core.Domain;
+using ChoreMonkey.Core.Feature.MemberLookup;
 using ChoreMonkey.Core.Security;
 using ChoreMonkey.Events;
 using FileEventStore;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -24,7 +26,7 @@ public record MemberOverdueDto(
 
 public record GetOverdueResponse(List<MemberOverdueDto> MemberOverdue);
 
-internal class Handler(IEventStore store)
+internal class Handler(IEventStore store, ISender mediator)
 {
     public async Task<GetOverdueResponse?> HandleAsync(GetOverdueQuery request)
     {
@@ -49,27 +51,9 @@ internal class Handler(IEventStore store)
         
         var today = DateTime.UtcNow.Date;
         
-        // Get all members with current nicknames
-        var members = householdEvents.OfType<MemberJoinedHousehold>()
-            .ToDictionary(e => e.MemberId, e => e.Nickname);
-        
-        // Apply nickname changes
-        foreach (var change in householdEvents.OfType<MemberNicknameChanged>())
-        {
-            if (members.ContainsKey(change.MemberId))
-            {
-                members[change.MemberId] = change.NewNickname;
-            }
-        }
-        
-        // Remove removed members
-        var removedMemberIds = householdEvents.OfType<MemberRemoved>()
-            .Select(e => e.MemberId)
-            .ToHashSet();
-        foreach (var removedId in removedMemberIds)
-        {
-            members.Remove(removedId);
-        }
+        // Get members via MemberLookup query
+        var memberLookup = await mediator.Send(new MemberLookupQuery(request.HouseholdId));
+        var members = memberLookup.Members;
         
         // Get all chores with frequencies
         var chores = choreEvents.OfType<ChoreCreated>()
@@ -89,7 +73,7 @@ internal class Handler(IEventStore store)
         
         var result = new List<MemberOverdueDto>();
         
-        foreach (var (memberId, nickname) in members)
+        foreach (var (memberId, member) in members)
         {
             var overdueChores = new List<OverdueChoreDto>();
             
@@ -128,7 +112,7 @@ internal class Handler(IEventStore store)
             
             result.Add(new MemberOverdueDto(
                 memberId,
-                nickname,
+                member.Nickname,
                 overdueChores.Count,
                 overdueChores.OrderBy(c => c.DisplayName).ToList()));
         }
@@ -154,24 +138,14 @@ internal class Handler(IEventStore store)
         };
     }
     
-    /// <summary>
-    /// Daily chores: only overdue if missed YESTERDAY (grace period = 1 day)
-    /// Older misses are forgiven - we only show the most recent missed day
-    /// </summary>
     private static string? CalculateDailyOverdue(DateTime? lastCompleted, DateTime today, DateTime choreCreatedAt)
     {
         var yesterday = today.AddDays(-1);
         
-        // Can't be overdue if chore didn't exist yesterday
         if (choreCreatedAt > yesterday) return null;
-        
-        // If completed today, not overdue
         if (lastCompleted?.Date >= today) return null;
-        
-        // If completed yesterday, not overdue
         if (lastCompleted?.Date >= yesterday) return null;
         
-        // Missed yesterday - that's the only overdue we show (grace period)
         return "yesterday";
     }
     
@@ -181,81 +155,54 @@ internal class Handler(IEventStore store)
         return date.AddDays(-diff).Date;
     }
 
-    /// <summary>
-    /// Weekly chores: only overdue if missed LAST WEEK (grace period = 1 week)
-    /// Older weeks are forgiven - we only show the most recent missed week
-    /// </summary>
     private static string? CalculateWeeklyOverdue(string[]? days, DateTime? lastCompleted, DateTime today, DateTime choreCreatedAt)
     {
         var currentWeekStart = GetMondayOfWeek(today);
         var previousWeekStart = currentWeekStart.AddDays(-7);
         
-        // Weekly-anyday: no specific days = must complete once per week (Mon-Sun)
         if (days == null || days.Length == 0)
         {
-            // Can't be overdue if created this week or last week
             if (choreCreatedAt >= previousWeekStart) return null;
-            
-            // If completed this week, not overdue
             if (lastCompleted?.Date >= currentWeekStart) return null;
-            
-            // If completed last week, not overdue (that's the grace period)
             if (lastCompleted?.Date >= previousWeekStart) return null;
-            
-            // Missed last week - that's the only overdue we show
             return "last week";
         }
         
-        // Weekly with specific days - check if they missed last week's required day
         var requiredDays = days
             .Select(d => Enum.Parse<DayOfWeek>(d, ignoreCase: true))
             .ToHashSet();
         
-        // Find last week's required day(s)
         for (int i = 0; i < 7; i++)
         {
             var checkDate = previousWeekStart.AddDays(i);
             
             if (!requiredDays.Contains(checkDate.DayOfWeek)) continue;
-            
-            // Found a required day last week - was it already created then?
             if (choreCreatedAt > checkDate) continue;
-            
-            // Check if completed on or after that day (up to now)
             if (lastCompleted?.Date >= checkDate) return null;
             
-            // Missed last week's required day - overdue within grace period
             return $"last {checkDate.DayOfWeek}";
         }
         
         return null;
     }
     
-    /// <summary>
-    /// Interval chores: only overdue within 1 interval grace period
-    /// If more than 2 intervals have passed, only show 1 interval overdue
-    /// </summary>
     private static string? CalculateIntervalOverdue(int intervalDays, DateTime? lastCompleted, DateTime today, DateTime choreCreatedAt)
     {
         DateTime dueDate;
         
         if (lastCompleted == null)
         {
-            // First due date is intervalDays after creation
             dueDate = choreCreatedAt.AddDays(intervalDays);
         }
         else
         {
-            // Due date is intervalDays after last completion
             dueDate = lastCompleted.Value.Date.AddDays(intervalDays);
         }
         
-        // Not due yet
         if (today <= dueDate) return null;
         
         var daysOverdue = (int)(today - dueDate).TotalDays;
         
-        // Only show if within grace period (1 interval)
         if (daysOverdue > intervalDays) return null;
         
         if (daysOverdue == 1) return "yesterday";
