@@ -66,11 +66,13 @@ public class PublishingEventStore(IEventStore inner, IPublisher publisher) : IEv
         {
             try
             {
+                Console.WriteLine($"[SignalR] Publishing event: {notification.GetType().Name}");
                 await publisher.Publish(notification);
+                Console.WriteLine($"[SignalR] Published event: {notification.GetType().Name}");
             }
-            catch
+            catch (Exception ex)
             {
-                // Ignore publishing errors - SignalR broadcast is best-effort
+                Console.WriteLine($"[SignalR] Error publishing {notification.GetType().Name}: {ex.Message}");
             }
         }
     }
