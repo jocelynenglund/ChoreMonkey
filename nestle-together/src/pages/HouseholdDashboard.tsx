@@ -306,11 +306,15 @@ export default function HouseholdDashboard() {
                   <div className="absolute -top-1 -right-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <RemoveMemberDialog
                       member={member}
-                      onRemove={async () => {
+                      onRemove={async (pinCode) => {
                         if (currentMemberId) {
-                          await removeMember(household.id, member.id, currentMemberId);
-                          await fetchHouseholdMembers(household.id);
+                          const success = await removeMember(household.id, member.id, currentMemberId, pinCode);
+                          if (success) {
+                            await fetchHouseholdMembers(household.id);
+                          }
+                          return success;
                         }
+                        return false;
                       }}
                     />
                   </div>
