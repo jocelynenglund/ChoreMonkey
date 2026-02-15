@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Sparkles, Bug, Wrench, Zap } from 'lucide-react';
+import { Sparkles, Bug, Wrench, Zap, Server, Monitor } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -43,13 +43,29 @@ interface WhatsNewDialogProps {
   onOpenChange?: (open: boolean) => void;
 }
 
+interface ApiVersion {
+  version: string;
+  buildTime: string;
+  gitSha: string;
+}
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7422';
+
 export function WhatsNewDialog({ variant = 'icon', open: controlledOpen, onOpenChange }: WhatsNewDialogProps) {
   const [changelog, setChangelog] = useState<Changelog | null>(null);
+  const [apiVersion, setApiVersion] = useState<ApiVersion | null>(null);
   const [internalOpen, setInternalOpen] = useState(false);
   
   const isControlled = variant === 'controlled';
   const open = isControlled ? controlledOpen ?? false : internalOpen;
   const setOpen = isControlled ? (onOpenChange ?? (() => {})) : setInternalOpen;
+
+  // Frontend version from build-time injection
+  const frontendVersion = {
+    version: typeof __BUILD_VERSION__ !== 'undefined' ? __BUILD_VERSION__ : 'dev',
+    gitSha: typeof __GIT_SHA__ !== 'undefined' ? __GIT_SHA__ : 'local',
+    buildTime: typeof __BUILD_TIME__ !== 'undefined' ? __BUILD_TIME__ : 'unknown',
+  };
 
   useEffect(() => {
     if (open && !changelog) {
@@ -58,7 +74,13 @@ export function WhatsNewDialog({ variant = 'icon', open: controlledOpen, onOpenC
         .then(data => setChangelog(data))
         .catch(err => console.error('Failed to load changelog', err));
     }
-  }, [open, changelog]);
+    if (open && !apiVersion) {
+      fetch(`${API_BASE_URL}/api/version`)
+        .then(res => res.json())
+        .then(data => setApiVersion(data))
+        .catch(err => console.error('Failed to load API version', err));
+    }
+  }, [open, changelog, apiVersion]);
 
   // Group commits by date
   const groupedByDate = changelog?.commits.reduce((acc, commit) => {
@@ -90,6 +112,23 @@ export function WhatsNewDialog({ variant = 'icon', open: controlledOpen, onOpenC
             <Sparkles className="w-5 h-5 text-primary" />
             What's New
           </DialogTitle>
+          {/* Version info */}
+          <div className="flex flex-wrap gap-3 pt-2 text-xs text-muted-foreground">
+            <div className="flex items-center gap-1.5" title={`SHA: ${frontendVersion.gitSha}\nBuilt: ${frontendVersion.buildTime}`}>
+              <Monitor className="w-3.5 h-3.5" />
+              <span>Web:</span>
+              <code className="bg-muted px-1.5 py-0.5 rounded font-mono">
+                {frontendVersion.version}
+              </code>
+            </div>
+            <div className="flex items-center gap-1.5" title={apiVersion ? `SHA: ${apiVersion.gitSha}\nBuilt: ${apiVersion.buildTime}` : ''}>
+              <Server className="w-3.5 h-3.5" />
+              <span>API:</span>
+              <code className="bg-muted px-1.5 py-0.5 rounded font-mono">
+                {apiVersion?.version || '...'}
+              </code>
+            </div>
+          </div>
         </DialogHeader>
         <ScrollArea className="h-[60vh] pr-4">
           {!changelog ? (

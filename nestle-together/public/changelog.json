@@ -1,6 +1,24 @@
 {
-  "generated": "2026-02-15T15:41:00.672Z",
+  "generated": "2026-02-15T15:50:50.493Z",
   "commits": [
+    {
+      "hash": "41db55038198316434f1337033a512b3e9d6fb1b",
+      "shortHash": "41db550",
+      "message": "feat: Add build versioning for API and frontend",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Add build versioning for API and frontend"
+    },
+    {
+      "hash": "ae04981eef3f262231ce973dae29853a9e8edfec",
+      "shortHash": "ae04981",
+      "message": "fix: TeamOverviewAccordion refreshes on SignalR events via refreshKey prop",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "TeamOverviewAccordion refreshes on SignalR events via refreshKey prop"
+    },
     {
       "hash": "7514996e61d8054a046dea3a373e43f991ddc09e",
       "shortHash": "7514996",
@@ -162,24 +180,6 @@
       "author": "Jocelyn Englund",
       "type": "update",
       "displayMessage": "Update deploy-staging.yml to handle branch input"
-    },
-    {
-      "hash": "af9c0ddd0e3728af151ce7ae4dbd9178fc157455",
-      "shortHash": "af9c0dd",
-      "message": "fix: proper member/chore ID mapping with avatar colors",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Proper member/chore ID mapping with avatar colors"
-    },
-    {
-      "hash": "f07e51d7234473657bc83297f9aafac0c305e8d8",
-      "shortHash": "f07e51d",
-      "message": "fix: filter deleted chores from overdue list",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Filter deleted chores from overdue list"
     }
   ]
 }

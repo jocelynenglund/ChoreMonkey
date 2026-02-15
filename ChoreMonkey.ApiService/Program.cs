@@ -1,3 +1,4 @@
+using System.Reflection;
 using ChoreMonkey.Core;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -48,6 +49,26 @@ app.MapDefaultEndpoints();
 
 app.MapChoreMonkeyEndpoints();
 app.MapChoreMonkeyHub();
+
+// Version endpoint
+app.MapGet("/api/version", () => {
+    var assembly = Assembly.GetExecutingAssembly();
+    var infoVersion = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "unknown";
+    // InformationalVersion may contain git SHA or "version+sha" format
+    var gitSha = infoVersion.Contains('+') ? infoVersion.Split('+').Last() : infoVersion;
+    if (gitSha.Length > 7) gitSha = gitSha[..7];
+    
+    var buildTime = File.GetLastWriteTimeUtc(assembly.Location);
+    // Human-readable version: YYYY.MM.DD.sha
+    var version = $"{buildTime:yyyy.MM.dd}.{gitSha}";
+    
+    return Results.Ok(new { 
+        version,
+        buildTime = buildTime.ToString("o"),
+        gitSha,
+        component = "api"
+    });
+});
 
 // Debug endpoint to check data path
 app.MapGet("/api/debug/config", () => {

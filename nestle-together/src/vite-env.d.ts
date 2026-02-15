@@ -7,3 +7,8 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
+
+// Build-time injected globals (e.g., "2026.02.15.1" or "2026.02.15.abc1234")
+declare const __BUILD_VERSION__: string;
+declare const __BUILD_TIME__: string;
+declare const __GIT_SHA__: string;
