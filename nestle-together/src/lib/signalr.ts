@@ -8,6 +8,7 @@ export interface HouseholdEvents {
   onChoreCompleted?: (data: { choreId: string; completedByMemberId: string; completedAt: string }) => void;
   onChoreCreated?: (data: { choreId: string; displayName: string; description: string; isOptional: boolean }) => void;
   onChoreAssigned?: (data: { choreId: string; assignedToMemberIds?: string[]; assignToAll?: boolean }) => void;
+  onChoreDeleted?: (data: { choreId: string }) => void;
   onMemberJoined?: (data: { memberId: string; nickname: string }) => void;
   onMemberRemoved?: (data: { memberId: string; nickname: string }) => void;
   onMemberStatusChanged?: (data: { memberId: string; status: string }) => void;
@@ -92,6 +93,10 @@ class HouseholdConnection {
 
       this.connection.on('ChoreAssigned', (data) => {
         this.eventHandlers.onChoreAssigned?.(data);
+      });
+
+      this.connection.on('ChoreDeleted', (data) => {
+        this.eventHandlers.onChoreDeleted?.(data);
       });
 
       this.connection.on('MemberJoined', (data) => {

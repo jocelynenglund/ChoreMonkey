@@ -1,6 +1,15 @@
 {
-  "generated": "2026-02-15T14:15:08.395Z",
+  "generated": "2026-02-15T14:19:22.798Z",
   "commits": [
+    {
+      "hash": "16d185e0dac485c06fbc2b8bf25491b9c345b079",
+      "shortHash": "16d185e",
+      "message": "fix: Refresh activity timeline after chore reassignment",
+      "date": "2026-02-15",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Refresh activity timeline after chore reassignment"
+    },
     {
       "hash": "6696ff34c582d5baf60ef15f0881d6e73b52a42d",
       "shortHash": "6696ff3",
@@ -171,15 +180,6 @@
       "author": "ItsyBOT",
       "type": "fix",
       "displayMessage": "Use inline styles for guaranteed text truncation"
-    },
-    {
-      "hash": "1ce390881f94dd250621f8ca6dac91b30dc34913",
-      "shortHash": "1ce3908",
-      "message": "fix: add choremonkey.itsybit.se to CORS allowed origins",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Add choremonkey.itsybit.se to CORS allowed origins"
     }
   ]
 }

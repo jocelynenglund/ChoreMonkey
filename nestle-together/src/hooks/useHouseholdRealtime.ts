@@ -28,6 +28,7 @@ export function useHouseholdRealtime({
       onChoreCompleted: () => refresh(),
       onChoreCreated: () => refresh(),
       onChoreAssigned: () => refresh(),
+      onChoreDeleted: () => refresh(),
       onMemberJoined: () => refresh(),
       onMemberRemoved: () => refresh(),
       onMemberStatusChanged: () => refresh(),
