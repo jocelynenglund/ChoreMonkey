@@ -34,10 +34,16 @@ jobs:
       - working-directory: nestle-together
         run: npm ci
 
-      - working-directory: nestle-together
+      - name: Build frontend
+        working-directory: nestle-together
         env:
           VITE_API_URL: https://itsybitsylist-api.azurewebsites.net
-        run: npm run build
+          BUILD_TIME: ${{ github.event.head_commit.timestamp }}
+          GIT_SHA: ${{ github.sha }}
+        run: |
+          # Generate version: YYYY.MM.DD.run_number
+          export BUILD_VERSION=$(date -u +%Y.%m.%d).${{ github.run_number }}
+          npm run build
 
       - name: Deploy to Staging (labs)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
