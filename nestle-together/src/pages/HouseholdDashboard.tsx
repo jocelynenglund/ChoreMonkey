@@ -234,17 +234,12 @@ export default function HouseholdDashboard() {
               </div>
             ))}
           </div>
-          {/* Status Marquee - at bottom */}
+          {/* Status Display - at bottom */}
           {hoveredMemberStatus && (
-            <div className="overflow-hidden mt-3 py-1 bg-muted/50 rounded-md">
-              <div className="animate-marquee whitespace-nowrap">
-                <span className="text-sm text-muted-foreground px-4">
-                  💬 {hoveredMemberStatus}
-                </span>
-                <span className="text-sm text-muted-foreground px-4">
-                  💬 {hoveredMemberStatus}
-                </span>
-              </div>
+            <div className="mt-3 py-2 px-4 bg-muted/50 rounded-md">
+              <p className="text-sm text-muted-foreground">
+                💬 {hoveredMemberStatus}
+              </p>
             </div>
           )}
         </div>

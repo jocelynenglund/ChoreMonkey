@@ -18,7 +18,7 @@ public record CompletionEntry(
 );
 
 public record ActivityEntry(
-    string Type,           // "completion" | "member_joined" | "chore_assigned" | "nickname_changed"
+    string Type,           // "completion" | "member_joined" | "chore_assigned" | "nickname_changed" | "status_changed"
     DateTimeOffset Timestamp,
     Guid? ChoreId,
     string? ChoreName,
@@ -29,7 +29,8 @@ public record ActivityEntry(
     string? OldNickname = null,            // For nickname changes
     string? NewNickname = null,
     string? AssignedByNickname = null,     // Who assigned
-    bool? IsClaimed = null                  // Self-assigned
+    bool? IsClaimed = null,                // Self-assigned
+    string? Status = null                  // For status changes
 );
 
 public record GetCompletionTimelineResponse(
@@ -153,10 +154,30 @@ internal class Handler(IEventStore store)
                 n.NewNickname
             ));
 
+        var statusActivities = householdEvents
+            .OfType<MemberStatusChanged>()
+            .Where(s => DateTime.TryParse(s.TimestampUtc, out var ts) && ts >= cutoff)
+            .Select(s => new ActivityEntry(
+                "status_changed",
+                DateTime.TryParse(s.TimestampUtc, out var ts) ? ts : DateTime.UtcNow,
+                null,
+                null,
+                s.MemberId,
+                memberNicknames.GetValueOrDefault(s.MemberId, "Unknown"),
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                s.Status
+            ));
+
         var activities = completionActivities
             .Concat(joinActivities)
             .Concat(assignmentActivities)
             .Concat(nicknameActivities)
+            .Concat(statusActivities)
             .OrderByDescending(a => a.Timestamp)
             .Take(maxItems)
             .ToList();
