@@ -762,6 +762,19 @@ export const useHouseholdStore = create<HouseholdState>()(
     }),
     {
       name: 'household-storage',
+      // Ensure arrays are never null when restoring from localStorage
+      merge: (persistedState, currentState) => {
+        const persisted = persistedState as Partial<HouseholdState> | undefined;
+        return {
+          ...currentState,
+          ...persisted,
+          // Ensure arrays are always arrays, never null
+          households: persisted?.households ?? [],
+          members: persisted?.members ?? [],
+          chores: persisted?.chores ?? [],
+          invites: persisted?.invites ?? [],
+        };
+      },
     }
   )
 );
