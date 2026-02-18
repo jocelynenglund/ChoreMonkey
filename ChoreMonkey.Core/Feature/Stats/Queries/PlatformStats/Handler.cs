@@ -3,6 +3,7 @@ using FileEventStore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Configuration;
 
 namespace ChoreMonkey.Core.Feature.Stats.Queries.PlatformStats;
 
@@ -19,21 +20,26 @@ public record PlatformStatsResponse(
     int TotalHouseholds,
     int TotalMembers,
     int TotalChores,
-    List<HouseholdStatsDto> Households);
+    List<HouseholdStatsDto> Households,
+    string? DebugDataPath = null,
+    bool? DebugDirectoryExists = null);
 
-internal class Handler(IEventStore store)
+internal class Handler(IEventStore store, IConfiguration config)
 {
-    private static readonly string DataPath = Environment.GetEnvironmentVariable("EVENTSTORE_PATH") 
+    private string GetDataPath() => Environment.GetEnvironmentVariable("EVENTSTORE_PATH") 
+        ?? config["EventStore:Path"]
         ?? Path.Combine(Directory.GetCurrentDirectory(), "data");
     
     public async Task<PlatformStatsResponse> HandleAsync()
     {
+        var dataPath = GetDataPath();
+        
         // Scan data directory for household stream files
         var householdStreamIds = new List<string>();
         
-        if (Directory.Exists(DataPath))
+        if (Directory.Exists(dataPath))
         {
-            var files = Directory.GetFiles(DataPath, "household-*.jsonl");
+            var files = Directory.GetFiles(dataPath, "household-*.jsonl");
             householdStreamIds = files
                 .Select(f => Path.GetFileNameWithoutExtension(f))
                 .ToList();
@@ -92,7 +98,9 @@ internal class Handler(IEventStore store)
             households.Count,
             totalMembers,
             totalChores,
-            households.OrderByDescending(h => h.CreatedAt).ToList());
+            households.OrderByDescending(h => h.CreatedAt).ToList(),
+            dataPath,
+            Directory.Exists(dataPath));
     }
 }
 
