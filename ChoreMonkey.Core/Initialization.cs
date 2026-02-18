@@ -38,6 +38,9 @@ using ChoreMonkey.Core.Feature.Chores.Queries.OverdueChores;
 using ChoreMonkey.Core.Feature.Activity.Queries.CompletionTimeline;
 using ChoreMonkey.Core.Feature.Activity.Queries.TeamOverview;
 
+// Stats module
+using ChoreMonkey.Core.Feature.Stats.Queries.PlatformStats;
+
 using ChoreMonkey.Core.Infrastructure;
 using ChoreMonkey.Core.Infrastructure.SignalR;
 
@@ -116,6 +119,9 @@ public static class Initialization
         services.AddScoped<Feature.Activity.Queries.CompletionTimeline.Handler>();
         services.AddScoped<Feature.Activity.Queries.TeamOverview.Handler>();
 
+        // Stats module
+        services.AddScoped<Feature.Stats.Queries.PlatformStats.Handler>();
+
         return services;
     }
 
@@ -156,6 +162,9 @@ public static class Initialization
         // Activity module
         CompletionTimelineEndpoint.Map(householdEndpoints);
         TeamOverviewEndpoint.Map(householdEndpoints);
+
+        // Stats module
+        PlatformStatsEndpoint.Map(householdEndpoints);
 
         return app;
     }
