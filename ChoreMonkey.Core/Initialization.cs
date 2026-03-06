@@ -41,6 +41,13 @@ using ChoreMonkey.Core.Feature.Activity.Queries.TeamOverview;
 // Stats module
 using ChoreMonkey.Core.Feature.Stats.Queries.PlatformStats;
 
+// SalaryReports module
+using ChoreMonkey.Core.Feature.SalaryReports.Commands.EnableSalaryReports;
+using ChoreMonkey.Core.Feature.SalaryReports.Commands.UpdateBaseSalary;
+using ChoreMonkey.Core.Feature.SalaryReports.Commands.GenerateSalaryReport;
+using ChoreMonkey.Core.Feature.SalaryReports.Queries.SalarySettings;
+using ChoreMonkey.Core.Feature.SalaryReports.Queries.SalaryReports;
+
 using ChoreMonkey.Core.Infrastructure;
 using ChoreMonkey.Core.Infrastructure.SignalR;
 
@@ -122,6 +129,13 @@ public static class Initialization
         // Stats module
         services.AddScoped<Feature.Stats.Queries.PlatformStats.Handler>();
 
+        // SalaryReports module
+        services.AddScoped<Feature.SalaryReports.Commands.EnableSalaryReports.Handler>();
+        services.AddScoped<Feature.SalaryReports.Commands.UpdateBaseSalary.Handler>();
+        services.AddScoped<Feature.SalaryReports.Commands.GenerateSalaryReport.Handler>();
+        services.AddScoped<Feature.SalaryReports.Queries.SalarySettings.Handler>();
+        services.AddScoped<Feature.SalaryReports.Queries.SalaryReports.Handler>();
+
         return services;
     }
 
@@ -165,6 +179,13 @@ public static class Initialization
 
         // Stats module
         PlatformStatsEndpoint.Map(householdEndpoints);
+
+        // SalaryReports module
+        EnableSalaryReportsEndpoint.Map(householdEndpoints);
+        UpdateBaseSalaryEndpoint.Map(householdEndpoints);
+        GenerateSalaryReportEndpoint.Map(householdEndpoints);
+        SalarySettingsEndpoint.Map(householdEndpoints);
+        SalaryReportsEndpoint.Map(householdEndpoints);
 
         return app;
     }

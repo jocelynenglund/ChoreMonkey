@@ -44,6 +44,8 @@ export async function fetchChores(householdId: string): Promise<Chore[]> {
       lastCompletedBy: c.lastCompletedBy as string | undefined,
       memberCompletions: c.memberCompletions as MemberCompletion[] | undefined,
       isOptional: c.isOptional as boolean | undefined,
+      isRequired: c.isRequired as boolean | undefined,
+      missedDeduction: c.missedDeduction as number | undefined,
     };
   });
 }

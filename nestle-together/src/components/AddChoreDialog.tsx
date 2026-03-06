@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Star } from 'lucide-react';
+import { Plus, Star, DollarSign } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -23,7 +23,7 @@ import { Switch } from '@/components/ui/switch';
 import type { ChoreFrequency } from '@/types/household';
 
 interface AddChoreDialogProps {
-  onAdd: (displayName: string, description: string, frequency?: ChoreFrequency, isOptional?: boolean, startDate?: Date) => Promise<void> | void;
+  onAdd: (displayName: string, description: string, frequency?: ChoreFrequency, isOptional?: boolean, startDate?: Date, isRequired?: boolean, missedDeduction?: number) => Promise<void> | void;
 }
 
 const DAYS_OF_WEEK = [
@@ -44,6 +44,8 @@ export function AddChoreDialog({ onAdd }: AddChoreDialogProps) {
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [intervalDays, setIntervalDays] = useState('3');
   const [isOptional, setIsOptional] = useState(false);
+  const [isRequired, setIsRequired] = useState(true);
+  const [missedDeduction, setMissedDeduction] = useState('10');
   const [startDate, setStartDate] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -64,7 +66,8 @@ export function AddChoreDialog({ onAdd }: AddChoreDialogProps) {
 
     setIsSubmitting(true);
     const parsedStartDate = startDate ? new Date(startDate) : undefined;
-    await onAdd(displayName.trim(), description.trim(), frequency, isOptional, parsedStartDate);
+    const deduction = parseFloat(missedDeduction) || 10;
+    await onAdd(displayName.trim(), description.trim(), frequency, isOptional, parsedStartDate, isRequired, deduction);
     setIsSubmitting(false);
     setDisplayName('');
     setDescription('');
@@ -72,6 +75,8 @@ export function AddChoreDialog({ onAdd }: AddChoreDialogProps) {
     setSelectedDays([]);
     setIntervalDays('3');
     setIsOptional(false);
+    setIsRequired(true);
+    setMissedDeduction('10');
     setStartDate('');
     setOpen(false);
   };
@@ -135,6 +140,47 @@ export function AddChoreDialog({ onAdd }: AddChoreDialogProps) {
               onCheckedChange={setIsOptional}
             />
           </div>
+
+          {/* Salary Required Toggle */}
+          {!isOptional && (
+            <div className="flex items-center justify-between p-3 rounded-lg bg-green-50 border border-green-200">
+              <div className="flex items-center gap-2">
+                <DollarSign className="w-5 h-5 text-green-600" />
+                <div>
+                  <Label htmlFor="isRequired" className="text-sm font-medium cursor-pointer">
+                    Required for Salary
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Missing this chore deducts from allowance
+                  </p>
+                </div>
+              </div>
+              <Switch
+                id="isRequired"
+                checked={isRequired}
+                onCheckedChange={setIsRequired}
+              />
+            </div>
+          )}
+
+          {/* Missed Deduction Amount */}
+          {!isOptional && isRequired && (
+            <div className="space-y-2">
+              <Label htmlFor="missedDeduction">Deduction if Missed (kr)</Label>
+              <Input
+                id="missedDeduction"
+                type="number"
+                min="0"
+                step="5"
+                value={missedDeduction}
+                onChange={(e) => setMissedDeduction(e.target.value)}
+                className="h-12 w-32"
+              />
+              <p className="text-xs text-muted-foreground">
+                Amount subtracted from salary when this chore is missed
+              </p>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label>How often?</Label>

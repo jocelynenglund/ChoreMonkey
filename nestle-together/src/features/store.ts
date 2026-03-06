@@ -52,7 +52,7 @@ interface AppState {
   
   // Chores
   getHouseholdChores: (householdId: string) => Promise<Chore[]>;
-  addChore: (householdId: string, displayName: string, description: string, frequency?: ChoreFrequency, isOptional?: boolean, startDate?: Date) => Promise<Chore | null>;
+  addChore: (householdId: string, displayName: string, description: string, frequency?: ChoreFrequency, isOptional?: boolean, startDate?: Date, isRequired?: boolean, missedDeduction?: number) => Promise<Chore | null>;
   completeChore: (householdId: string, choreId: string, memberId: string, completedAt?: Date) => Promise<void>;
   assignChore: (householdId: string, choreId: string, memberIds?: string[], assignToAll?: boolean) => Promise<void>;
   deleteChore: (householdId: string, choreId: string) => Promise<boolean>;
@@ -230,7 +230,7 @@ export const useAppStore = create<AppState>()(
 
       getHouseholdChores: (householdId) => choresApi.fetchChores(householdId),
 
-      addChore: async (householdId, displayName, description, frequency, isOptional, startDate) => {
+      addChore: async (householdId, displayName, description, frequency, isOptional, startDate, isRequired = true, missedDeduction = 10) => {
         try {
           await choresApi.addChore(householdId, {
             displayName,
@@ -238,6 +238,8 @@ export const useAppStore = create<AppState>()(
             frequency,
             isOptional,
             startDate: startDate?.toISOString(),
+            isRequired,
+            missedDeduction,
           });
 
           // Return a minimal chore object - full data comes from refresh
@@ -250,6 +252,8 @@ export const useAppStore = create<AppState>()(
             createdAt: new Date(),
             frequency: frequency || { type: 'once' },
             isOptional,
+            isRequired,
+            missedDeduction,
           };
         } catch {
           return null;

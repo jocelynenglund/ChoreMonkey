@@ -21,7 +21,9 @@ public record ChoreDto(
     DateTime? LastCompletedAt = null,
     Guid? LastCompletedBy = null,
     List<MemberCompletionDto>? MemberCompletions = null,
-    bool IsOptional = false);
+    bool IsOptional = false,
+    bool IsRequired = true,
+    decimal MissedDeduction = 10m);
 
 public record MemberCompletionDto(
     Guid MemberId,
@@ -125,7 +127,9 @@ internal class Handler(IEventStore store)
                     lastCompletion?.CompletedAt,
                     lastCompletion?.CompletedByMemberId,
                     memberCompletions,
-                    e.IsOptional);
+                    e.IsOptional,
+                    e.IsRequired,
+                    e.MissedDeduction);
             })
             .ToList();
 

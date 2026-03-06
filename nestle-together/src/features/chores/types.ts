@@ -26,6 +26,8 @@ export interface Chore {
   lastCompletedBy?: string;
   memberCompletions?: MemberCompletion[];
   isOptional?: boolean;
+  isRequired?: boolean;
+  missedDeduction?: number;
 }
 
 export interface ChoreCompletion {
@@ -39,6 +41,8 @@ export interface AddChoreRequest {
   frequency?: ChoreFrequency;
   isOptional?: boolean;
   startDate?: string;
+  isRequired?: boolean;
+  missedDeduction?: number;
 }
 
 export interface AssignChoreRequest {
