@@ -12,12 +12,13 @@ test.describe('Household Creation', () => {
     // Click create household
     await page.click('text=Create Household');
     
-    // Fill form
+    // Step 1: Name
     await page.getByLabel(/household name/i).fill(householdName);
     await page.getByLabel(/your name|nickname/i).first().fill('Tester');
-    await page.getByLabel(/admin.*pin|pin.*code/i).first().fill('1234');
+    await page.getByRole('button', { name: /continue/i }).click();
     
-    // Submit
+    // Step 2: PIN
+    await page.getByLabel(/admin.*pin|pin.*code/i).first().fill('1234');
     await page.getByRole('button', { name: /create/i }).click();
     
     // Should redirect to dashboard with household name
@@ -32,6 +33,7 @@ test.describe('Household Creation', () => {
     await page.click('text=Create Household');
     await page.getByLabel(/household name/i).fill(householdName);
     await page.getByLabel(/your name|nickname/i).first().fill('Admin');
+    await page.getByRole('button', { name: /continue/i }).click();
     await page.getByLabel(/admin.*pin|pin.*code/i).first().fill('5678');
     await page.getByRole('button', { name: /create/i }).click();
     
@@ -65,6 +67,7 @@ test.describe('Chores', () => {
     await page.click('text=Create Household');
     await page.getByLabel(/household name/i).fill(householdName);
     await page.getByLabel(/your name|nickname/i).first().fill('Tester');
+    await page.getByRole('button', { name: /continue/i }).click();
     await page.getByLabel(/admin.*pin|pin.*code/i).first().fill('1234');
     await page.getByRole('button', { name: /create/i }).click();
     
@@ -144,6 +147,7 @@ test.describe('Profile', () => {
     await page.click('text=Create Household');
     await page.getByLabel(/household name/i).fill(householdName);
     await page.getByLabel(/your name|nickname/i).first().fill('Original');
+    await page.getByRole('button', { name: /continue/i }).click();
     await page.getByLabel(/admin.*pin|pin.*code/i).first().fill('1234');
     await page.getByRole('button', { name: /create/i }).click();
     
@@ -191,6 +195,7 @@ test.describe('Invites', () => {
     await page.click('text=Create Household');
     await page.getByLabel(/household name/i).fill(householdName);
     await page.getByLabel(/your name|nickname/i).first().fill('Admin');
+    await page.getByRole('button', { name: /continue/i }).click();
     await page.getByLabel(/admin.*pin|pin.*code/i).first().fill('1234');
     await page.getByRole('button', { name: /create/i }).click();
     
@@ -213,6 +218,7 @@ test.describe('What\'s New', () => {
     await page.click('text=Create Household');
     await page.getByLabel(/household name/i).fill(householdName);
     await page.getByLabel(/your name|nickname/i).first().fill('Tester');
+    await page.getByRole('button', { name: /continue/i }).click();
     await page.getByLabel(/admin.*pin|pin.*code/i).first().fill('1234');
     await page.getByRole('button', { name: /create/i }).click();
     
