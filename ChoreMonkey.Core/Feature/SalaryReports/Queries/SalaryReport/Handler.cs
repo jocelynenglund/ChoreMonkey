@@ -6,12 +6,11 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using System.Globalization;
 
-namespace ChoreMonkey.Core.Feature.SalaryReports.Commands.GenerateSalaryReport;
+namespace ChoreMonkey.Core.Feature.SalaryReports.Queries.SalaryReport;
 
-public record GenerateSalaryReportCommand(Guid HouseholdId, Guid MemberId, string Period);
-public record GenerateSalaryReportRequest(Guid MemberId, string Period);
+public record GetSalaryReportQuery(Guid HouseholdId, Guid MemberId, string Period);
 
-public record GenerateSalaryReportResponse(
+public record SalaryReportResponse(
     bool Success,
     string? Period,
     decimal? BaseAmount,
@@ -23,7 +22,7 @@ public record DeductionDto(Guid ChoreId, string ChoreName, string MissedPeriod, 
 
 internal class Handler(IEventStore store)
 {
-    public async Task<GenerateSalaryReportResponse> HandleAsync(GenerateSalaryReportCommand request)
+    public async Task<SalaryReportResponse> HandleAsync(GetSalaryReportQuery request)
     {
         var salaryStreamId = SalaryReportsAggregate.StreamId(request.HouseholdId);
         var householdStreamId = HouseholdAggregate.StreamId(request.HouseholdId);
@@ -34,7 +33,7 @@ internal class Handler(IEventStore store)
         var enabledEvent = salaryEvents.OfType<SalaryReportsEnabled>().FirstOrDefault();
         if (enabledEvent == null)
         {
-            return new GenerateSalaryReportResponse(false, null, null, null, null, "Salary reports not enabled");
+            return new SalaryReportResponse(false, null, null, null, null, "Salary reports not enabled");
         }
         
         // Get current base amount (could be updated)
@@ -48,13 +47,13 @@ internal class Handler(IEventStore store)
             .Any(e => e.MemberId == request.MemberId);
         if (!memberExists)
         {
-            return new GenerateSalaryReportResponse(false, null, null, null, null, "Member not found");
+            return new SalaryReportResponse(false, null, null, null, null, "Member not found");
         }
         
         // Parse period
         if (!TryParsePeriod(request.Period, out var periodStart, out var periodEnd, out var periodType))
         {
-            return new GenerateSalaryReportResponse(false, null, null, null, null, "Invalid period format. Use YYYY-Wnn for weeks or YYYY-MM for months");
+            return new SalaryReportResponse(false, null, null, null, null, "Invalid period format. Use YYYY-Wnn for weeks or YYYY-MM for months");
         }
         
         // Get chores and completions
@@ -77,7 +76,7 @@ internal class Handler(IEventStore store)
             .GroupBy(e => e.ChoreId)
             .ToDictionary(g => g.Key, g => g.ToList());
         
-        var deductions = new List<SalaryDeduction>();
+        var deductions = new List<DeductionDto>();
         
         foreach (var (choreId, chore) in chores)
         {
@@ -104,7 +103,7 @@ internal class Handler(IEventStore store)
             
             foreach (var missedPeriod in missedPeriods)
             {
-                deductions.Add(new SalaryDeduction(
+                deductions.Add(new DeductionDto(
                     choreId,
                     chore.DisplayName,
                     missedPeriod,
@@ -115,21 +114,8 @@ internal class Handler(IEventStore store)
         var totalDeductions = deductions.Sum(d => d.Amount);
         var finalAmount = Math.Max(0, baseAmount - totalDeductions);
         
-        // Record the generated report
-        var reportEvent = new SalaryReportGenerated(
-            request.HouseholdId,
-            request.MemberId,
-            request.Period,
-            baseAmount,
-            deductions.ToArray(),
-            finalAmount);
-        
-        await store.AppendToStreamAsync(salaryStreamId, reportEvent, ExpectedVersion.Any);
-        
-        var deductionDtos = deductions.Select(d => 
-            new DeductionDto(d.ChoreId, d.ChoreName, d.MissedPeriod, d.Amount)).ToList();
-        
-        return new GenerateSalaryReportResponse(true, request.Period, baseAmount, deductionDtos, finalAmount, null);
+        // No event storage - this is a pure read model / query
+        return new SalaryReportResponse(true, request.Period, baseAmount, deductions, finalAmount, null);
     }
     
     private static bool TryParsePeriod(string period, out DateTime start, out DateTime end, out string periodType)
@@ -277,14 +263,14 @@ internal class Handler(IEventStore store)
     }
 }
 
-internal static class GenerateSalaryReportEndpoint
+internal static class SalaryReportEndpoint
 {
     public static void Map(this RouteGroupBuilder group)
     {
-        group.MapPost("households/{householdId:guid}/salary/report", async (Guid householdId, GenerateSalaryReportRequest dto, Handler handler) =>
+        group.MapGet("households/{householdId:guid}/salary/report", async (Guid householdId, Guid memberId, string period, Handler handler) =>
         {
-            var command = new GenerateSalaryReportCommand(householdId, dto.MemberId, dto.Period);
-            var result = await handler.HandleAsync(command);
+            var query = new GetSalaryReportQuery(householdId, memberId, period);
+            var result = await handler.HandleAsync(query);
             
             if (!result.Success)
                 return Results.BadRequest(result);

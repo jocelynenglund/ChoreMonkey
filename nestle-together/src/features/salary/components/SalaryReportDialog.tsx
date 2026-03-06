@@ -89,10 +89,11 @@ export function SalaryReportDialog({ householdId }: SalaryReportDialogProps) {
     setIsLoading(true);
 
     try {
-      const result = await salaryApi.generateSalaryReport(householdId, {
-        memberId: selectedMember,
-        period: selectedPeriod,
-      });
+      const result = await salaryApi.getSalaryReport(
+        householdId,
+        selectedMember,
+        selectedPeriod
+      );
 
       if (result.success) {
         setReport(result);

@@ -1,9 +1,7 @@
 import type {
   SalarySettings,
-  SalaryReport,
   EnableSalaryReportsRequest,
   UpdateBaseSalaryRequest,
-  GenerateSalaryReportRequest,
   GenerateSalaryReportResponse,
 } from './types';
 
@@ -59,33 +57,15 @@ export async function updateBaseSalary(
 
 // ============ Salary Reports ============
 
-export async function fetchSalaryReports(
+export async function getSalaryReport(
   householdId: string,
-  memberId?: string
-): Promise<SalaryReport[]> {
-  const url = memberId
-    ? `${API_BASE_URL}/api/households/${householdId}/salary/reports?memberId=${memberId}`
-    : `${API_BASE_URL}/api/households/${householdId}/salary/reports`;
-
-  const response = await fetch(url);
-  
-  if (!response.ok) {
-    return [];
-  }
-
-  const data = await response.json();
-  return data.reports || [];
-}
-
-export async function generateSalaryReport(
-  householdId: string,
-  request: GenerateSalaryReportRequest
+  memberId: string,
+  period: string
 ): Promise<GenerateSalaryReportResponse> {
-  const response = await fetch(`${API_BASE_URL}/api/households/${householdId}/salary/report`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(request),
-  });
+  const params = new URLSearchParams({ memberId, period });
+  const response = await fetch(
+    `${API_BASE_URL}/api/households/${householdId}/salary/report?${params}`
+  );
 
   return response.json();
 }
