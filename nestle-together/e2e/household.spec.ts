@@ -22,7 +22,7 @@ test.describe('Household Creation', () => {
     await page.getByRole('button', { name: /create/i }).click();
     
     // Wait for redirect to dashboard
-    await page.waitForURL(/\/dashboard\//, { timeout: 15000 });
+    await page.waitForURL(/\/household\//, { timeout: 15000 });
     
     // Should show household name
     await expect(page.locator('h1')).toContainText(householdName, { timeout: 10000 });
@@ -41,7 +41,7 @@ test.describe('Household Creation', () => {
     await page.getByRole('button', { name: /create/i }).click();
     
     // Wait for redirect to dashboard
-    await page.waitForURL(/\/dashboard\//, { timeout: 15000 });
+    await page.waitForURL(/\/household\//, { timeout: 15000 });
     
     // Wait for dashboard
     await expect(page.locator('h1')).toContainText(householdName, { timeout: 10000 });
@@ -53,12 +53,12 @@ test.describe('Household Creation', () => {
     await page.getByRole('button', { name: /logout|log out/i }).click();
     
     // Navigate back and access with PIN
-    await page.goto(url.replace('/dashboard/', '/access/'));
+    await page.goto(url.replace('/household/', '/access/'));
     await page.getByLabel(/pin/i).fill('5678');
     await page.getByRole('button', { name: /access|enter|submit/i }).click();
     
     // Wait for redirect to dashboard
-    await page.waitForURL(/\/dashboard\//, { timeout: 15000 });
+    await page.waitForURL(/\/household\//, { timeout: 15000 });
     
     // Should be back on dashboard
     await expect(page.locator('h1')).toContainText(householdName, { timeout: 10000 });
@@ -81,7 +81,7 @@ test.describe('Chores', () => {
     await page.getByRole('button', { name: /create/i }).click();
     
     // Wait for redirect to dashboard
-    await page.waitForURL(/\/dashboard\//, { timeout: 15000 });
+    await page.waitForURL(/\/household\//, { timeout: 15000 });
     
     await expect(page.locator('h1')).toContainText(householdName, { timeout: 10000 });
     householdUrl = page.url();
@@ -164,7 +164,7 @@ test.describe('Profile', () => {
     await page.getByRole('button', { name: /create/i }).click();
     
     // Wait for redirect to dashboard
-    await page.waitForURL(/\/dashboard\//, { timeout: 15000 });
+    await page.waitForURL(/\/household\//, { timeout: 15000 });
     
     await expect(page.locator('h1')).toContainText(householdName, { timeout: 10000 });
   });
@@ -215,7 +215,7 @@ test.describe('Invites', () => {
     await page.getByRole('button', { name: /create/i }).click();
     
     // Wait for redirect to dashboard
-    await page.waitForURL(/\/dashboard\//, { timeout: 15000 });
+    await page.waitForURL(/\/household\//, { timeout: 15000 });
     
     await expect(page.locator('h1')).toContainText(householdName, { timeout: 10000 });
     
@@ -241,7 +241,7 @@ test.describe('What\'s New', () => {
     await page.getByRole('button', { name: /create/i }).click();
     
     // Wait for redirect to dashboard
-    await page.waitForURL(/\/dashboard\//, { timeout: 15000 });
+    await page.waitForURL(/\/household\//, { timeout: 15000 });
     
     await expect(page.locator('h1')).toContainText(householdName, { timeout: 10000 });
     
