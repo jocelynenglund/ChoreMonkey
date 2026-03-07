@@ -80,7 +80,7 @@ jobs:
         working-directory: nestle-together
         run: npx playwright test
         env:
-          E2E_BASE_URL: https://labs.itsybit.se
+          E2E_BASE_URL: https://choremonkey.itsybit.se
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
