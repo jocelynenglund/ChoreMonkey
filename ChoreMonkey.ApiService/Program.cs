@@ -34,8 +34,8 @@ builder.Services.AddCors(options =>
 builder.Services.AddChoreMonkeyCore();
 
 // Rate limiting for auth endpoints (PIN brute-force protection)
-// Disabled in Development/Test to allow integration tests to run
-if (!builder.Environment.IsDevelopment())
+// Disabled in Development/Testing to allow integration tests to run
+if (!builder.Environment.IsDevelopment() && !builder.Environment.IsEnvironment("Testing"))
 {
     builder.Services.AddRateLimiter(options =>
     {
@@ -74,7 +74,7 @@ app.UseExceptionHandler();
 app.UseCors("ChoreMonkeyCors");
 
 // Enable rate limiting (production only)
-if (!app.Environment.IsDevelopment())
+if (!app.Environment.IsDevelopment() && !app.Environment.IsEnvironment("Testing"))
 {
     app.UseRateLimiter();
 }
