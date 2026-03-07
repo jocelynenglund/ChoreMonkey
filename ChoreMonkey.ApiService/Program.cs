@@ -141,6 +141,29 @@ app.MapGet("/api/debug/config", () => {
     });
 });
 
+// Debug endpoint for event store stats
+app.MapGet("/api/debug/stats", () => {
+    var dataPath = Environment.GetEnvironmentVariable("EVENTSTORE_PATH") 
+        ?? Path.Combine(Directory.GetCurrentDirectory(), "data");
+    var streamsPath = Path.Combine(dataPath, "streams");
+    
+    var households = 0;
+    var totalStreams = 0;
+    
+    if (Directory.Exists(streamsPath))
+    {
+        var streamDirs = Directory.GetDirectories(streamsPath);
+        totalStreams = streamDirs.Length;
+        households = streamDirs.Count(d => Path.GetFileName(d).StartsWith("household-"));
+    }
+    
+    return Results.Ok(new { 
+        households,
+        totalStreams,
+        timestamp = DateTime.UtcNow.ToString("o")
+    });
+});
+
 app.Run();
 
 record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
