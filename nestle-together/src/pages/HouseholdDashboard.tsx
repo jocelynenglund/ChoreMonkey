@@ -249,6 +249,7 @@ export default function HouseholdDashboard() {
                 size="icon"
                 onClick={logout}
                 className="text-muted-foreground hover:text-foreground"
+                aria-label="Log out"
               >
                 <LogOut className="w-5 h-5" />
               </Button>
