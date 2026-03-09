@@ -45,13 +45,20 @@ test.describe('Household Creation', () => {
     await createHousehold(page, householdName, pin);
 
     // Extract household ID from the URL
-    const householdId = page.url().split('/household/')[1];
+    const url = page.url();
+    const householdId = url.split('/household/')[1];
+
+    // Wait for dashboard to fully load before logging out
+    await page.waitForLoadState('networkidle');
 
     // Log out — button has aria-label="Log out"
     await page.getByRole('button', { name: /log out/i }).click();
 
     // App redirects to /access/:id automatically
     await page.waitForURL(`**/access/${householdId}`, { timeout: 15000 });
+
+    // Wait for PIN input to be ready
+    await page.waitForLoadState('networkidle');
 
     // Only one member was created so it is auto-selected; just enter the PIN
     await fillPinInput(page, pin);
@@ -76,62 +83,62 @@ test.describe('Chores', () => {
     await page.getByRole('button', { name: /add chore/i }).click();
 
     // Fill chore details
-    await page.getByLabel(/name|title/i).fill('Clean garage');
+    await page.getByLabel(/chore name/i).fill('Clean garage');
     await page.getByLabel(/description/i).fill('Spring cleaning');
 
-    // Submit
-    await page.getByRole('button', { name: /add|create|save/i }).last().click();
+    // Submit - button text is "Add Chore"
+    await page.getByRole('button', { name: /add chore/i }).last().click();
 
     // Chore should appear
-    await expect(page.locator('text=Clean garage')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('text=Clean garage')).toBeVisible({ timeout: 10000 });
   });
 
   test('can add a daily chore', async ({ page }) => {
     await page.getByRole('button', { name: /add chore/i }).click();
 
-    await page.getByLabel(/name|title/i).fill('Make bed');
+    await page.getByLabel(/chore name/i).fill('Make bed');
 
-    // Select daily frequency
-    await page.getByRole('combobox').first().click();
-    await page.getByRole('option', { name: /daily/i }).click();
+    // Select daily frequency - the option text is "Every day"
+    await page.getByRole('combobox').click();
+    await page.getByRole('option', { name: /every day/i }).click();
 
-    await page.getByRole('button', { name: /add|create|save/i }).last().click();
+    await page.getByRole('button', { name: /add chore/i }).last().click();
 
-    await expect(page.locator('text=Make bed')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('text=Make bed')).toBeVisible({ timeout: 10000 });
   });
 
   test('can complete a chore', async ({ page }) => {
     // First add a chore
     await page.getByRole('button', { name: /add chore/i }).click();
-    await page.getByLabel(/name|title/i).fill('Test completion');
-    await page.getByRole('button', { name: /add|create|save/i }).last().click();
+    await page.getByLabel(/chore name/i).fill('Test completion');
+    await page.getByRole('button', { name: /add chore/i }).last().click();
 
-    await expect(page.locator('text=Test completion')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('text=Test completion')).toBeVisible({ timeout: 10000 });
 
-    // Find the chore card and click complete
+    // Find the chore card and click the complete button (checkmark icon)
     const choreCard = page.locator('[class*="card"]').filter({ hasText: 'Test completion' });
     await choreCard.getByRole('button').first().click();
 
-    // Complete dialog should appear
+    // Complete dialog should appear - click confirm
     await page.getByRole('button', { name: /complete|done|confirm/i }).click();
 
     // Activity timeline should show completion
-    await expect(page.locator('text=/completed|finished/i')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('text=/completed|finished/i')).toBeVisible({ timeout: 10000 });
   });
 
   test('can add an optional/bonus chore', async ({ page }) => {
     await page.getByRole('button', { name: /add chore/i }).click();
 
-    await page.getByLabel(/name|title/i).fill('Bonus task');
+    await page.getByLabel(/chore name/i).fill('Bonus task');
 
-    // Check optional checkbox
-    await page.getByLabel(/optional|bonus/i).check();
+    // Toggle the Bonus Chore switch (it's a Switch, not a checkbox)
+    await page.getByRole('switch', { name: /bonus chore/i }).click();
 
-    await page.getByRole('button', { name: /add|create|save/i }).last().click();
+    await page.getByRole('button', { name: /add chore/i }).last().click();
 
     // Should appear in bonus section
-    await expect(page.locator('text=Bonus task')).toBeVisible({ timeout: 5000 });
-    await expect(page.locator('text=/bonus chores/i')).toBeVisible();
+    await expect(page.locator('text=Bonus task')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('text=/bonus chores/i')).toBeVisible({ timeout: 5000 });
   });
 });
 
@@ -142,35 +149,44 @@ test.describe('Profile', () => {
   });
 
   test('can change nickname', async ({ page }) => {
-    // Click avatar to open profile
-    await page.locator('[class*="avatar"]').first().click();
+    // Click avatar button (has title="Edit profile")
+    await page.getByRole('button', { name: /edit profile/i }).click();
 
-    // Change nickname
+    // Wait for dialog and change nickname
+    await page.getByLabel(/nickname/i).waitFor({ state: 'visible', timeout: 5000 });
     await page.getByLabel(/nickname/i).fill('NewName');
     await page.getByRole('button', { name: /save/i }).click();
 
-    // Wait for dialog to close and verify change
-    await expect(page.locator('text=NewName')).toBeVisible({ timeout: 5000 });
+    // Wait for dialog to close and verify change in member strip
+    await expect(page.locator('text=NewName')).toBeVisible({ timeout: 10000 });
   });
 
   test('can set and clear status', async ({ page }) => {
-    // Click avatar to open profile
-    await page.locator('[class*="avatar"]').first().click();
+    // Click avatar button to open profile
+    await page.getByRole('button', { name: /edit profile/i }).click();
 
-    // Set status
+    // Wait for dialog and set status
+    await page.getByLabel(/status/i).waitFor({ state: 'visible', timeout: 5000 });
     await page.getByLabel(/status/i).fill('Busy testing!');
     await page.getByRole('button', { name: /save/i }).click();
 
-    // Avatar should have status ring (pulsing)
-    await expect(page.locator('[class*="pulse"]')).toBeVisible({ timeout: 5000 });
+    // Wait for dialog to close
+    await page.waitForTimeout(1500);
+
+    // Avatar should have status ring (pulsing) - check in member strip
+    await expect(page.locator('.animate-pulse')).toBeVisible({ timeout: 5000 });
 
     // Reopen and clear
-    await page.locator('[class*="avatar"]').first().click();
+    await page.getByRole('button', { name: /edit profile/i }).click();
+    await page.getByLabel(/status/i).waitFor({ state: 'visible', timeout: 5000 });
     await page.getByRole('button', { name: /clear/i }).click();
     await page.getByRole('button', { name: /save/i }).click();
 
+    // Wait for dialog to close
+    await page.waitForTimeout(1500);
+
     // Ring should be gone
-    await expect(page.locator('[class*="pulse"]')).not.toBeVisible({ timeout: 5000 });
+    await expect(page.locator('.animate-pulse')).not.toBeVisible({ timeout: 5000 });
   });
 });
 
@@ -179,12 +195,17 @@ test.describe('Invites', () => {
     const householdName = `Invite Test ${uniqueId()}`;
     await createHousehold(page, householdName);
 
-    // Click invite
+    // Click invite button in the Family Members section
     await page.getByRole('button', { name: /invite/i }).click();
 
-    // Should show invite dialog with link
-    await expect(page.locator('text=/invite|link|share/i')).toBeVisible();
-    await expect(page.locator('input[readonly]')).toBeVisible();
+    // Dialog opens - should show "Invite Family Member" title
+    await expect(page.getByRole('heading', { name: /invite family member/i })).toBeVisible({ timeout: 5000 });
+
+    // Click "Generate Invite Link" button
+    await page.getByRole('button', { name: /generate invite link/i }).click();
+
+    // Should show the invite code and readonly link input
+    await expect(page.locator('input[readonly]')).toBeVisible({ timeout: 10000 });
   });
 });
 
