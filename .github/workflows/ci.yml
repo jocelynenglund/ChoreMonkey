@@ -65,16 +65,44 @@ jobs:
     
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: nestle-together/package-lock.json
 
-      - name: Install Playwright only
+      - name: Install dependencies
+        working-directory: nestle-together
+        run: npm ci
+
+      - name: Build frontend
         working-directory: nestle-together
         run: |
-          npm install @playwright/test
-          npx playwright install --with-deps chromium
+          export BUILD_VERSION=$(date -u +%Y.%m.%d).${{ github.run_number }}
+          export BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          export GIT_SHA=${{ github.sha }}
+          npm run build
+        env:
+          VITE_API_URL: https://itsybitsylist-api.azurewebsites.net
+
+      - name: Deploy to labs (staging)
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: nestle-together/dist/
+          server-dir: /labs/
+
+      - name: Wait for deployment to propagate
+        run: sleep 10
+
+      - name: Install Playwright
+        working-directory: nestle-together
+        run: npx playwright install --with-deps chromium
 
       - name: Run E2E tests against staging
         working-directory: nestle-together
