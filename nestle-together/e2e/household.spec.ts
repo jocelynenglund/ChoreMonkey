@@ -4,13 +4,12 @@ import { test, expect, type Page } from '@playwright/test';
 const uniqueId = () => Math.random().toString(36).substring(7);
 
 // Helper: navigate the 2-step CreateHousehold form and wait for the dashboard
-async function createHousehold(page: Page, householdName: string, pin = '1234', yourName = 'Tester') {
+async function createHousehold(page: Page, householdName: string, pin = '1234') {
   await page.goto('/');
   await page.click('text=Create Household');
 
-  // Step 1: Household name + Your name
+  // Step 1: Household name
   await page.getByLabel('Household Name').fill(householdName);
-  await page.getByLabel('Your Name').fill(yourName);
   await page.getByRole('button', { name: 'Continue' }).click();
 
   // Step 2: Admin PIN (both fields must match)
