@@ -235,6 +235,7 @@ export default function HouseholdDashboard() {
                   onClick={() => setProfileOpen(true)}
                   className="rounded-full hover:ring-2 hover:ring-primary transition-all"
                   title="Edit profile"
+                  aria-label="Edit profile"
                 >
                   <MemberAvatar
                     nickname={currentMember.nickname}

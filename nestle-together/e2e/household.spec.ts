@@ -48,17 +48,17 @@ test.describe('Household Creation', () => {
     const url = page.url();
     const householdId = url.split('/household/')[1];
 
-    // Wait for dashboard to fully load before logging out
-    await page.waitForLoadState('networkidle');
-
-    // Log out — button has aria-label="Log out"
-    await page.getByRole('button', { name: /log out/i }).click();
+    // Wait for logout button to be visible (confirms dashboard is loaded)
+    const logoutButton = page.getByRole('button', { name: /log out/i });
+    await logoutButton.waitFor({ state: 'visible', timeout: 15000 });
+    await logoutButton.click();
 
     // App redirects to /access/:id automatically
     await page.waitForURL(`**/access/${householdId}`, { timeout: 15000 });
 
     // Wait for PIN input to be ready
-    await page.waitForLoadState('networkidle');
+    const pinInputs = page.locator('input[type="tel"]');
+    await pinInputs.first().waitFor({ state: 'visible', timeout: 10000 });
 
     // Only one member was created so it is auto-selected; just enter the PIN
     await fillPinInput(page, pin);
@@ -82,12 +82,15 @@ test.describe('Chores', () => {
     // Click add chore button
     await page.getByRole('button', { name: /add chore/i }).click();
 
-    // Fill chore details
+    // Wait for dialog and fill chore details
+    await page.getByLabel(/chore name/i).waitFor({ state: 'visible' });
     await page.getByLabel(/chore name/i).fill('Clean garage');
     await page.getByLabel(/description/i).fill('Spring cleaning');
 
-    // Submit - button text is "Add Chore"
-    await page.getByRole('button', { name: /add chore/i }).last().click();
+    // Scroll submit button into view and click
+    const submitButton = page.getByRole('button', { name: /add chore/i }).last();
+    await submitButton.scrollIntoViewIfNeeded();
+    await submitButton.click();
 
     // Chore should appear
     await expect(page.locator('text=Clean garage')).toBeVisible({ timeout: 10000 });
@@ -96,13 +99,18 @@ test.describe('Chores', () => {
   test('can add a daily chore', async ({ page }) => {
     await page.getByRole('button', { name: /add chore/i }).click();
 
+    // Wait for dialog to be visible
+    await page.getByLabel(/chore name/i).waitFor({ state: 'visible' });
     await page.getByLabel(/chore name/i).fill('Make bed');
 
     // Select daily frequency - the option text is "Every day"
     await page.getByRole('combobox').click();
     await page.getByRole('option', { name: /every day/i }).click();
 
-    await page.getByRole('button', { name: /add chore/i }).last().click();
+    // Scroll submit button into view and click
+    const submitButton = page.getByRole('button', { name: /add chore/i }).last();
+    await submitButton.scrollIntoViewIfNeeded();
+    await submitButton.click();
 
     await expect(page.locator('text=Make bed')).toBeVisible({ timeout: 10000 });
   });
@@ -110,8 +118,12 @@ test.describe('Chores', () => {
   test('can complete a chore', async ({ page }) => {
     // First add a chore
     await page.getByRole('button', { name: /add chore/i }).click();
+    await page.getByLabel(/chore name/i).waitFor({ state: 'visible' });
     await page.getByLabel(/chore name/i).fill('Test completion');
-    await page.getByRole('button', { name: /add chore/i }).last().click();
+    
+    const submitButton = page.getByRole('button', { name: /add chore/i }).last();
+    await submitButton.scrollIntoViewIfNeeded();
+    await submitButton.click();
 
     await expect(page.locator('text=Test completion')).toBeVisible({ timeout: 10000 });
 
@@ -129,12 +141,17 @@ test.describe('Chores', () => {
   test('can add an optional/bonus chore', async ({ page }) => {
     await page.getByRole('button', { name: /add chore/i }).click();
 
+    // Wait for dialog
+    await page.getByLabel(/chore name/i).waitFor({ state: 'visible' });
     await page.getByLabel(/chore name/i).fill('Bonus task');
 
     // Toggle the Bonus Chore switch (it's a Switch, not a checkbox)
     await page.getByRole('switch', { name: /bonus chore/i }).click();
 
-    await page.getByRole('button', { name: /add chore/i }).last().click();
+    // Scroll submit button into view and click
+    const submitButton = page.getByRole('button', { name: /add chore/i }).last();
+    await submitButton.scrollIntoViewIfNeeded();
+    await submitButton.click();
 
     // Should appear in bonus section
     await expect(page.locator('text=Bonus task')).toBeVisible({ timeout: 10000 });
