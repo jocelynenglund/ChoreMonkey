@@ -152,8 +152,8 @@ test.describe('Chores', () => {
     await submitButton.scrollIntoViewIfNeeded();
     await submitButton.click();
 
-    // Should appear in bonus section
-    await expect(page.locator('text=Bonus task')).toBeVisible({ timeout: 10000 });
+    // Should appear in bonus section (use more specific locator to avoid matching activity log)
+    await expect(page.getByRole('heading', { name: 'Bonus task' })).toBeVisible({ timeout: 10000 });
     await expect(page.locator('text=/bonus chores/i')).toBeVisible({ timeout: 5000 });
   });
 });
@@ -173,8 +173,8 @@ test.describe('Profile', () => {
     await page.getByLabel(/nickname/i).fill('NewName');
     await page.getByRole('button', { name: /save/i }).click();
 
-    // Wait for dialog to close and verify change in member strip
-    await expect(page.locator('text=NewName')).toBeVisible({ timeout: 10000 });
+    // Wait for dialog to close and verify change in member strip (use exact match to avoid activity log)
+    await expect(page.getByText('NewName', { exact: true })).toBeVisible({ timeout: 10000 });
   });
 
   test('can set and clear status', async ({ page }) => {

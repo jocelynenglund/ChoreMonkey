@@ -16,7 +16,7 @@ function getWebServer() {
     return {
       command: 'npm run preview',
       url: 'http://localhost:4173',
-      reuseExistingServer: false,
+      reuseExistingServer: !process.env.CI,
     };
   }
   // Local dev: use vite dev server
