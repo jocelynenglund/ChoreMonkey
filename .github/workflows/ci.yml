@@ -61,26 +61,66 @@ jobs:
 
   e2e-tests:
     runs-on: ubuntu-latest
-    needs: [build-frontend]
+    needs: [test-backend, build-frontend]
     
     steps:
       - uses: actions/checkout@v4
 
+      # Setup .NET for API
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Configure NuGet
+        run: |
+          dotnet nuget update source github \
+            --username jocelynenglund \
+            --password ${{ secrets.NUGET_AUTH_TOKEN }} \
+            --store-password-in-clear-text
+
+      - name: Restore .NET
+        run: dotnet restore
+
+      - name: Build API
+        run: dotnet build ChoreMonkey.ApiService --configuration Release --no-restore
+
+      # Setup Node for frontend
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: nestle-together/package-lock.json
 
-      - name: Install Playwright only
+      - name: Install frontend dependencies
         working-directory: nestle-together
-        run: |
-          npm install @playwright/test
-          npx playwright install --with-deps chromium
+        run: npm ci
 
-      - name: Run E2E tests against staging
+      - name: Build frontend (pointing to local API)
+        working-directory: nestle-together
+        run: npm run build
+        env:
+          VITE_API_URL: http://localhost:5536
+
+      - name: Install Playwright
+        working-directory: nestle-together
+        run: npx playwright install --with-deps chromium
+
+      # Start API in background
+      - name: Start API
+        run: |
+          dotnet run --project ChoreMonkey.ApiService --configuration Release --no-build &
+          echo "Waiting for API to start..."
+          sleep 10
+          curl -s http://localhost:5536/health || echo "Health check skipped"
+        env:
+          ASPNETCORE_URLS: http://localhost:5536
+          ASPNETCORE_ENVIRONMENT: Development
+
+      - name: Run E2E tests (full local stack)
         working-directory: nestle-together
         run: npx playwright test
         env:
-          E2E_BASE_URL: https://labs.itsybit.se
+          E2E_BASE_URL: http://localhost:4173
 
       - name: Upload test results
         uses: actions/upload-artifact@v4

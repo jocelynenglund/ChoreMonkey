@@ -235,6 +235,7 @@ export default function HouseholdDashboard() {
                   onClick={() => setProfileOpen(true)}
                   className="rounded-full hover:ring-2 hover:ring-primary transition-all"
                   title="Edit profile"
+                  aria-label="Edit profile"
                 >
                   <MemberAvatar
                     nickname={currentMember.nickname}
@@ -249,6 +250,7 @@ export default function HouseholdDashboard() {
                 size="icon"
                 onClick={logout}
                 className="text-muted-foreground hover:text-foreground"
+                aria-label="Log out"
               >
                 <LogOut className="w-5 h-5" />
               </Button>

@@ -24,7 +24,9 @@ builder.Services.AddCors(options =>
                 "http://choremonkey.itsybit.se",
                 "https://choremonkey.itsybit.se",
                 "http://localhost:5173",
-                "https://localhost:5173")
+                "https://localhost:5173",
+                "http://localhost:4173",
+                "https://localhost:4173")
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();

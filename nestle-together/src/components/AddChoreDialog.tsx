@@ -90,7 +90,7 @@ export function AddChoreDialog({ onAdd }: AddChoreDialogProps) {
           Add Chore
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl">Add New Chore</DialogTitle>
         </DialogHeader>
