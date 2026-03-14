@@ -89,6 +89,9 @@ app.MapDefaultEndpoints();
 app.MapChoreMonkeyEndpoints();
 app.MapChoreMonkeyHub();
 
+// Health endpoint for monitoring
+app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
+
 // Version endpoint
 app.MapGet("/api/version", () => {
     var assembly = Assembly.GetExecutingAssembly();
