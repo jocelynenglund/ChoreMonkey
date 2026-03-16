@@ -54,7 +54,9 @@ ChoreMonkey/
 
 | Environment | URL | FTP Path |
 |-------------|-----|----------|
-| **Production** | http://labs.itsybit.se | `/public_html/labs/` |
+| **Production** | http://labs.itsybit.se | `/labs/` |
+
+⚠️ **FTP root is `/`, not `/public_html/`!**
 
 **FTP Server:** `nt23.unoeuro.com`  
 **FTP User:** `itsybit.se`  
