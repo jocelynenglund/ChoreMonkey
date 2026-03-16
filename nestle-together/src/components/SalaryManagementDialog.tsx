@@ -4,21 +4,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { SalaryAdmin } from '@/features/salary/components/SalaryAdmin';
+import { AdminPanel } from '@/features/admin';
 
-interface SalaryManagementDialogProps {
+interface AdminPanelDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export function SalaryManagementDialog({ open, onOpenChange }: SalaryManagementDialogProps) {
+export function SalaryManagementDialog({ open, onOpenChange }: AdminPanelDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Salary Management</DialogTitle>
+          <DialogTitle>⚙️ Admin Panel</DialogTitle>
         </DialogHeader>
-        <SalaryAdmin />
+        <AdminPanel />
       </DialogContent>
     </Dialog>
   );

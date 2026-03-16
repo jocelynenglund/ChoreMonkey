@@ -1,0 +1,185 @@
+.chore-management {
+  padding: 0.5rem;
+}
+
+.chore-management.loading {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-muted, #666);
+}
+
+.chore-management .saved-message {
+  text-align: center;
+  padding: 0.5rem;
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+}
+
+.chore-section {
+  margin-bottom: 1.5rem;
+}
+
+.chore-section h3 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-muted, #666);
+  margin: 0 0 0.75rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.chore-section .empty {
+  font-size: 0.875rem;
+  color: var(--text-muted, #999);
+  font-style: italic;
+  padding: 0.5rem;
+}
+
+.chore-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #e0e0e0);
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+}
+
+.chore-card.bonus {
+  border-color: #ffc107;
+  background: #fffde7;
+}
+
+.chore-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.chore-info strong {
+  font-size: 0.875rem;
+}
+
+.chore-meta {
+  font-size: 0.75rem;
+  color: var(--text-muted, #666);
+}
+
+.chore-info .assigned {
+  font-size: 0.75rem;
+  color: var(--primary, #4CAF50);
+}
+
+.chore-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.chore-actions button {
+  padding: 0.5rem;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text-muted, #666);
+}
+
+.chore-actions button:hover {
+  background: var(--surface-elevated, #f5f5f5);
+  color: var(--text, #333);
+}
+
+.chore-actions button.delete:hover {
+  background: #ffebee;
+  color: #c62828;
+}
+
+/* Edit Form */
+.edit-form,
+.assign-form {
+  width: 100%;
+}
+
+.edit-form h4,
+.assign-form h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.875rem;
+}
+
+.edit-form label,
+.assign-form label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.edit-form input[type="number"] {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--border, #e0e0e0);
+  border-radius: 6px;
+  margin-top: 0.25rem;
+}
+
+.assign-all {
+  display: flex !important;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: var(--surface-elevated, #f5f5f5);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.member-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.member-option {
+  display: flex !important;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #e0e0e0);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+.member-option:has(input:checked) {
+  background: #e8f5e9;
+  border-color: #4CAF50;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 0.75rem;
+}
+
+.form-actions .cancel-btn,
+.form-actions .save-btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid #e0e0e0;
+  background: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+.form-actions .save-btn {
+  background: #4CAF50;
+  color: white;
+  border-color: #4CAF50;
+}

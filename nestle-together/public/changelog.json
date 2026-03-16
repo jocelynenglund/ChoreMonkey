@@ -1,6 +1,15 @@
 {
-  "generated": "2026-03-16T17:57:35.321Z",
+  "generated": "2026-03-16T18:05:11.557Z",
   "commits": [
+    {
+      "hash": "3346c71493eb66f9e2a35509e462b7813c60d3c0",
+      "shortHash": "3346c71",
+      "message": "fix: AddChore dialog scrollable on small screens",
+      "date": "2026-03-16",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "AddChore dialog scrollable on small screens"
+    },
     {
       "hash": "36e9fbe78d1bc029cbd5e7e72a24b094f66957b8",
       "shortHash": "36e9fbe",
@@ -171,15 +180,6 @@
       "author": "ItsyBOT",
       "type": "refactor",
       "displayMessage": "Make salary reports a read model (not event)"
-    },
-    {
-      "hash": "fca9fe0ee6ae70f7c836463c49072bb12d380ef6",
-      "shortHash": "fca9fe0",
-      "message": "feat: Salary Reports (feature-based architecture)",
-      "date": "2026-03-07",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Salary Reports (feature-based architecture)"
     }
   ]
 }

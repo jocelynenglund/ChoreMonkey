@@ -120,15 +120,15 @@ export function SettingsDialog({ householdId, onManageSalaries }: SettingsDialog
         </DialogHeader>
 
         <div className="space-y-6 mt-4">
-          {/* Salary Management */}
+          {/* Admin Panel */}
           {onManageSalaries && (
             <div className="space-y-3">
               <h3 className="font-semibold flex items-center gap-2">
                 <Wallet className="w-4 h-4" />
-                Salary Management
+                Chores & Salaries
               </h3>
               <p className="text-xs text-muted-foreground">
-                Set allowances, deduction rates, and close monthly periods.
+                Manage chores, set allowances, and close monthly periods.
               </p>
               <Button 
                 onClick={() => {
@@ -138,7 +138,7 @@ export function SettingsDialog({ householdId, onManageSalaries }: SettingsDialog
                 variant="outline"
                 className="w-full"
               >
-                Manage Salaries
+                Open Admin Panel
               </Button>
             </div>
           )}
