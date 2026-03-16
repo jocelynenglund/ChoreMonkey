@@ -54,7 +54,7 @@ ChoreMonkey/
 
 | Environment | URL | FTP Path |
 |-------------|-----|----------|
-| **Production** | http://labs.itsybit.se | `/labs/` |
+| **Production** | http://choremonkey.itsybit.se | `/choremonkey/` |
 
 **FTP Server:** `nt23.unoeuro.com`  
 **FTP User:** `itsybit.se`  
@@ -67,7 +67,7 @@ ChoreMonkey/
 cd ~/ChoreMonkey/nestle-together
 npm run build
 source ~/.openclaw/.secrets.env
-lftp -c "open -u itsybit.se,$ITSYBIT_FTP_PASSWORD ftp://nt23.unoeuro.com && mirror -R dist/ /labs/ --exclude .git"
+lftp -c "open -u itsybit.se,$ITSYBIT_FTP_PASSWORD ftp://nt23.unoeuro.com && mirror -R dist/ /choremonkey/ --exclude .git"
 ```
 
 **Or via GitHub Actions** (push to `main` → auto-deploy, requires `FTP_USERNAME` + `FTP_PASSWORD` secrets)
