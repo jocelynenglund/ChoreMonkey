@@ -1,6 +1,15 @@
 {
-  "generated": "2026-03-16T17:26:42.842Z",
+  "generated": "2026-03-16T17:48:26.149Z",
   "commits": [
+    {
+      "hash": "3897f3443b74d10a572c133d30bd4e5e75b4dac5",
+      "shortHash": "3897f34",
+      "message": "fix: clearer salary admin UX",
+      "date": "2026-03-16",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Clearer salary admin UX"
+    },
     {
       "hash": "294d5076ff113075238a506b384cb779af03a6b1",
       "shortHash": "294d507",
@@ -166,15 +175,6 @@
     {
       "hash": "c0e51b57c329578159e06008c210d6a082d716d3",
       "shortHash": "c0e51b5",
-      "message": "debug: Add path info to stats endpoint",
-      "date": "2026-02-18",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Debug: Add path info to stats endpoint"
-    },
-    {
-      "hash": "c654c625acf52c09d62c2763435eac50b69dbe34",
-      "shortHash": "c654c62",
       "message": "debug: Add path info to stats endpoint",
       "date": "2026-02-18",
       "author": "ItsyBOT",

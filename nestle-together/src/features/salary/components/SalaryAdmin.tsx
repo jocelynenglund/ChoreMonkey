@@ -100,8 +100,13 @@ export function SalaryAdmin() {
           <span className="period">{formatDate(periodData.periodStart)}</span>
         )}
       </header>
+      
+      <p className="instructions">Click "Set Up" or "Edit" on a member to configure their salary, then click Save.</p>
 
       <div className="member-salaries">
+        {(!periodData?.members || periodData.members.length === 0) && (
+          <div className="no-members">No members found. Add members to your household first.</div>
+        )}
         {periodData?.members.map((member) => (
           <div key={member.memberId} className="member-card">
             {editingMember === member.memberId ? (
