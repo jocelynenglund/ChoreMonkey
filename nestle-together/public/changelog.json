@@ -1,6 +1,15 @@
 {
-  "generated": "2026-03-16T17:55:29.221Z",
+  "generated": "2026-03-16T17:57:35.321Z",
   "commits": [
+    {
+      "hash": "36e9fbe78d1bc029cbd5e7e72a24b094f66957b8",
+      "shortHash": "36e9fbe",
+      "message": "fix: make Save button more visible in salary form",
+      "date": "2026-03-16",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Make Save button more visible in salary form"
+    },
     {
       "hash": "6499b35bf8e15692d673506a5f4032c012faed9b",
       "shortHash": "6499b35",
@@ -171,15 +180,6 @@
       "author": "ItsyBOT",
       "type": "feature",
       "displayMessage": "Salary Reports (feature-based architecture)"
-    },
-    {
-      "hash": "b678bb9dec751f15f544790ec4440ad2a853ae19",
-      "shortHash": "b678bb9",
-      "message": "fix: disable rate limiting in Testing environment",
-      "date": "2026-03-07",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Disable rate limiting in Testing environment"
     }
   ]
 }
