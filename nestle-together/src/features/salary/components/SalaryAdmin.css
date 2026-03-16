@@ -156,11 +156,42 @@
   cursor: not-allowed;
 }
 
-/* Admin Actions */
-.admin-actions {
+/* Saved Message */
+.saved-message {
+  text-align: center;
+  padding: 0.75rem;
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-radius: 8px;
+  margin-top: 1rem;
+  font-weight: 500;
+}
+
+/* Not Configured */
+.not-configured {
+  color: var(--text-muted, #666);
+  font-style: italic;
+  font-size: 0.875rem;
+}
+
+/* Close Period Section */
+.close-period-section {
   margin-top: 2rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--border, #e0e0e0);
+  padding: 1rem;
+  border: 1px solid var(--border, #e0e0e0);
+  border-radius: 12px;
+  background: var(--surface-elevated, #fafafa);
+}
+
+.close-period-section h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+}
+
+.close-period-section .warning-text {
+  font-size: 0.75rem;
+  color: var(--text-muted, #666);
+  margin-bottom: 1rem;
 }
 
 .close-period-btn {

@@ -1,6 +1,15 @@
 {
-  "generated": "2026-03-16T17:17:06.842Z",
+  "generated": "2026-03-16T17:26:42.842Z",
   "commits": [
+    {
+      "hash": "294d5076ff113075238a506b384cb779af03a6b1",
+      "shortHash": "294d507",
+      "message": "feat: salary navigation via profile and settings",
+      "date": "2026-03-16",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Salary navigation via profile and settings"
+    },
     {
       "hash": "6ac558b26dceabf5c4724bf08d9d5493d7fc7848",
       "shortHash": "6ac558b",
@@ -171,15 +180,6 @@
       "author": "ItsyBOT",
       "type": "feature",
       "displayMessage": "Debug: Add path info to stats endpoint"
-    },
-    {
-      "hash": "a3923c1fe38da505b8545c77d48a6a3ec720d4fd",
-      "shortHash": "a3923c1",
-      "message": "feat: Rate limiting for auth endpoints (#22)",
-      "date": "2026-02-18",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Rate limiting for auth endpoints (#22)"
     }
   ]
 }

@@ -22,6 +22,7 @@ export function SalaryAdmin() {
   });
   const [saving, setSaving] = useState(false);
   const [closing, setClosing] = useState(false);
+  const [savedMessage, setSavedMessage] = useState<string | null>(null);
 
   useEffect(() => {
     loadPeriod();
@@ -56,6 +57,8 @@ export function SalaryAdmin() {
     
     if (success) {
       setEditingMember(null);
+      setSavedMessage('Salary saved!');
+      setTimeout(() => setSavedMessage(null), 2000);
       loadPeriod();
     }
     setSaving(false);
@@ -149,28 +152,34 @@ export function SalaryAdmin() {
               <>
                 <div className="member-info">
                   <h3>{member.name}</h3>
-                  <div className="salary-summary">
-                    <span className="base">Base: {formatCurrency(member.baseSalary)}</span>
-                    <span className="projected">
-                      → {formatCurrency(member.projected)}
-                    </span>
-                  </div>
-                  {member.deductions > 0 && (
-                    <span className="deduction-badge">
-                      -{formatCurrency(member.deductions)} ({member.missedChores.length} missed)
-                    </span>
-                  )}
-                  {member.bonuses > 0 && (
-                    <span className="bonus-badge">
-                      +{formatCurrency(member.bonuses)} bonus
-                    </span>
+                  {member.baseSalary > 0 ? (
+                    <>
+                      <div className="salary-summary">
+                        <span className="base">Base: {formatCurrency(member.baseSalary)}</span>
+                        <span className="projected">
+                          → {formatCurrency(member.projected)}
+                        </span>
+                      </div>
+                      {member.deductions > 0 && (
+                        <span className="deduction-badge">
+                          -{formatCurrency(member.deductions)} ({member.missedChores.length} missed)
+                        </span>
+                      )}
+                      {member.bonuses > 0 && (
+                        <span className="bonus-badge">
+                          +{formatCurrency(member.bonuses)} bonus
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    <span className="not-configured">No salary configured</span>
                   )}
                 </div>
                 <button 
                   className="edit-btn"
                   onClick={() => startEditing(member)}
                 >
-                  Edit
+                  {member.baseSalary > 0 ? 'Edit' : 'Set Up'}
                 </button>
               </>
             )}
@@ -178,7 +187,18 @@ export function SalaryAdmin() {
         ))}
       </div>
 
-      <div className="admin-actions">
+      {/* Success message */}
+      {savedMessage && (
+        <div className="saved-message">✓ {savedMessage}</div>
+      )}
+
+      {/* Close Period - separate section */}
+      <div className="close-period-section">
+        <h3>End of Month</h3>
+        <p className="warning-text">
+          Closing the period finalizes all salaries and generates payslips. 
+          This cannot be undone.
+        </p>
         <button 
           onClick={handleClosePeriod}
           disabled={closing}
