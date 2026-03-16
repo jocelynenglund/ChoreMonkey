@@ -1,9 +1,18 @@
 {
-  "generated": "2026-03-16T17:04:00.501Z",
+  "generated": "2026-03-16T17:07:10.852Z",
   "commits": [
     {
-      "hash": "a78658ec1caecb268eab477a1527aeb3a157bf19",
-      "shortHash": "a78658e",
+      "hash": "1d55151aca71f861887ee69329c1b1a66b9f56ce",
+      "shortHash": "1d55151",
+      "message": "feat: new salary UI for per-member system",
+      "date": "2026-03-16",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "New salary UI for per-member system"
+    },
+    {
+      "hash": "aa5b9379f35a0e0f1fb4a7594a9a80bd2e1dfd7f",
+      "shortHash": "aa5b937",
       "message": "fix: address Copilot review comments",
       "date": "2026-03-16",
       "author": "ItsyBOT",
@@ -171,15 +180,6 @@
       "author": "ItsyBOT",
       "type": "fix",
       "displayMessage": "Disable rate limiting in development/test mode"
-    },
-    {
-      "hash": "841cda2bbefeb668c3896f7f7880f8d534d3114e",
-      "shortHash": "841cda2",
-      "message": "feat: add rate limiting for auth endpoints",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Add rate limiting for auth endpoints"
     }
   ]
 }

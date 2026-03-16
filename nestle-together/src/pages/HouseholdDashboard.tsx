@@ -29,6 +29,7 @@ import { Button } from '@/components/ui/button';
 import { useHouseholdStore } from '@/stores/householdStore';
 import { ChoreCard } from '@/components/ChoreCard';
 import { AddChoreDialog } from '@/components/AddChoreDialog';
+import { setChoreRates } from '@/features/salary/api';
 import { CompleteChoreDialog } from '@/components/CompleteChoreDialog';
 import { InviteDialog } from '@/components/InviteDialog';
 import { MemberAvatar } from '@/components/MemberAvatar';
@@ -151,12 +152,19 @@ export default function HouseholdDashboard() {
   // Bonus chores: optional and not completed
   const bonusChores = (chores ?? []).filter((c) => c.isOptional && !c.completed);
 
-  const handleAddChore = async (displayName: string, description: string, frequency?: ChoreFrequency, isOptional?: boolean, startDate?: Date) => {
-    const newChore = await addChore(household.id, displayName, description, frequency, isOptional, startDate);
+  const handleAddChore = async (displayName: string, description: string, frequency?: ChoreFrequency, isOptional?: boolean, startDate?: Date, isRequired?: boolean, missedDeduction?: number) => {
+    const newChore = await addChore(household.id, displayName, description, frequency, isOptional, startDate, isRequired, missedDeduction);
     if (newChore) {
       setChores((prev) => [...prev, newChore]);
       setRefreshKey((k) => k + 1); // Refresh MyChoresSection
+      return { id: newChore.id };
     }
+    return null;
+  };
+
+  const handleSetChoreRates = async (choreId: string, deductionRate: number, bonusRate: number) => {
+    if (!household) return;
+    await setChoreRates(household.id, choreId, { deductionRate, bonusRate });
   };
 
   const handleCompleteChore = async (choreId: string, completedAt?: Date) => {
@@ -345,7 +353,7 @@ export default function HouseholdDashboard() {
             <ClipboardList className="w-5 h-5 text-primary" />
             <h2 className="font-bold text-lg">My Chores</h2>
           </div>
-          <AddChoreDialog onAdd={handleAddChore} />
+          <AddChoreDialog onAdd={handleAddChore} onSetRates={handleSetChoreRates} />
         </div>
 
         {/* My Chores - Personal Read Model */}

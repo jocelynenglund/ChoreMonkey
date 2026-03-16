@@ -232,7 +232,7 @@ export const useAppStore = create<AppState>()(
 
       addChore: async (householdId, displayName, description, frequency, isOptional, startDate, isRequired = true, missedDeduction = 10) => {
         try {
-          await choresApi.addChore(householdId, {
+          const result = await choresApi.addChore(householdId, {
             displayName,
             description,
             frequency,
@@ -244,7 +244,7 @@ export const useAppStore = create<AppState>()(
 
           // Return a minimal chore object - full data comes from refresh
           return {
-            id: crypto.randomUUID(),
+            id: result.id,
             householdId,
             displayName,
             description,

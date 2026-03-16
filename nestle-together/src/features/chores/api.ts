@@ -52,7 +52,7 @@ export async function fetchChores(householdId: string): Promise<Chore[]> {
 
 // ============ Chore Commands ============
 
-export async function addChore(householdId: string, request: AddChoreRequest): Promise<void> {
+export async function addChore(householdId: string, request: AddChoreRequest): Promise<{ id: string }> {
   const response = await fetch(`${API_BASE_URL}/api/households/${householdId}/chores`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -62,6 +62,9 @@ export async function addChore(householdId: string, request: AddChoreRequest): P
   if (!response.ok) {
     throw new Error('Failed to add chore');
   }
+  
+  const data = await response.json();
+  return { id: data.id };
 }
 
 export async function completeChore(
