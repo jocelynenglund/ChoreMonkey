@@ -51,11 +51,12 @@ export function ChoreManagement() {
     }
   }
 
-  async function handleSaveRates(choreId: string) {
+  async function handleSaveRates(choreId: string, isBonus: boolean) {
     if (!currentHouseholdId) return;
+    // Bonus chores: only bonusRate, Required chores: only deductionRate
     await setChoreRates(currentHouseholdId, choreId, {
-      deductionRate: parseFloat(ratesForm.deductionRate) || 0,
-      bonusRate: parseFloat(ratesForm.bonusRate) || 0
+      deductionRate: isBonus ? 0 : parseFloat(ratesForm.deductionRate) || 0,
+      bonusRate: isBonus ? parseFloat(ratesForm.bonusRate) || 0 : 0
     });
     setEditingChore(null);
     showMessage('Rates saved');
@@ -133,7 +134,7 @@ export function ChoreManagement() {
                 </label>
                 <div className="form-actions">
                   <button className="cancel-btn" onClick={() => setEditingChore(null)}>Cancel</button>
-                  <button className="save-btn" onClick={() => handleSaveRates(chore.id)}>💾 Save</button>
+                  <button className="save-btn" onClick={() => handleSaveRates(chore.id, false)}>💾 Save</button>
                 </div>
               </div>
             ) : assigningChore === chore.id ? (
@@ -219,7 +220,7 @@ export function ChoreManagement() {
                 </label>
                 <div className="form-actions">
                   <button className="cancel-btn" onClick={() => setEditingChore(null)}>Cancel</button>
-                  <button className="save-btn" onClick={() => handleSaveRates(chore.id)}>💾 Save</button>
+                  <button className="save-btn" onClick={() => handleSaveRates(chore.id, true)}>💾 Save</button>
                 </div>
               </div>
             ) : (

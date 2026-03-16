@@ -1,6 +1,15 @@
 {
-  "generated": "2026-03-16T19:17:41.802Z",
+  "generated": "2026-03-16T19:20:10.234Z",
   "commits": [
+    {
+      "hash": "2c67c5d846983ed775afe89557ca5214811d2a40",
+      "shortHash": "2c67c5d",
+      "message": "fix: reload chores after saving rates to show updated values",
+      "date": "2026-03-16",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Reload chores after saving rates to show updated values"
+    },
     {
       "hash": "e06b4be7a141dd2f24fa2a737c5c0d78320ebffc",
       "shortHash": "e06b4be",
@@ -171,15 +180,6 @@
       "author": "ItsyBOT",
       "type": "fix",
       "displayMessage": "Correct waitForURL pattern to match /household/ route"
-    },
-    {
-      "hash": "41677c18b887a2d3efc62a73a0433bf7462ca87f",
-      "shortHash": "41677c1",
-      "message": "fix: add waitForURL after household creation to fix E2E timing issues",
-      "date": "2026-03-07",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Add waitForURL after household creation to fix E2E timing issues"
     }
   ]
 }
