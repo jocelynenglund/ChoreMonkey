@@ -1,6 +1,24 @@
 {
-  "generated": "2026-03-16T19:12:51.011Z",
+  "generated": "2026-03-16T19:17:41.802Z",
   "commits": [
+    {
+      "hash": "e06b4be7a141dd2f24fa2a737c5c0d78320ebffc",
+      "shortHash": "e06b4be",
+      "message": "test: add ChoreRatesTests - bonus and deduction rates in ChoreList",
+      "date": "2026-03-16",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Add ChoreRatesTests - bonus and deduction rates in ChoreList"
+    },
+    {
+      "hash": "32712e5b525dd79b6d1e4d0ba15385b461824455",
+      "shortHash": "32712e5",
+      "message": "feat: ChoreList includes deductionRate and bonusRate from salary stream",
+      "date": "2026-03-16",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "ChoreList includes deductionRate and bonusRate from salary stream"
+    },
     {
       "hash": "d7e49a0a8ee29b881cf9a5fbe4137f97128bdb04",
       "shortHash": "d7e49a0",
@@ -162,24 +180,6 @@
       "author": "ItsyBOT",
       "type": "feature",
       "displayMessage": "Add waitForURL after household creation to fix E2E timing issues"
-    },
-    {
-      "hash": "7dd760d06038a2bfd0f4049ec5b691c0d468fafe",
-      "shortHash": "7dd760d",
-      "message": "fix(ci): revert e2e URL back to labs.itsybit.se (staging)",
-      "date": "2026-03-07",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Fix(ci): revert e2e URL back to labs.itsybit.se (staging)"
-    },
-    {
-      "hash": "65159c6ac1eb6bc06de5971496624793ea22696d",
-      "shortHash": "65159c6",
-      "message": "fix(ci): update e2e URL to choremonkey.itsybit.se",
-      "date": "2026-03-07",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Fix(ci): update e2e URL to choremonkey.itsybit.se"
     }
   ]
 }

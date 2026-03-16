@@ -59,6 +59,7 @@ export function ChoreManagement() {
     });
     setEditingChore(null);
     showMessage('Rates saved');
+    loadData(); // Refresh to show updated rates
   }
 
   async function handleSaveAssignment(choreId: string) {
