@@ -36,6 +36,7 @@ export interface ChoreCompletion {
 }
 
 export interface AddChoreRequest {
+  choreId?: string;  // Client-generated for idempotency
   displayName: string;
   description: string;
   frequency?: ChoreFrequency;
