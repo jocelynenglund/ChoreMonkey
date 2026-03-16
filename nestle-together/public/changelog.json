@@ -1,6 +1,15 @@
 {
-  "generated": "2026-03-16T19:03:44.041Z",
+  "generated": "2026-03-16T19:12:51.011Z",
   "commits": [
+    {
+      "hash": "d7e49a0a8ee29b881cf9a5fbe4137f97128bdb04",
+      "shortHash": "d7e49a0",
+      "message": "fix: required chores have deductions, bonus chores have bonuses",
+      "date": "2026-03-16",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Required chores have deductions, bonus chores have bonuses"
+    },
     {
       "hash": "860aef35533b0edc4105aa30b7673917ea6bd89e",
       "shortHash": "860aef3",
@@ -171,15 +180,6 @@
       "author": "ItsyBOT",
       "type": "fix",
       "displayMessage": "Fix(ci): update e2e URL to choremonkey.itsybit.se"
-    },
-    {
-      "hash": "ccea614c88b37a1df5ac9302393ba95b7a9750a1",
-      "shortHash": "ccea614",
-      "message": "fix: E2E tests for multi-step household creation",
-      "date": "2026-03-07",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "E2E tests for multi-step household creation"
     }
   ]
 }

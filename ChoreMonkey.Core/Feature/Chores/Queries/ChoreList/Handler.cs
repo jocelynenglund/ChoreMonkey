@@ -23,7 +23,9 @@ public record ChoreDto(
     List<MemberCompletionDto>? MemberCompletions = null,
     bool IsOptional = false,
     bool IsRequired = true,
-    decimal MissedDeduction = 10m);
+    decimal MissedDeduction = 10m,
+    decimal? DeductionRate = null,
+    decimal? BonusRate = null);
 
 public record MemberCompletionDto(
     Guid MemberId,
@@ -50,9 +52,16 @@ internal class Handler(IEventStore store)
     {
         var streamId = ChoreAggregate.StreamId(request.HouseholdId);
         var householdStreamId = HouseholdAggregate.StreamId(request.HouseholdId);
+        var salaryStreamId = SalaryAggregate.StreamId(request.HouseholdId);
         
         var events = await store.FetchEventsAsync(streamId);
         var householdEvents = await store.FetchEventsAsync(householdStreamId);
+        var salaryEvents = await store.FetchEventsAsync(salaryStreamId);
+        
+        // Get latest rates for each chore from salary stream
+        var choreRates = salaryEvents.OfType<ChoreRatesSet>()
+            .GroupBy(e => e.ChoreId)
+            .ToDictionary(g => g.Key, g => g.Last());
         
         var today = DateTime.UtcNow.Date;
         var weekStart = GetMondayOfWeek(today);
@@ -86,6 +95,7 @@ internal class Handler(IEventStore store)
                 var assignment = assignments.GetValueOrDefault(e.ChoreId);
                 var choreCompletions = completionsByChore.GetValueOrDefault(e.ChoreId) ?? new List<ChoreCompleted>();
                 var lastCompletion = choreCompletions.OrderByDescending(c => c.CompletedAt).FirstOrDefault();
+                var rates = choreRates.GetValueOrDefault(e.ChoreId);
                 
                 var frequency = e.Frequency != null 
                     ? new FrequencyDto(e.Frequency.Type, e.Frequency.Days, e.Frequency.IntervalDays)
@@ -129,7 +139,9 @@ internal class Handler(IEventStore store)
                     memberCompletions,
                     e.IsOptional,
                     e.IsRequired,
-                    e.MissedDeduction);
+                    e.MissedDeduction,
+                    rates?.DeductionRate,
+                    rates?.BonusRate);
             })
             .ToList();
 

@@ -28,6 +28,8 @@ export interface Chore {
   isOptional?: boolean;
   isRequired?: boolean;
   missedDeduction?: number;
+  deductionRate?: number;
+  bonusRate?: number;
 }
 
 export interface ChoreCompletion {

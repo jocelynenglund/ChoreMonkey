@@ -74,10 +74,10 @@ export function ChoreManagement() {
 
   function startEditing(chore: Chore) {
     setEditingChore(chore.id);
-    // Required chores have deductions, bonus chores have bonus rates
+    // Use saved rates, or fallback to defaults
     setRatesForm({
-      deductionRate: chore.isOptional ? '0' : (chore.missedDeduction || 10).toString(),
-      bonusRate: chore.isOptional ? '10' : '0'
+      deductionRate: (chore.deductionRate ?? chore.missedDeduction ?? 10).toString(),
+      bonusRate: (chore.bonusRate ?? 10).toString()
     });
   }
 
@@ -174,7 +174,7 @@ export function ChoreManagement() {
                   <strong>{chore.displayName}</strong>
                   <span className="chore-meta">
                     {chore.frequency?.type || 'once'}
-                    {chore.missedDeduction && ` • -${chore.missedDeduction} kr`}
+                    {(chore.deductionRate ?? chore.missedDeduction) ? ` • -${chore.deductionRate ?? chore.missedDeduction} kr` : ''}
                   </span>
                   <span className="assigned">
                     {chore.assignedToAll ? 'Everyone' : 
@@ -225,7 +225,7 @@ export function ChoreManagement() {
               <>
                 <div className="chore-info">
                   <strong>{chore.displayName}</strong>
-                  <span className="chore-meta">bonus</span>
+                  <span className="chore-meta">bonus{chore.bonusRate ? ` • +${chore.bonusRate} kr` : ''}</span>
                 </div>
                 <div className="chore-actions">
                   <button onClick={() => startEditing(chore)} title="Edit rates">
