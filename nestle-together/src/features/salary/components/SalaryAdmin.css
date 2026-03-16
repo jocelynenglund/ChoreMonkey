@@ -150,20 +150,26 @@
   gap: 0.5rem;
   justify-content: flex-end;
   margin-top: 1rem;
+  flex-wrap: wrap;
 }
 
-.form-actions button {
+.form-actions button,
+.form-actions .cancel-btn,
+.form-actions .save-btn {
   padding: 0.5rem 1rem;
-  border: 1px solid var(--border, #e0e0e0);
-  background: transparent;
+  border: 1px solid #e0e0e0;
+  background: #fff;
   border-radius: 6px;
   cursor: pointer;
+  min-width: 80px;
+  font-size: 0.875rem;
 }
 
-.form-actions button.primary {
-  background: var(--primary, #4CAF50);
+.form-actions .save-btn {
+  background: #4CAF50;
   color: white;
-  border-color: var(--primary, #4CAF50);
+  border-color: #4CAF50;
+  font-weight: 600;
 }
 
 .form-actions button:disabled {

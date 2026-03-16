@@ -1,6 +1,24 @@
 {
-  "generated": "2026-03-16T17:48:26.149Z",
+  "generated": "2026-03-16T17:55:29.221Z",
   "commits": [
+    {
+      "hash": "6499b35bf8e15692d673506a5f4032c012faed9b",
+      "shortHash": "6499b35",
+      "message": "fix: salary views use MemberLookup for active members only",
+      "date": "2026-03-16",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Salary views use MemberLookup for active members only"
+    },
+    {
+      "hash": "998aa9f6b5fae7e10c2134735151ba6cdab2c65d",
+      "shortHash": "998aa9f",
+      "message": "fix: add instructions and empty state to salary admin",
+      "date": "2026-03-16",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Add instructions and empty state to salary admin"
+    },
     {
       "hash": "3897f3443b74d10a572c133d30bd4e5e75b4dac5",
       "shortHash": "3897f34",
@@ -162,24 +180,6 @@
       "author": "ItsyBOT",
       "type": "fix",
       "displayMessage": "Disable rate limiting in Testing environment"
-    },
-    {
-      "hash": "e1584465ea6531640466758c8a363d2058937a68",
-      "shortHash": "e158446",
-      "message": "Add debug stats endpoint",
-      "date": "2026-03-07",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Add debug stats endpoint"
-    },
-    {
-      "hash": "c0e51b57c329578159e06008c210d6a082d716d3",
-      "shortHash": "c0e51b5",
-      "message": "debug: Add path info to stats endpoint",
-      "date": "2026-02-18",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Debug: Add path info to stats endpoint"
     }
   ]
 }

@@ -145,11 +145,21 @@ export function SalaryAdmin() {
                   <span className="hint">1.5 = 50% extra bonus</span>
                 </label>
                 <div className="form-actions">
-                  <button onClick={() => setEditingMember(null)} disabled={saving}>
+                  <button 
+                    type="button"
+                    onClick={() => setEditingMember(null)} 
+                    disabled={saving}
+                    className="cancel-btn"
+                  >
                     Cancel
                   </button>
-                  <button onClick={saveSalary} disabled={saving} className="primary">
-                    {saving ? 'Saving...' : 'Save'}
+                  <button 
+                    type="button"
+                    onClick={saveSalary} 
+                    disabled={saving} 
+                    className="save-btn"
+                  >
+                    {saving ? 'Saving...' : '💾 Save'}
                   </button>
                 </div>
               </div>
