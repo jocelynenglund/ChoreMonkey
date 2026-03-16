@@ -56,20 +56,21 @@ ChoreMonkey/
 |-------------|-----|----------|
 | **Production** | http://labs.itsybit.se | `/labs/` |
 
-⚠️ **FTP root is `/`, not `/public_html/`!**
-
 **FTP Server:** `nt23.unoeuro.com`  
 **FTP User:** `itsybit.se`  
 **FTP Password:** `$ITSYBIT_FTP_PASSWORD`
+
+⚠️ **FTP root is `/`, not `/public_html/`!**
 
 **Build & Deploy:**
 ```bash
 cd ~/ChoreMonkey/nestle-together
 npm run build
-# Then FTP upload dist/ to /public_html/labs/
+source ~/.openclaw/.secrets.env
+lftp -c "open -u itsybit.se,$ITSYBIT_FTP_PASSWORD ftp://nt23.unoeuro.com && mirror -R dist/ /labs/ --exclude .git"
 ```
 
-⚠️ **Note:** GitHub Actions deploy requires `FTP_USERNAME` and `FTP_PASSWORD` secrets (not yet configured)
+**Or via GitHub Actions** (push to `main` → auto-deploy, requires `FTP_USERNAME` + `FTP_PASSWORD` secrets)
 
 ## Development
 
