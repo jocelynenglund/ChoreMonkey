@@ -78,10 +78,10 @@ internal class Handler(IEventStore store)
             .GroupBy(e => e.ChoreId)
             .ToDictionary(g => g.Key, g => g.Last());
 
-        // Get completions in period
+        // Get completions in period (end-exclusive)
         var completionsInPeriod = choreEvents
             .OfType<ChoreCompleted>()
-            .Where(e => e.CompletedAt >= periodStart && e.CompletedAt <= periodEnd.AddDays(1))
+            .Where(e => e.CompletedAt >= periodStart && e.CompletedAt < periodEnd.AddDays(1))
             .GroupBy(e => (e.ChoreId, e.CompletedByMemberId))
             .ToDictionary(g => g.Key, g => g.ToList());
 
@@ -165,8 +165,8 @@ internal class Handler(IEventStore store)
                 totalDeductions,
                 totalBonuses,
                 netPay,
-                deductions,
-                bonuses));
+                deductions.AsReadOnly(),
+                bonuses.AsReadOnly()));
 
             payoutDtos.Add(new PayoutSummaryDto(
                 memberId,
@@ -185,7 +185,7 @@ internal class Handler(IEventStore store)
             request.HouseholdId,
             periodStart,
             periodEnd,
-            payouts,
+            payouts.AsReadOnly(),
             DateTime.UtcNow);
 
         await store.AppendToStreamAsync(salaryStreamId, closedEvent, ExpectedVersion.Any);

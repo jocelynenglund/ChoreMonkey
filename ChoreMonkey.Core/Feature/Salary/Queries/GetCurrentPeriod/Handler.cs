@@ -36,7 +36,7 @@ internal class Handler(IEventStore store)
         var now = DateTime.UtcNow;
         var today = now.Date;
         var periodStart = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
-        var periodEnd = periodStart.AddMonths(1).AddDays(-1);
+        var periodEndExclusive = periodStart.AddMonths(1); // End-exclusive for accurate boundary
 
         // Fetch all relevant streams
         var salaryStreamId = SalaryAggregate.StreamId(request.HouseholdId);
@@ -81,7 +81,7 @@ internal class Handler(IEventStore store)
         // Get completions in period grouped by (chore, member)
         var completionsInPeriod = choreEvents
             .OfType<ChoreCompleted>()
-            .Where(e => e.CompletedAt >= periodStart && e.CompletedAt <= periodEnd)
+            .Where(e => e.CompletedAt >= periodStart && e.CompletedAt < periodEndExclusive)
             .GroupBy(e => (e.ChoreId, e.CompletedByMemberId))
             .ToDictionary(g => g.Key, g => g.ToList());
 
@@ -170,7 +170,7 @@ internal class Handler(IEventStore store)
                 bonusChores));
         }
 
-        return new CurrentPeriodResponse(periodStart, periodEnd, members);
+        return new CurrentPeriodResponse(periodStart, periodEndExclusive.AddDays(-1), members);
     }
 
     private List<string> CalculateMissedInstances(

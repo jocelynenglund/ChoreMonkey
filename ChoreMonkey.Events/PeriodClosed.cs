@@ -5,7 +5,7 @@ public record PeriodClosed(
     Guid HouseholdId,
     DateTime PeriodStart,
     DateTime PeriodEnd,
-    List<PeriodPayout> Payouts,
+    IReadOnlyList<PeriodPayout> Payouts,
     DateTime ClosedAt) : EventBase;
 
 public record PeriodPayout(
@@ -15,8 +15,8 @@ public record PeriodPayout(
     decimal GrossDeductions,
     decimal GrossBonuses,
     decimal NetPay,
-    List<PayoutDeduction> Deductions,
-    List<PayoutBonus> Bonuses);
+    IReadOnlyList<PayoutDeduction> Deductions,
+    IReadOnlyList<PayoutBonus> Bonuses);
 
 public record PayoutDeduction(
     Guid ChoreId,
