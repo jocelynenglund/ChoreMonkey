@@ -1,118 +1,140 @@
-# 🐵 ChoreMonkey
+# ChoreMonkey - Household Chore Management
 
-Household chore management with event sourcing. Built with .NET 10, React, and vertical slice architecture.
+Event-sourced household chore management with salary/allowance tracking.
 
-## Features
+## Repos
 
-- **Households** - Create and manage family households with PIN access
-- **Members** - Invite family members, set nicknames and status
-- **Chores** - Daily, weekly, interval, and one-time chores
-- **Multi-assignee** - Assign chores to specific members or everyone
-- **Optional/Bonus** - Mark chores as optional for extra credit
-- **Overdue tracking** - See who's behind on their chores
-- **Activity timeline** - Track completions and household activity
-- **Real-time updates** - SignalR for live sync (requires Azure Basic tier)
+| Component | Repo | Local Path |
+|-----------|------|------------|
+| **Backend + Frontend** | [jocelynenglund/ChoreMonkey](https://github.com/jocelynenglund/ChoreMonkey) (upstream) | `~/ChoreMonkey/` |
+| **Fork** | [itsybit-agent/ChoreMonkey](https://github.com/itsybit-agent/ChoreMonkey) | same |
 
-## Architecture
+**Git remotes:**
+- `origin` → itsybit-agent/ChoreMonkey (fork)
+- `upstream` → jocelynenglund/ChoreMonkey (canonical)
+
+## Project Structure
 
 ```
 ChoreMonkey/
-├── ChoreMonkey.ApiService/     # Minimal API endpoints
-├── ChoreMonkey.Core/           # Business logic (vertical slices)
-│   └── Feature/
-│       ├── Household/          # CreateHousehold, AccessHousehold, SetAdminPin
-│       ├── Members/            # Join, Profile, Remove
-│       ├── Invites/            # GenerateInvite, InviteLink
-│       ├── Chores/             # CRUD, Complete, Overdue, MyChores
-│       └── Activity/           # Timeline, TeamOverview
-├── ChoreMonkey.Events/         # Event definitions
-├── ChoreMonkey.IntegrationTests/  # 83 integration tests
-├── nestle-together/            # React frontend
-└── docs/                       # Event model documentation
+├── ChoreMonkey.Api/              # .NET Minimal API
+├── ChoreMonkey.Core/             # Business logic
+│   └── Feature/                  # Vertical slices
+│       ├── Chores/               # Chore CRUD, completion, assignment
+│       ├── Household/            # Household management
+│       ├── Members/              # Member profiles, PINs
+│       ├── Salary/               # Allowance system
+│       └── Activity/             # Timeline, team overview
+├── ChoreMonkey.Events/           # Event definitions
+├── ChoreMonkey.IntegrationTests/ # 88 integration tests
+├── nestle-together/              # React frontend
+│   └── src/
+│       ├── features/             # Feature modules
+│       │   ├── admin/            # Admin panel (chores + salary tabs)
+│       │   ├── chores/           # Chore types, API
+│       │   └── salary/           # Allowance components
+│       ├── components/           # Shared UI components
+│       └── pages/                # Page components
+└── data/                         # Local FileEventStore data
 ```
-
-## Getting Started
-
-### Prerequisites
-
-- .NET 10 SDK
-- Node.js 22+
-- GitHub Packages access for FileEventStore
-
-### Backend (Aspire)
-
-```bash
-# Configure NuGet (one time)
-dotnet nuget update source github \
-  --username YOUR_GITHUB_USERNAME \
-  --password YOUR_GITHUB_TOKEN \
-  --store-password-in-clear-text
-
-# Run with Aspire (recommended)
-dotnet run --project ChoreMonkey.AppHost
-
-# Or run API directly
-dotnet run --project ChoreMonkey.ApiService
-```
-
-The Aspire dashboard opens at https://localhost:17130 with telemetry, logs, and traces.
-
-### Frontend
-
-```bash
-cd nestle-together
-npm install
-npm run dev
-```
-
-### Tests
-
-```bash
-# Integration tests (83 tests)
-dotnet test ChoreMonkey.IntegrationTests
-
-# E2E tests (Playwright)
-cd nestle-together
-npx playwright install  # first time
-npm run test:e2e
-```
-
-## Event Model
-
-The system is documented using [Giraflow](https://github.com/SBortz/giraflow) - a human-readable format for event modeling.
-
-### View the Event Model
-
-```bash
-# From giraflow directory
-cd /path/to/giraflow
-npm install        # first time
-npm run build      # first time
-npm start /path/to/ChoreMonkey/docs/choremonkey.giraflow.json
-```
-
-Opens at http://localhost:3000 with:
-- **Info** - Overview of all events, commands, and views
-- **Timeline** - Visual swimlane diagram
-- **Slices** - Given-When-Then scenarios
-
-### Event Model File
-
-The event model is at `docs/choremonkey.giraflow.json` and includes:
-- 5 modules (Household, Members, Invites, Chores, Activity)
-- All commands and events
-- State view projections
-- Test scenarios
 
 ## Deployment
 
-- **API**: Azure App Service (itsybitsylist-api.azurewebsites.net)
-- **Frontend**: Simply.com (choremonkey.itsybit.se)
-- **CI/CD**: GitHub Actions
+### API (.NET/Azure)
 
-## Tech Stack
+| Environment | URL |
+|-------------|-----|
+| **Production** | https://itsybitsylist-api.azurewebsites.net |
 
-- **Backend**: .NET 10, Minimal APIs, MediatR, FileEventStore
-- **Frontend**: React 18, TypeScript, Vite, Tailwind, shadcn/ui
-- **Real-time**: SignalR (Azure Basic tier required for WebSockets)
-- **Testing**: xUnit, Playwright
+**Health check:** `curl https://itsybitsylist-api.azurewebsites.net/health`
+
+**Deploy:** Push to `main` → GitHub Actions builds & deploys to Azure
+
+### Frontend (React/Simply.com)
+
+| Environment | URL | FTP Path |
+|-------------|-----|----------|
+| **Production** | http://labs.itsybit.se | `/public_html/labs/` |
+
+**FTP Server:** `nt23.unoeuro.com`  
+**FTP User:** `itsybit.se`  
+**FTP Password:** `$ITSYBIT_FTP_PASSWORD`
+
+**Build & Deploy:**
+```bash
+cd ~/ChoreMonkey/nestle-together
+npm run build
+# Then FTP upload dist/ to /public_html/labs/
+```
+
+⚠️ **Note:** GitHub Actions deploy requires `FTP_USERNAME` and `FTP_PASSWORD` secrets (not yet configured)
+
+## Development
+
+### Run API locally
+```bash
+cd ~/ChoreMonkey
+DOTNET_ROOT=~/.dotnet ~/.dotnet/dotnet run --project ChoreMonkey.Api
+```
+
+### Run tests
+```bash
+cd ~/ChoreMonkey
+DOTNET_ROOT=~/.dotnet ~/.dotnet/dotnet test ChoreMonkey.IntegrationTests
+```
+
+### Run frontend locally
+```bash
+cd ~/ChoreMonkey/nestle-together
+npm run dev
+```
+
+## Key Features
+
+### Chores
+- Daily, weekly, interval, one-time frequencies
+- Multi-assignee with per-member completion tracking
+- Optional (bonus) vs Required chores
+- Overdue detection based on frequency
+
+### Salary/Allowance System
+- Per-member base salary + multiplier
+- Per-chore rates: `deductionRate` (required) or `bonusRate` (optional)
+- Auto-missed detection (>2 days overdue)
+- Period close with payout history
+- Kids see own salary, admins see all
+
+### Events (FileEventStore)
+- `HouseholdCreated`, `MemberJoinedHousehold`
+- `ChoreCreated`, `ChoreAssigned`, `ChoreCompleted`, `ChoreDeleted`
+- `MemberSalarySet`, `ChoreRatesSet`, `PeriodClosed`
+
+## API Endpoints
+
+Base: `https://itsybitsylist-api.azurewebsites.net/api`
+
+### Households
+- `POST /households` - Create household
+- `POST /households/{id}/invite` - Generate invite
+- `POST /households/{id}/join` - Join via invite
+
+### Chores
+- `GET /households/{id}/chores` - List chores (includes rates)
+- `POST /households/{id}/chores` - Add chore
+- `POST /households/{id}/chores/{choreId}/complete` - Mark complete
+- `POST /households/{id}/chores/{choreId}/assign` - Assign members
+- `DELETE /households/{id}/chores/{choreId}` - Delete chore
+
+### Salary
+- `POST /households/{id}/chores/{choreId}/rates` - Set chore rates
+- `POST /households/{id}/members/{memberId}/salary` - Set member salary
+- `GET /households/{id}/salary/current` - Get current period preview
+- `POST /households/{id}/salary/close` - Close period, finalize payouts
+- `GET /households/{id}/salary/history` - Past payouts
+
+## Notes
+
+- Uses FileEventStore (file-based event sourcing)
+- NuGet feed: `https://nuget.pkg.github.com/jocelynenglund/index.json`
+- SignalR disabled (Azure Free tier doesn't support WebSockets)
+- Frontend uses client-generated IDs for idempotency
