@@ -72,7 +72,14 @@ export async function completeChore(
 ): Promise<{ completedAt: string; completedBy: string }> {
   const body: Record<string, unknown> = { memberId };
   if (completedAt) {
-    body.completedAt = completedAt.toISOString();
+    // Set to noon UTC to avoid timezone date shifts
+    const noonUtc = new Date(Date.UTC(
+      completedAt.getFullYear(),
+      completedAt.getMonth(),
+      completedAt.getDate(),
+      12, 0, 0
+    ));
+    body.completedAt = noonUtc.toISOString();
   }
 
   const response = await fetch(

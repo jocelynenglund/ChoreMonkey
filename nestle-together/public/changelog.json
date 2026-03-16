@@ -1,6 +1,15 @@
 {
-  "generated": "2026-03-16T18:05:11.557Z",
+  "generated": "2026-03-16T18:49:16.063Z",
   "commits": [
+    {
+      "hash": "9ad3221e67ea05a08e37d0b769e004c2379bb026",
+      "shortHash": "9ad3221",
+      "message": "feat: unified Admin Panel with Chores + Salaries tabs",
+      "date": "2026-03-16",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Unified Admin Panel with Chores + Salaries tabs"
+    },
     {
       "hash": "3346c71493eb66f9e2a35509e462b7813c60d3c0",
       "shortHash": "3346c71",
@@ -171,15 +180,6 @@
       "author": "ItsyBOT",
       "type": "fix",
       "displayMessage": "CI test failures for salary reports PR"
-    },
-    {
-      "hash": "74fd952be0f4191a573b509ff97397bffe7062f6",
-      "shortHash": "74fd952",
-      "message": "refactor: Make salary reports a read model (not event)",
-      "date": "2026-03-07",
-      "author": "ItsyBOT",
-      "type": "refactor",
-      "displayMessage": "Make salary reports a read model (not event)"
     }
   ]
 }
