@@ -74,9 +74,10 @@ export function ChoreManagement() {
 
   function startEditing(chore: Chore) {
     setEditingChore(chore.id);
+    // Required chores have deductions, bonus chores have bonus rates
     setRatesForm({
-      deductionRate: (chore.missedDeduction || 10).toString(),
-      bonusRate: '10'
+      deductionRate: chore.isOptional ? '0' : (chore.missedDeduction || 10).toString(),
+      bonusRate: chore.isOptional ? '10' : '0'
     });
   }
 

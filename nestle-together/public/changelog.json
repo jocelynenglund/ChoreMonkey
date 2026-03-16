@@ -1,6 +1,15 @@
 {
-  "generated": "2026-03-16T18:49:16.063Z",
+  "generated": "2026-03-16T19:03:44.041Z",
   "commits": [
+    {
+      "hash": "860aef35533b0edc4105aa30b7673917ea6bd89e",
+      "shortHash": "860aef3",
+      "message": "fix: datepicker timezone bug - use noon UTC to preserve date",
+      "date": "2026-03-16",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Datepicker timezone bug - use noon UTC to preserve date"
+    },
     {
       "hash": "9ad3221e67ea05a08e37d0b769e004c2379bb026",
       "shortHash": "9ad3221",
@@ -171,15 +180,6 @@
       "author": "ItsyBOT",
       "type": "fix",
       "displayMessage": "E2E tests for multi-step household creation"
-    },
-    {
-      "hash": "6325537d8a0cc9685f59d5be8b3dc250e47db16c",
-      "shortHash": "6325537",
-      "message": "fix: CI test failures for salary reports PR",
-      "date": "2026-03-07",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "CI test failures for salary reports PR"
     }
   ]
 }

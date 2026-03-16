@@ -75,7 +75,12 @@ export function AddChoreDialog({ onAdd, onSetRates }: AddChoreDialogProps) {
     
     // Set salary rates if we got a chore ID back
     if (result?.id && onSetRates) {
-      await onSetRates(result.id, deduction, bonus);
+      // Required chores have deductions, bonus chores have bonuses (mutually exclusive)
+      if (isOptional) {
+        await onSetRates(result.id, 0, bonus);
+      } else if (isRequired) {
+        await onSetRates(result.id, deduction, 0);
+      }
     }
     
     setIsSubmitting(false);
