@@ -1,6 +1,8 @@
 using ChoreMonkey.Core.Domain;
+using ChoreMonkey.Core.Feature.Members.Queries.MemberLookup;
 using ChoreMonkey.Events;
 using FileEventStore;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -27,7 +29,7 @@ public record CurrentPeriodResponse(
     DateTime PeriodEnd,
     List<MemberPeriodSummary> Members);
 
-internal class Handler(IEventStore store)
+internal class Handler(IEventStore store, ISender mediator)
 {
     private const int GracePeriodDays = 2;
     
@@ -40,17 +42,14 @@ internal class Handler(IEventStore store)
 
         // Fetch all relevant streams
         var salaryStreamId = SalaryAggregate.StreamId(request.HouseholdId);
-        var householdStreamId = HouseholdAggregate.StreamId(request.HouseholdId);
         var choreStreamId = ChoreAggregate.StreamId(request.HouseholdId);
 
         var salaryEvents = await store.FetchEventsAsync(salaryStreamId);
-        var householdEvents = await store.FetchEventsAsync(householdStreamId);
         var choreEvents = await store.FetchEventsAsync(choreStreamId);
 
-        // Get member info
-        var memberNames = householdEvents
-            .OfType<MemberJoinedHousehold>()
-            .ToDictionary(e => e.MemberId, e => e.Nickname);
+        // Get active members with current nicknames (handles renames and removals)
+        var memberLookup = await mediator.Send(new MemberLookupQuery(request.HouseholdId));
+        var activeMembers = memberLookup.Members;
 
         // Get salary configs
         var salaryConfigs = salaryEvents
@@ -92,7 +91,7 @@ internal class Handler(IEventStore store)
 
         // Calculate per-member summaries
         var members = new List<MemberPeriodSummary>();
-        var allMemberIds = memberNames.Keys.ToList();
+        var allMemberIds = activeMembers.Keys.ToList();
 
         if (request.MemberId.HasValue)
         {
@@ -161,7 +160,7 @@ internal class Handler(IEventStore store)
 
             members.Add(new MemberPeriodSummary(
                 memberId,
-                memberNames.GetValueOrDefault(memberId, "Unknown"),
+                activeMembers.GetValueOrDefault(memberId)?.Nickname ?? "Unknown",
                 baseSalary,
                 totalDeductions,
                 totalBonuses,

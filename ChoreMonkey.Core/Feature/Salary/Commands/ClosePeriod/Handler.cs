@@ -1,6 +1,8 @@
 using ChoreMonkey.Core.Domain;
+using ChoreMonkey.Core.Feature.Members.Queries.MemberLookup;
 using ChoreMonkey.Events;
 using FileEventStore;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -30,7 +32,7 @@ public record ClosePeriodResponse(
     DateTime PeriodEnd,
     List<PayoutSummaryDto> Payouts);
 
-internal class Handler(IEventStore store)
+internal class Handler(IEventStore store, ISender mediator)
 {
     public async Task<ClosePeriodResponse> HandleAsync(ClosePeriodCommand request)
     {
@@ -40,17 +42,14 @@ internal class Handler(IEventStore store)
 
         // Fetch all relevant streams
         var salaryStreamId = SalaryAggregate.StreamId(request.HouseholdId);
-        var householdStreamId = HouseholdAggregate.StreamId(request.HouseholdId);
         var choreStreamId = ChoreAggregate.StreamId(request.HouseholdId);
 
         var salaryEvents = await store.FetchEventsAsync(salaryStreamId);
-        var householdEvents = await store.FetchEventsAsync(householdStreamId);
         var choreEvents = await store.FetchEventsAsync(choreStreamId);
 
-        // Get member info
-        var memberNames = householdEvents
-            .OfType<MemberJoinedHousehold>()
-            .ToDictionary(e => e.MemberId, e => e.Nickname);
+        // Get active members with current nicknames
+        var memberLookup = await mediator.Send(new MemberLookupQuery(request.HouseholdId));
+        var activeMembers = memberLookup.Members;
 
         // Get salary configs
         var salaryConfigs = salaryEvents
@@ -94,7 +93,7 @@ internal class Handler(IEventStore store)
         var payouts = new List<PeriodPayout>();
         var payoutDtos = new List<PayoutSummaryDto>();
 
-        foreach (var memberId in memberNames.Keys)
+        foreach (var memberId in activeMembers.Keys)
         {
             var config = salaryConfigs.GetValueOrDefault(memberId);
             var baseSalary = config?.BaseSalary ?? 0m;
@@ -156,7 +155,7 @@ internal class Handler(IEventStore store)
             }
 
             var netPay = Math.Max(0m, baseSalary - totalDeductions + totalBonuses);
-            var memberName = memberNames.GetValueOrDefault(memberId, "Unknown");
+            var memberName = activeMembers.GetValueOrDefault(memberId)?.Nickname ?? "Unknown";
 
             payouts.Add(new PeriodPayout(
                 memberId,
