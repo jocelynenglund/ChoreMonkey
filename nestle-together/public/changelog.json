@@ -1,6 +1,132 @@
 {
-  "generated": "2026-03-06T15:49:41.043Z",
+  "generated": "2026-03-16T17:04:00.501Z",
   "commits": [
+    {
+      "hash": "a78658ec1caecb268eab477a1527aeb3a157bf19",
+      "shortHash": "a78658e",
+      "message": "fix: address Copilot review comments",
+      "date": "2026-03-16",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Address Copilot review comments"
+    },
+    {
+      "hash": "5ef694c762a36ab2c2198884b999dae946445a68",
+      "shortHash": "5ef694c",
+      "message": "feat: auto-calculate missed chores based on frequency",
+      "date": "2026-03-16",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Auto-calculate missed chores based on frequency"
+    },
+    {
+      "hash": "4b51dbb80363b8d3eb549264a75a3113d27886a9",
+      "shortHash": "4b51dbb",
+      "message": "feat: replace SalaryReports with per-member Salary system",
+      "date": "2026-03-16",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Replace SalaryReports with per-member Salary system"
+    },
+    {
+      "hash": "2e81412634959f81e102303cea6c1e94633a361f",
+      "shortHash": "2e81412",
+      "message": "Add /health endpoint for monitoring",
+      "date": "2026-03-14",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Add /health endpoint for monitoring"
+    },
+    {
+      "hash": "b23d74cdf9ad4d23f50c4ecba5e38b4c626ee622",
+      "shortHash": "b23d74c",
+      "message": "fix: correct waitForURL pattern to match /household/ route",
+      "date": "2026-03-08",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Correct waitForURL pattern to match /household/ route"
+    },
+    {
+      "hash": "41677c18b887a2d3efc62a73a0433bf7462ca87f",
+      "shortHash": "41677c1",
+      "message": "fix: add waitForURL after household creation to fix E2E timing issues",
+      "date": "2026-03-07",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Add waitForURL after household creation to fix E2E timing issues"
+    },
+    {
+      "hash": "7dd760d06038a2bfd0f4049ec5b691c0d468fafe",
+      "shortHash": "7dd760d",
+      "message": "fix(ci): revert e2e URL back to labs.itsybit.se (staging)",
+      "date": "2026-03-07",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Fix(ci): revert e2e URL back to labs.itsybit.se (staging)"
+    },
+    {
+      "hash": "65159c6ac1eb6bc06de5971496624793ea22696d",
+      "shortHash": "65159c6",
+      "message": "fix(ci): update e2e URL to choremonkey.itsybit.se",
+      "date": "2026-03-07",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Fix(ci): update e2e URL to choremonkey.itsybit.se"
+    },
+    {
+      "hash": "ccea614c88b37a1df5ac9302393ba95b7a9750a1",
+      "shortHash": "ccea614",
+      "message": "fix: E2E tests for multi-step household creation",
+      "date": "2026-03-07",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "E2E tests for multi-step household creation"
+    },
+    {
+      "hash": "6325537d8a0cc9685f59d5be8b3dc250e47db16c",
+      "shortHash": "6325537",
+      "message": "fix: CI test failures for salary reports PR",
+      "date": "2026-03-07",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "CI test failures for salary reports PR"
+    },
+    {
+      "hash": "74fd952be0f4191a573b509ff97397bffe7062f6",
+      "shortHash": "74fd952",
+      "message": "refactor: Make salary reports a read model (not event)",
+      "date": "2026-03-07",
+      "author": "ItsyBOT",
+      "type": "refactor",
+      "displayMessage": "Make salary reports a read model (not event)"
+    },
+    {
+      "hash": "fca9fe0ee6ae70f7c836463c49072bb12d380ef6",
+      "shortHash": "fca9fe0",
+      "message": "feat: Salary Reports (feature-based architecture)",
+      "date": "2026-03-07",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Salary Reports (feature-based architecture)"
+    },
+    {
+      "hash": "b678bb9dec751f15f544790ec4440ad2a853ae19",
+      "shortHash": "b678bb9",
+      "message": "fix: disable rate limiting in Testing environment",
+      "date": "2026-03-07",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Disable rate limiting in Testing environment"
+    },
+    {
+      "hash": "e1584465ea6531640466758c8a363d2058937a68",
+      "shortHash": "e158446",
+      "message": "Add debug stats endpoint",
+      "date": "2026-03-07",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Add debug stats endpoint"
+    },
     {
       "hash": "c0e51b57c329578159e06008c210d6a082d716d3",
       "shortHash": "c0e51b5",
@@ -54,132 +180,6 @@
       "author": "ItsyBOT",
       "type": "feature",
       "displayMessage": "Add rate limiting for auth endpoints"
-    },
-    {
-      "hash": "cc0bcfb01a9f7778ec6ae86a8d24aa712b44cc27",
-      "shortHash": "cc0bcfb",
-      "message": "Revert \"feat: add time-travel support (frontend)\"",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Revert \"feat: add time-travel support (frontend)\""
-    },
-    {
-      "hash": "d37ef9d1301f7a27674117905ade70c5847971c6",
-      "shortHash": "d37ef9d",
-      "message": "feat: add time-travel support (frontend)",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Add time-travel support (frontend)"
-    },
-    {
-      "hash": "4ae39ba83747b401554a9512eb2a7f19cb860f7f",
-      "shortHash": "4ae39ba",
-      "message": "fix: invalid JSON in giraflow (leading zeros)",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Invalid JSON in giraflow (leading zeros)"
-    },
-    {
-      "hash": "858075c64eddd633e3b3aa9253fe2a0fb87db479",
-      "shortHash": "858075c",
-      "message": "refactor: organize integration tests into module folders",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "refactor",
-      "displayMessage": "Organize integration tests into module folders"
-    },
-    {
-      "hash": "bd2f25645d85c1992d38abd486c8ddf9e7c7eadd",
-      "shortHash": "bd2f256",
-      "message": "chore: remove unused projects and build artifacts",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "update",
-      "displayMessage": "Remove unused projects and build artifacts"
-    },
-    {
-      "hash": "eaadebf897d1596cdd17575e630237f515f9879b",
-      "shortHash": "eaadebf",
-      "message": "Implement e2e-tests in CI workflow",
-      "date": "2026-02-15",
-      "author": "Jocelyn Englund",
-      "type": "update",
-      "displayMessage": "Implement e2e-tests in CI workflow"
-    },
-    {
-      "hash": "412d3f7ef2db93dbf8ef91f12e1d42b68ef365d3",
-      "shortHash": "412d3f7",
-      "message": "Modify test command and disable e2e tests temporarily",
-      "date": "2026-02-15",
-      "author": "Jocelyn Englund",
-      "type": "update",
-      "displayMessage": "Modify test command and disable e2e tests temporarily"
-    },
-    {
-      "hash": "83be094f9ebe8a76e62fcc1690dff04fa22b5e9d",
-      "shortHash": "83be094",
-      "message": "fix: AddChore endpoint returns chore ID in response",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "AddChore endpoint returns chore ID in response"
-    },
-    {
-      "hash": "267b92fb73675b75cad4c430e06f5ddfe6ecd77d",
-      "shortHash": "267b92f",
-      "message": "fix: Correct DTOs and test logic for integration tests",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Correct DTOs and test logic for integration tests"
-    },
-    {
-      "hash": "a990815e08665613d1adfa16489227499b557ce3",
-      "shortHash": "a990815",
-      "message": "Implement E2E tests in CI workflow",
-      "date": "2026-02-15",
-      "author": "Jocelyn Englund",
-      "type": "update",
-      "displayMessage": "Implement E2E tests in CI workflow"
-    },
-    {
-      "hash": "e0c2f425cb56cb3cdc5537498084d51bd1e38d43",
-      "shortHash": "e0c2f42",
-      "message": "fix: Store currentPinCode on household creation",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Store currentPinCode on household creation"
-    },
-    {
-      "hash": "1d418aa9c1ababccfd65e2d2a35d2003ed10d6dd",
-      "shortHash": "1d418aa",
-      "message": "test: Add Playwright E2E test suite",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Add Playwright E2E test suite"
-    },
-    {
-      "hash": "2dec50d5c1bfea5fe1ed4794d53aaf7d6616c6a3",
-      "shortHash": "2dec50d",
-      "message": "refactor(frontend): Reorganize features into 5 aligned modules",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "update",
-      "displayMessage": "Refactor(frontend): Reorganize features into 5 aligned modules"
-    },
-    {
-      "hash": "e6422ec9e37b303d66f803623780a4a41bf778f7",
-      "shortHash": "e6422ec",
-      "message": "refactor(backend): Reorganize features into module structure",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "update",
-      "displayMessage": "Refactor(backend): Reorganize features into module structure"
     }
   ]
 }

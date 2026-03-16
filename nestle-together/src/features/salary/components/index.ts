@@ -1,2 +1,2 @@
-export { SalarySettingsDialog } from './SalarySettingsDialog';
-export { SalaryReportDialog } from './SalaryReportDialog';
+export { MyAllowance } from './MyAllowance';
+export { SalaryAdmin } from './SalaryAdmin';

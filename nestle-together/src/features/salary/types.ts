@@ -1,30 +1,68 @@
-// Salary Reports types
+// Per-member Salary System types
 
-export interface SalarySettings {
-  enabled: boolean;
-  baseAmount: number;
+export interface MemberSalaryConfig {
+  memberId: string;
+  baseSalary: number;
+  deductionMultiplier: number;
+  bonusMultiplier: number;
 }
 
-export interface SalaryDeduction {
+export interface ChoreRates {
+  choreId: string;
+  deductionRate: number;
+  bonusRate: number;
+}
+
+export interface MissedChore {
   choreId: string;
   choreName: string;
-  missedPeriod: string;
-  amount: number;
+  period: string;
+  deduction: number;
 }
 
-export interface EnableSalaryReportsRequest {
-  baseAmount?: number;
+export interface BonusChore {
+  choreId: string;
+  choreName: string;
+  completedAt: string;
+  bonus: number;
 }
 
-export interface UpdateBaseSalaryRequest {
-  newBaseAmount: number;
+export interface MemberPeriodSummary {
+  memberId: string;
+  name: string;
+  baseSalary: number;
+  deductions: number;
+  bonuses: number;
+  projected: number;
+  missedChores: MissedChore[];
+  bonusChores: BonusChore[];
 }
 
-export interface GenerateSalaryReportResponse {
-  success: boolean;
-  period?: string;
-  baseAmount?: number;
-  deductions?: SalaryDeduction[];
-  finalAmount?: number;
-  error?: string;
+export interface CurrentPeriodResponse {
+  periodStart: string;
+  periodEnd: string;
+  members: MemberPeriodSummary[];
+}
+
+export interface PayoutSummary {
+  memberId: string;
+  name: string;
+  baseSalary: number;
+  deductions: number;
+  bonuses: number;
+  netPay: number;
+}
+
+export interface PeriodPayout {
+  periodId: string;
+  periodStart: string;
+  periodEnd: string;
+  payouts: PayoutSummary[];
+}
+
+export interface ClosePeriodResponse {
+  periodId: string;
+  periodStart: string;
+  periodEnd: string;
+  payouts: PayoutSummary[];
 }
