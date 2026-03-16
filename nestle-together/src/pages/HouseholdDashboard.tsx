@@ -36,6 +36,8 @@ import { MemberAvatar } from '@/components/MemberAvatar';
 import { TeamOverviewAccordion } from '@/components/TeamOverviewAccordion';
 import { CompletionTimeline } from '@/components/CompletionTimeline';
 import { SettingsDialog } from '@/components/SettingsDialog';
+import { AllowanceDialog } from '@/components/AllowanceDialog';
+import { SalaryManagementDialog } from '@/components/SalaryManagementDialog';
 import { MyChoresSection } from '@/components/MyChoresSection';
 import { ProfileDialog } from '@/components/ProfileDialog';
 import { RemoveMemberDialog } from '@/components/RemoveMemberDialog';
@@ -53,6 +55,8 @@ export default function HouseholdDashboard() {
   const [hoveredMemberStatus, setHoveredMemberStatus] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [whatsNewOpen, setWhatsNewOpen] = useState(false);
+  const [allowanceOpen, setAllowanceOpen] = useState(false);
+  const [salaryManagementOpen, setSalaryManagementOpen] = useState(false);
 
   const {
     isAuthenticated,
@@ -251,7 +255,10 @@ export default function HouseholdDashboard() {
                   />
                 </button>
               )}
-              <SettingsDialog householdId={household.id} />
+              <SettingsDialog 
+                householdId={household.id} 
+                onManageSalaries={() => setSalaryManagementOpen(true)} 
+              />
               <Button
                 variant="ghost"
                 size="icon"
@@ -442,8 +449,21 @@ export default function HouseholdDashboard() {
           currentNickname={currentMember.nickname}
           currentStatus={currentMember.status ?? ''}
           avatarColor={currentMember.avatarColor}
+          onViewAllowance={() => setAllowanceOpen(true)}
         />
       )}
+
+      {/* Allowance Dialog */}
+      <AllowanceDialog 
+        open={allowanceOpen} 
+        onOpenChange={setAllowanceOpen} 
+      />
+
+      {/* Salary Management Dialog (Admin) */}
+      <SalaryManagementDialog 
+        open={salaryManagementOpen} 
+        onOpenChange={setSalaryManagementOpen} 
+      />
 
       {/* What's New Dialog */}
       <WhatsNewDialog

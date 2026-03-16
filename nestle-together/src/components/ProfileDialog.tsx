@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { User, Pencil, X } from 'lucide-react';
+import { User, Pencil, X, Wallet } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -20,6 +20,7 @@ interface ProfileDialogProps {
   currentNickname: string;
   currentStatus?: string;
   avatarColor: string;
+  onViewAllowance?: () => void;
 }
 
 export function ProfileDialog({ 
@@ -29,7 +30,8 @@ export function ProfileDialog({
   memberId, 
   currentNickname,
   currentStatus = '',
-  avatarColor 
+  avatarColor,
+  onViewAllowance,
 }: ProfileDialogProps) {
   const [nickname, setNickname] = useState(currentNickname);
   const [status, setStatus] = useState(currentStatus ?? '');
@@ -83,6 +85,21 @@ export function ProfileDialog({
               size="lg"
             />
           </div>
+
+          {/* My Allowance Button */}
+          {onViewAllowance && (
+            <Button
+              variant="outline"
+              className="w-full gap-2"
+              onClick={() => {
+                onOpenChange(false);
+                onViewAllowance();
+              }}
+            >
+              <Wallet className="w-4 h-4" />
+              My Allowance
+            </Button>
+          )}
 
           {/* Nickname */}
           <div className="space-y-2">

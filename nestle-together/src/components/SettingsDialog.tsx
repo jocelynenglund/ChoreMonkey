@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Settings, Lock, Shield } from 'lucide-react';
+import { Settings, Lock, Shield, Wallet } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -16,9 +16,10 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7422';
 
 interface SettingsDialogProps {
   householdId: string;
+  onManageSalaries?: () => void;
 }
 
-export function SettingsDialog({ householdId }: SettingsDialogProps) {
+export function SettingsDialog({ householdId, onManageSalaries }: SettingsDialogProps) {
   const [open, setOpen] = useState(false);
   const [currentPin, setCurrentPin] = useState('');
   const [newAdminPin, setNewAdminPin] = useState('');
@@ -119,6 +120,31 @@ export function SettingsDialog({ householdId }: SettingsDialogProps) {
         </DialogHeader>
 
         <div className="space-y-6 mt-4">
+          {/* Salary Management */}
+          {onManageSalaries && (
+            <div className="space-y-3">
+              <h3 className="font-semibold flex items-center gap-2">
+                <Wallet className="w-4 h-4" />
+                Salary Management
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                Set allowances, deduction rates, and close monthly periods.
+              </p>
+              <Button 
+                onClick={() => {
+                  setOpen(false);
+                  onManageSalaries();
+                }}
+                variant="outline"
+                className="w-full"
+              >
+                Manage Salaries
+              </Button>
+            </div>
+          )}
+
+          {onManageSalaries && <hr />}
+
           {/* Change Admin PIN */}
           <div className="space-y-3">
             <h3 className="font-semibold flex items-center gap-2">
