@@ -46,6 +46,8 @@ export async function fetchChores(householdId: string): Promise<Chore[]> {
       isOptional: c.isOptional as boolean | undefined,
       isRequired: c.isRequired as boolean | undefined,
       missedDeduction: c.missedDeduction as number | undefined,
+      deductionRate: c.deductionRate as number | undefined,
+      bonusRate: c.bonusRate as number | undefined,
     };
   });
 }

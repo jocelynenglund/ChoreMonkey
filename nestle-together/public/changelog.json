@@ -1,6 +1,15 @@
 {
-  "generated": "2026-03-16T19:20:10.234Z",
+  "generated": "2026-03-16T19:24:08.274Z",
   "commits": [
+    {
+      "hash": "da0cc42db7a2e12ab780863ee7b19a66cb2d8458",
+      "shortHash": "da0cc42",
+      "message": "fix: bonus chores send deductionRate=0, required chores send bonusRate=0",
+      "date": "2026-03-16",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Bonus chores send deductionRate=0, required chores send bonusRate=0"
+    },
     {
       "hash": "2c67c5d846983ed775afe89557ca5214811d2a40",
       "shortHash": "2c67c5d",
@@ -171,15 +180,6 @@
       "author": "ItsyBOT",
       "type": "feature",
       "displayMessage": "Add /health endpoint for monitoring"
-    },
-    {
-      "hash": "b23d74cdf9ad4d23f50c4ecba5e38b4c626ee622",
-      "shortHash": "b23d74c",
-      "message": "fix: correct waitForURL pattern to match /household/ route",
-      "date": "2026-03-08",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Correct waitForURL pattern to match /household/ route"
     }
   ]
 }
