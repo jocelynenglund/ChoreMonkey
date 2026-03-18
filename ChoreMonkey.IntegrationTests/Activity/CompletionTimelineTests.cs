@@ -27,9 +27,8 @@ public class CompletionTimelineTests(ApiFixture fixture) : IClassFixture<ApiFixt
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var result = await response.Content.ReadFromJsonAsync<dynamic>();
         var activities = result!.GetProperty("activities");
-        
-        // New household will have "member_joined" activity
-        // But no completions, which is what we're testing
+
+        // New household will have "member_joined" activity, but no completions
         var completionCount = 0;
         for (int i = 0; i < activities.GetArrayLength(); i++)
         {
@@ -89,7 +88,7 @@ public class CompletionTimelineTests(ApiFixture fixture) : IClassFixture<ApiFixt
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var result = await response.Content.ReadFromJsonAsync<dynamic>();
         var activities = result!.GetProperty("activities");
-        
+
         // Filter to just completions
         var completions = new List<System.Text.Json.JsonElement>();
         for (int i = 0; i < activities.GetArrayLength(); i++)
@@ -97,21 +96,21 @@ public class CompletionTimelineTests(ApiFixture fixture) : IClassFixture<ApiFixt
             if (activities[i].GetProperty("type").GetString() == "completion")
                 completions.Add(activities[i]);
         }
-        
+
         Assert.Equal(2, completions.Count);
-        
-        // Most recent should be first (Chore B) - check description contains names
+
+        // Most recent should be first (Chore B)
         Assert.Contains("Chore B", completions[0].GetProperty("description").GetString());
         Assert.Contains("Dad", completions[0].GetProperty("description").GetString());
     }
 
     [Fact]
-    public async Task GetCompletionTimeline_RespectsLimitParameter()
+    public async Task GetCompletionTimeline_ReturnsAllCompletionsThisMonth()
     {
-        // Arrange - create household with many completions
+        // Arrange - create household with multiple completions
         var createResponse = await _client.PostAsJsonAsync("/api/households", new
         {
-            name = "Timeline Limit Test",
+            name = "Timeline Month Test",
             pinCode = 1234,
             ownerNickname = "Parent"
         });
@@ -132,7 +131,7 @@ public class CompletionTimelineTests(ApiFixture fixture) : IClassFixture<ApiFixt
         var choresResponse = await _client.GetAsync($"/api/households/{householdId}/chores");
         var choresData = await choresResponse.Content.ReadFromJsonAsync<dynamic>();
         var chores = choresData!.GetProperty("chores");
-        
+
         for (int i = 0; i < 5; i++)
         {
             string choreId = chores[i].GetProperty("choreId").GetString()!;
@@ -142,15 +141,21 @@ public class CompletionTimelineTests(ApiFixture fixture) : IClassFixture<ApiFixt
             });
         }
 
-        // Act - request only 3
-        var response = await _client.GetAsync($"/api/households/{householdId}/completions?limit=3");
+        // Act
+        var response = await _client.GetAsync($"/api/households/{householdId}/completions");
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var result = await response.Content.ReadFromJsonAsync<dynamic>();
         var activities = result!.GetProperty("activities");
-        
-        // Should have exactly 3 activities total (limit=3)
-        Assert.Equal(3, activities.GetArrayLength());
+
+        // All 5 completions should be returned (no arbitrary limit)
+        var completionCount = 0;
+        for (int i = 0; i < activities.GetArrayLength(); i++)
+        {
+            if (activities[i].GetProperty("type").GetString() == "completion")
+                completionCount++;
+        }
+        Assert.Equal(5, completionCount);
     }
 }

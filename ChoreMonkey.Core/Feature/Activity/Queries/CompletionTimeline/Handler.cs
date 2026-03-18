@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Routing;
 
 namespace ChoreMonkey.Core.Feature.Activity.Queries.CompletionTimeline;
 
-public record GetCompletionTimelineQuery(Guid HouseholdId, int? Limit = 50, int? Days = 7);
+public record GetCompletionTimelineQuery(Guid HouseholdId);
 
 public record ActivityEntry(
     string Type,           // "completion", "assignment", "nickname_change", "status_change", "member_joined", "member_removed", "chore_created"
@@ -23,9 +23,8 @@ internal class Handler(IEventStore store)
 {
     public async Task<GetCompletionTimelineResponse> HandleAsync(GetCompletionTimelineQuery request)
     {
-        var maxDays = request.Days ?? 7;
-        var maxItems = request.Limit ?? 50;
-        var cutoff = DateTime.UtcNow.AddDays(-maxDays);
+        var now = DateTime.UtcNow;
+        var cutoff = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
 
         var householdStreamId = HouseholdAggregate.StreamId(request.HouseholdId);
         var choreStreamId = ChoreAggregate.StreamId(request.HouseholdId);
@@ -173,10 +172,9 @@ internal class Handler(IEventStore store)
             ));
         }
 
-        // Sort by timestamp descending, take limit
+        // Sort by timestamp descending
         var result = activities
             .OrderByDescending(a => a.Timestamp)
-            .Take(maxItems)
             .ToList();
 
         return new GetCompletionTimelineResponse(result);
@@ -196,12 +194,10 @@ public static class CompletionTimelineEndpoint
     {
         app.MapGet("/households/{householdId}/completions", async (
             Guid householdId,
-            Handler handler,
-            int? limit,
-            int? days) =>
+            Handler handler) =>
         {
             var response = await handler.HandleAsync(
-                new GetCompletionTimelineQuery(householdId, limit, days));
+                new GetCompletionTimelineQuery(householdId));
             return Results.Ok(response);
         });
     }
