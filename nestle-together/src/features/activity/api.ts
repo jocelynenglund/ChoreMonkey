@@ -5,11 +5,10 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7422';
 // ============ Completion Timeline ============
 
 export async function fetchActivityTimeline(
-  householdId: string, 
-  limit = 20
+  householdId: string
 ): Promise<Activity[]> {
   const response = await fetch(
-    `${API_BASE_URL}/api/households/${householdId}/activity?limit=${limit}`
+    `${API_BASE_URL}/api/households/${householdId}/activity`
   );
   
   if (!response.ok) {

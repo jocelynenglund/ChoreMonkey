@@ -23,8 +23,7 @@ internal class Handler(IEventStore store)
 {
     public async Task<GetCompletionTimelineResponse> HandleAsync(GetCompletionTimelineQuery request)
     {
-        var now = DateTime.UtcNow;
-        var cutoff = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+        var cutoff = DateTime.UtcNow.AddDays(-30);
 
         var householdStreamId = HouseholdAggregate.StreamId(request.HouseholdId);
         var choreStreamId = ChoreAggregate.StreamId(request.HouseholdId);
@@ -192,7 +191,7 @@ public static class CompletionTimelineEndpoint
 {
     public static void Map(IEndpointRouteBuilder app)
     {
-        app.MapGet("/households/{householdId}/completions", async (
+        app.MapGet("/households/{householdId}/activity", async (
             Guid householdId,
             Handler handler) =>
         {

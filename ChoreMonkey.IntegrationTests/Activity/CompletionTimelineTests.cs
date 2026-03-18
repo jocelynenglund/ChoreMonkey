@@ -21,7 +21,7 @@ public class CompletionTimelineTests(ApiFixture fixture) : IClassFixture<ApiFixt
         string householdId = household!.GetProperty("householdId").GetString()!;
 
         // Act
-        var response = await _client.GetAsync($"/api/households/{householdId}/completions");
+        var response = await _client.GetAsync($"/api/households/{householdId}/activity");
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -82,7 +82,7 @@ public class CompletionTimelineTests(ApiFixture fixture) : IClassFixture<ApiFixt
         });
 
         // Act
-        var response = await _client.GetAsync($"/api/households/{householdId}/completions");
+        var response = await _client.GetAsync($"/api/households/{householdId}/activity");
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -105,7 +105,7 @@ public class CompletionTimelineTests(ApiFixture fixture) : IClassFixture<ApiFixt
     }
 
     [Fact]
-    public async Task GetCompletionTimeline_ReturnsAllCompletionsThisMonth()
+    public async Task GetActivityTimeline_ReturnsAllCompletionsInLast30Days()
     {
         // Arrange - create household with multiple completions
         var createResponse = await _client.PostAsJsonAsync("/api/households", new
@@ -142,7 +142,7 @@ public class CompletionTimelineTests(ApiFixture fixture) : IClassFixture<ApiFixt
         }
 
         // Act
-        var response = await _client.GetAsync($"/api/households/{householdId}/completions");
+        var response = await _client.GetAsync($"/api/households/{householdId}/activity");
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
