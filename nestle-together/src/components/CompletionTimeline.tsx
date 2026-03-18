@@ -69,7 +69,7 @@ export function CompletionTimeline({ householdId }: CompletionTimelineProps) {
       setIsLoading(true);
       try {
         const apiUrl = import.meta.env.VITE_API_URL || 'https://localhost:7422';
-        const response = await fetch(`${apiUrl}/api/households/${householdId}/completions?days=7&limit=20`);
+        const response = await fetch(`${apiUrl}/api/households/${householdId}/activity`);
         if (response.ok) {
           const data = await response.json();
           setActivities(data.activities ?? []);
@@ -105,7 +105,7 @@ export function CompletionTimeline({ householdId }: CompletionTimelineProps) {
       <div className="p-4 border-b">
         <h3 className="font-semibold flex items-center gap-2">
           <Clock className="h-5 w-5 text-primary" />
-          Recent Activity
+          Activity — Last 30 Days
         </h3>
       </div>
       <div className="divide-y max-h-80 overflow-y-auto">
