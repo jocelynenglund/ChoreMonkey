@@ -194,7 +194,7 @@ public class MemberProfileTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         
         // Get timeline
         var timelineResponse = await _client.GetAsync(
-            $"/api/households/{household.HouseholdId}/completions");
+            $"/api/households/{household.HouseholdId}/activity");
         
         // Assert
         var content = await timelineResponse.Content.ReadAsStringAsync();
@@ -230,7 +230,7 @@ public class MemberProfileTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         
         // Act - Get timeline
         var timelineResponse = await _client.GetAsync(
-            $"/api/households/{household.HouseholdId}/completions");
+            $"/api/households/{household.HouseholdId}/activity");
         
         // Assert - Should show CURRENT nickname for completions
         var content = await timelineResponse.Content.ReadAsStringAsync();

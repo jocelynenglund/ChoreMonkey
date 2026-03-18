@@ -66,7 +66,7 @@ interface AppState {
   fetchOverdueChores: (householdId: string) => Promise<MemberOverdue[]>;
   
   // Activity
-  fetchActivityTimeline: (householdId: string, limit?: number) => Promise<Activity[]>;
+  fetchActivityTimeline: (householdId: string) => Promise<Activity[]>;
   
   // Team Overview (admin only)
   fetchTeamOverview: (householdId: string) => Promise<MemberOverview[]>;
@@ -296,8 +296,8 @@ export const useAppStore = create<AppState>()(
         return choresApi.fetchOverdueChores(householdId, parseInt(currentPinCode, 10));
       },
 
-      fetchActivityTimeline: (householdId, limit) =>
-        activityApi.fetchActivityTimeline(householdId, limit),
+      fetchActivityTimeline: (householdId) =>
+        activityApi.fetchActivityTimeline(householdId),
 
       fetchTeamOverview: async (householdId) => {
         const { currentPinCode, isAdmin } = get();
