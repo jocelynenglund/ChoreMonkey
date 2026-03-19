@@ -52,25 +52,11 @@ ChoreMonkey/
 
 ### Frontend (React/Simply.com)
 
-| Environment | URL | FTP Path |
-|-------------|-----|----------|
-| **Production** | http://choremonkey.itsybit.se | `/choremonkey/` |
+| Environment | URL |
+|-------------|-----|
+| **Production** | http://choremonkey.itsybit.se |
 
-**FTP Server:** `nt23.unoeuro.com`  
-**FTP User:** `itsybit.se`  
-**FTP Password:** `$ITSYBIT_FTP_PASSWORD`
-
-⚠️ **FTP root is `/`, not `/public_html/`!**
-
-**Build & Deploy:**
-```bash
-cd ~/ChoreMonkey/nestle-together
-npm run build
-source ~/.openclaw/.secrets.env
-lftp -c "open -u itsybit.se,$ITSYBIT_FTP_PASSWORD ftp://nt23.unoeuro.com && mirror -R dist/ /choremonkey/ --exclude .git"
-```
-
-**Or via GitHub Actions** (push to `main` → auto-deploy, requires `FTP_USERNAME` + `FTP_PASSWORD` secrets)
+**Deploy:** Push to `main` → GitHub Actions builds & deploys via FTP (requires `FTP_USERNAME` + `FTP_PASSWORD` secrets)
 
 ## Development
 
