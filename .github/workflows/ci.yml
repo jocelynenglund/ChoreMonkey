@@ -76,6 +76,16 @@ jobs:
           npm install @playwright/test
           npx playwright install --with-deps chromium
 
+      - name: Warm up API (Azure Free tier cold start)
+        run: |
+          echo "Pinging API health endpoint to wake it up..."
+          for i in 1 2 3; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://itsybitsylist-api.azurewebsites.net/health)
+            echo "Attempt $i: HTTP $STATUS"
+            if [ "$STATUS" = "200" ]; then break; fi
+            sleep 10
+          done
+
       - name: Run E2E tests against staging
         working-directory: nestle-together
         run: npx playwright test
