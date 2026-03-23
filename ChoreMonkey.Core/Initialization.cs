@@ -46,6 +46,7 @@ using ChoreMonkey.Core.Feature.FamilyQuest.Queries.Party;
 using ChoreMonkey.Core.Feature.FamilyQuest.Queries.Quests;
 using ChoreMonkey.Core.Feature.FamilyQuest.Queries.XP;
 using ChoreMonkey.Core.Feature.FamilyQuest.Queries.Victories;
+using ChoreMonkey.Core.Feature.FamilyQuest.Queries.Calendar;
 
 // Salary module
 using ChoreMonkey.Core.Feature.Salary.Commands.SetMemberSalary;
@@ -140,6 +141,8 @@ public static class Initialization
         services.AddScoped<Feature.FamilyQuest.Queries.Quests.Handler>();
         services.AddScoped<Feature.FamilyQuest.Queries.XP.Handler>();
         services.AddScoped<Feature.FamilyQuest.Queries.Victories.Handler>();
+        services.AddScoped<Feature.FamilyQuest.Queries.Calendar.Handler>();
+        services.AddHttpClient<Feature.FamilyQuest.Queries.Calendar.Handler>();
 
         // Salary module
         services.AddScoped<Feature.Salary.Commands.SetMemberSalary.Handler>();
@@ -197,6 +200,7 @@ public static class Initialization
         QuestsEndpoint.Map(householdEndpoints);
         XpEndpoint.Map(householdEndpoints);
         VictoriesEndpoint.Map(householdEndpoints);
+        CalendarEndpoint.Map(householdEndpoints);
 
         // Salary module
         SetMemberSalaryEndpoint.Map(householdEndpoints);
