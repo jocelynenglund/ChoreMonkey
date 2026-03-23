@@ -25,7 +25,6 @@ internal class Handler(IEventStore store)
         var householdEvents = await store.FetchEventsAsync(HouseholdAggregate.StreamId(request.HouseholdId));
         var choreEvents     = await store.FetchEventsAsync(ChoreAggregate.StreamId(request.HouseholdId));
 
-        // Latest nicknames
         var nicknames = new Dictionary<Guid, string>();
         foreach (var e in householdEvents)
         {
@@ -36,7 +35,6 @@ internal class Handler(IEventStore store)
             }
         }
 
-        // Chore names
         var choreNames = choreEvents.OfType<ChoreCreated>()
             .ToDictionary(c => c.ChoreId, c => c.DisplayName);
 
