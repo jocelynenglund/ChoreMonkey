@@ -148,45 +148,38 @@ internal class Handler(HttpClient http)
             ? bd.Split(',').Select(ParseDayOfWeek).Where(d => d.HasValue).Select(d => d!.Value).ToHashSet()
             : null;
 
-        var cursor    = ev.Start;
+        // Fast-forward cursor to just before the window to avoid iterating years of history
+        var cursor = FastForward(ev.Start, freq, interval, windowStart);
+
         int generated = 0;
-        int maxIter   = 3000; // safety
+        int maxIter   = 100; // only need a handful of occurrences within one week
 
         while (maxIter-- > 0)
         {
             if (until.HasValue && cursor.Date > until.Value.Date) break;
             if (count.HasValue && generated >= count.Value) break;
-            if (cursor.Date > windowEnd) break;
+            if (cursor.Date >= windowEnd) break;
 
-            // For WEEKLY with BYDAY, iterate each matching day in the week
+            // For WEEKLY with BYDAY, check each matching day in the current week
             if (freq.Equals("WEEKLY", StringComparison.OrdinalIgnoreCase) && byDay != null)
             {
-                // Find start of the week containing cursor
                 var weekMon = cursor.Date.AddDays(-(cursor.DayOfWeek == DayOfWeek.Sunday ? 6 : (int)cursor.DayOfWeek - 1));
                 for (int d = 0; d < 7; d++)
                 {
                     var candidate = weekMon.AddDays(d);
                     if (!byDay.Contains(candidate.DayOfWeek)) continue;
-                    // Keep original time
                     var occ = candidate.Add(ev.Start.TimeOfDay);
-                    if (occ < ev.Start) continue;
+                    if (occ.Date < ev.Start.Date) continue;
                     if (ev.ExDates.Contains(occ.Date)) continue;
                     if (occ.Date >= windowStart && occ.Date < windowEnd)
-                    {
-                        yield return occ;
-                        generated++;
-                    }
+                    { yield return occ; generated++; }
                 }
                 cursor = cursor.AddDays(7 * interval);
             }
             else
             {
-                // Simple: check cursor itself
                 if (!ev.ExDates.Contains(cursor.Date) && cursor.Date >= windowStart && cursor.Date < windowEnd)
-                {
-                    yield return cursor;
-                    generated++;
-                }
+                { yield return cursor; generated++; }
 
                 cursor = freq.ToUpperInvariant() switch
                 {
@@ -194,14 +187,26 @@ internal class Handler(HttpClient http)
                     "WEEKLY"  => cursor.AddDays(7 * interval),
                     "MONTHLY" => cursor.AddMonths(interval),
                     "YEARLY"  => cursor.AddYears(interval),
-                    _         => windowEnd // stop unknown
+                    _         => windowEnd
                 };
             }
-
-            // Advance cursor if we haven't moved past window yet (simple non-BYDAY weekly/daily/etc.)
-            if (cursor.Date > windowEnd && freq.Equals("WEEKLY", StringComparison.OrdinalIgnoreCase) && byDay == null)
-                break;
         }
+    }
+
+    /// <summary>Fast-forward a recurrence cursor to just before windowStart.</summary>
+    private static DateTime FastForward(DateTime start, string freq, int interval, DateTime windowStart)
+    {
+        if (start.Date >= windowStart) return start;
+        var span = windowStart - start.Date;
+        var cursor = freq.ToUpperInvariant() switch
+        {
+            "DAILY"   => start.AddDays(Math.Max(0, (int)(span.TotalDays / interval) - 1) * interval),
+            "WEEKLY"  => start.AddDays(Math.Max(0, (int)(span.TotalDays / (7 * interval)) - 1) * 7 * interval),
+            "MONTHLY" => start.AddMonths(Math.Max(0, (int)(span.TotalDays / 30 / interval) - 1) * interval),
+            "YEARLY"  => start.AddYears(Math.Max(0, (int)(span.TotalDays / 365 / interval) - 1) * interval),
+            _         => start
+        };
+        return cursor;
     }
 
     private static DayOfWeek? ParseDayOfWeek(string s) => s.Trim().ToUpperInvariant() switch
