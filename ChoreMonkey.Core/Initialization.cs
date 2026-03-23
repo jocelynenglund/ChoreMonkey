@@ -41,6 +41,11 @@ using ChoreMonkey.Core.Feature.Activity.Queries.TeamOverview;
 // Stats module
 using ChoreMonkey.Core.Feature.Stats.Queries.PlatformStats;
 
+// FamilyQuest module
+using ChoreMonkey.Core.Feature.FamilyQuest.Queries.Party;
+using ChoreMonkey.Core.Feature.FamilyQuest.Queries.Quests;
+using ChoreMonkey.Core.Feature.FamilyQuest.Queries.XP;
+
 // Salary module
 using ChoreMonkey.Core.Feature.Salary.Commands.SetMemberSalary;
 using ChoreMonkey.Core.Feature.Salary.Commands.SetChoreRates;
@@ -129,6 +134,11 @@ public static class Initialization
         // Stats module
         services.AddScoped<Feature.Stats.Queries.PlatformStats.Handler>();
 
+        // FamilyQuest module
+        services.AddScoped<Feature.FamilyQuest.Queries.Party.Handler>();
+        services.AddScoped<Feature.FamilyQuest.Queries.Quests.Handler>();
+        services.AddScoped<Feature.FamilyQuest.Queries.XP.Handler>();
+
         // Salary module
         services.AddScoped<Feature.Salary.Commands.SetMemberSalary.Handler>();
         services.AddScoped<Feature.Salary.Commands.SetChoreRates.Handler>();
@@ -179,6 +189,11 @@ public static class Initialization
 
         // Stats module
         PlatformStatsEndpoint.Map(householdEndpoints);
+
+        // FamilyQuest module
+        PartyEndpoint.Map(householdEndpoints);
+        QuestsEndpoint.Map(householdEndpoints);
+        XpEndpoint.Map(householdEndpoints);
 
         // Salary module
         SetMemberSalaryEndpoint.Map(householdEndpoints);
