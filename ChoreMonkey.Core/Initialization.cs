@@ -10,6 +10,8 @@ using ChoreMonkey.Core.Feature.Household.Commands.SetAdminPin;
 using ChoreMonkey.Core.Feature.Household.Commands.SetMemberPin;
 using ChoreMonkey.Core.Feature.Household.Queries.HouseholdName;
 using ChoreMonkey.Core.Feature.Household.Queries.AccessHousehold;
+using ChoreMonkey.Core.Feature.Household.Commands.SetHouseholdSlug;
+using ChoreMonkey.Core.Feature.Household.Queries.GetHouseholdBySlug;
 
 // Members module
 using ChoreMonkey.Core.Feature.Members.Commands.JoinHousehold;
@@ -106,6 +108,8 @@ public static class Initialization
         services.AddScoped<Feature.Household.Commands.SetMemberPin.Handler>();
         services.AddScoped<Feature.Household.Queries.HouseholdName.Handler>();
         services.AddScoped<Feature.Household.Queries.AccessHousehold.Handler>();
+        services.AddScoped<Feature.Household.Commands.SetHouseholdSlug.Handler>();
+        services.AddScoped<Feature.Household.Queries.GetHouseholdBySlug.Handler>();
 
         // Members module
         services.AddScoped<Feature.Members.Commands.JoinHousehold.Handler>();
@@ -167,6 +171,8 @@ public static class Initialization
         SetMemberPinEndpoint.Map(householdEndpoints);
         HouseholdNameEndpoint.Map(householdEndpoints);
         AccessHouseholdEndpoint.Map(householdEndpoints);
+        SetHouseholdSlugEndpoint.Map(householdEndpoints);
+        GetHouseholdBySlugEndpoint.Map(householdEndpoints);
 
         // Members module
         JoinHouseholdEndpoint.Map(householdEndpoints);

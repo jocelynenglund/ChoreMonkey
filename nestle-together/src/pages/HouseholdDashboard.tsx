@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
-import { LogOut, ClipboardList } from 'lucide-react';
+import { LogOut, ClipboardList, Link, Check, Copy } from 'lucide-react';
 import { useHouseholdRealtime } from '@/hooks/useHouseholdRealtime';
 import { ConnectionStatus } from '@/components/ConnectionStatus';
 
@@ -57,6 +57,7 @@ export default function HouseholdDashboard() {
   const [whatsNewOpen, setWhatsNewOpen] = useState(false);
   const [allowanceOpen, setAllowanceOpen] = useState(false);
   const [salaryManagementOpen, setSalaryManagementOpen] = useState(false);
+  const [slugCopied, setSlugCopied] = useState(false);
 
   const {
     isAuthenticated,
@@ -231,6 +232,20 @@ export default function HouseholdDashboard() {
                 </h1>
                 <p className="text-xs text-muted-foreground">
                   {members?.length ?? 0} member{(members?.length ?? 0) !== 1 ? 's' : ''}
+                  {household.slug && (
+                    <button
+                      className="ml-2 inline-flex items-center gap-1 text-primary hover:underline font-mono"
+                      title="Copy household link"
+                      onClick={() => {
+                        navigator.clipboard.writeText(`${window.location.origin}/h/${household.slug}`);
+                        setSlugCopied(true);
+                        setTimeout(() => setSlugCopied(false), 2000);
+                      }}
+                    >
+                      /h/{household.slug}
+                      {slugCopied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                    </button>
+                  )}
                 </p>
               </div>
             </div>
@@ -255,9 +270,11 @@ export default function HouseholdDashboard() {
                   />
                 </button>
               )}
-              <SettingsDialog 
-                householdId={household.id} 
-                onManageSalaries={() => setSalaryManagementOpen(true)} 
+              <SettingsDialog
+                householdId={household.id}
+                currentSlug={household.slug}
+                onManageSalaries={() => setSalaryManagementOpen(true)}
+                onSlugChanged={(slug) => setHousehold(prev => prev ? { ...prev, slug } : prev)}
               />
               <Button
                 variant="ghost"

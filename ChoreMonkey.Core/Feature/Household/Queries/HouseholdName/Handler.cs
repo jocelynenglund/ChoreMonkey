@@ -10,19 +10,25 @@ using System.Text;
 namespace ChoreMonkey.Core.Feature.Household.Queries.HouseholdName;
 
 public record HouseholdNameQuery(Guid HouseholdId);
-public record HouseholdNameResponse(Guid HouseholdId, string HouseholdName);
+public record HouseholdNameResponse(Guid HouseholdId, string HouseholdName, string? Slug = null);
 
 internal class Handler(IEventStore store)
 {
     public async Task<HouseholdNameResponse> HandleAsync(HouseholdNameQuery request)
     {
-        // Placeholder implementation
         var streamId  = HouseholdAggregate.StreamId(request.HouseholdId);
 
-        var @events = (await store.FetchEventsAsync(streamId))
+        var events = await store.FetchEventsAsync(streamId);
+
+        var householdCreated = events
             .OfType<ChoreMonkey.Events.HouseholdCreated>()
             .FirstOrDefault();
-        return new HouseholdNameResponse(request.HouseholdId, @events?.Name ?? "Unknown");
+
+        var slug = events
+            .OfType<ChoreMonkey.Events.HouseholdSlugSet>()
+            .LastOrDefault()?.Slug;
+
+        return new HouseholdNameResponse(request.HouseholdId, householdCreated?.Name ?? "Unknown", slug);
     }
 }
 internal static class HouseholdNameEndpoint

@@ -3,6 +3,18 @@ export interface Household {
   name: string;
   pinCode: string;
   createdAt: Date;
+  slug?: string;
+}
+
+export interface SetSlugResponse {
+  slug: string;
+  url: string;
+}
+
+export interface HouseholdBySlugResponse {
+  householdId: string;
+  name: string;
+  memberCount: number;
 }
 
 export interface AccessResponse {

@@ -1,6 +1,150 @@
 {
-  "generated": "2026-03-16T19:24:08.274Z",
+  "generated": "2026-04-02T18:18:33.895Z",
   "commits": [
+    {
+      "hash": "73638f51651cc7154b92f836607e0b665e8d0667",
+      "shortHash": "73638f5",
+      "message": "feat: official salary slip — printable per-member payout breakdown",
+      "date": "2026-04-02",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Official salary slip — printable per-member payout breakdown"
+    },
+    {
+      "hash": "208c4983c2366f2f4cd1ca19f539ae9a7babd9ae",
+      "shortHash": "208c498",
+      "message": "fix: fast-forward RRULE cursor to current week — no more old/outdated recurring events",
+      "date": "2026-03-23",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Fast-forward RRULE cursor to current week — no more old/outdated recurring events"
+    },
+    {
+      "hash": "1e12e033222f5d782f4e85a4b70b1a0a299a9762",
+      "shortHash": "1e12e03",
+      "message": "fix: expand recurring events (RRULE) in calendar ICS parser",
+      "date": "2026-03-23",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Expand recurring events (RRULE) in calendar ICS parser"
+    },
+    {
+      "hash": "34e4dae6531f0ca9d9e13174611e8f12d93fd47a",
+      "shortHash": "34e4dae",
+      "message": "fix: add ninjafredde.com to CORS allowed origins",
+      "date": "2026-03-23",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Add ninjafredde.com to CORS allowed origins"
+    },
+    {
+      "hash": "c6ed702b6a1ad561e4e4d34bfadbb3e60fcc84c1",
+      "shortHash": "c6ed702",
+      "message": "feat: family-quest calendar + victories endpoints (#35)",
+      "date": "2026-03-23",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Family-quest calendar + victories endpoints (#35)"
+    },
+    {
+      "hash": "7dea88a1f5462158f3d21dab3ee549f7e58798fc",
+      "shortHash": "7dea88a",
+      "message": "feat: add family-quest/victories endpoint + status in party (#34)",
+      "date": "2026-03-23",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Add family-quest/victories endpoint + status in party (#34)"
+    },
+    {
+      "hash": "b7e25967781333cfbfd79752b860715f9d09acb4",
+      "shortHash": "b7e2596",
+      "message": "feat: add status field to HeroDto in party endpoint (#33)",
+      "date": "2026-03-23",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Add status field to HeroDto in party endpoint (#33)"
+    },
+    {
+      "hash": "c3a26e08569980d64477db7bd41bc6329a5bae0b",
+      "shortHash": "c3a26e0",
+      "message": "fix: add labs.ninjafredde.com to CORS allowed origins (#32)",
+      "date": "2026-03-23",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Add labs.ninjafredde.com to CORS allowed origins (#32)"
+    },
+    {
+      "hash": "2316e48daf7581d2243b25eaad02f6a09622bee4",
+      "shortHash": "2316e48",
+      "message": "fix: increase e2e timeouts for Azure cold starts (#31)",
+      "date": "2026-03-23",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Increase e2e timeouts for Azure cold starts (#31)"
+    },
+    {
+      "hash": "bb7b3d4db3255ef3302ebe60eb1a59910d8ad59e",
+      "shortHash": "bb7b3d4",
+      "message": "feat: add family-quest read-only endpoints (#30)",
+      "date": "2026-03-23",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Add family-quest read-only endpoints (#30)"
+    },
+    {
+      "hash": "5bda707981aac0d8a6962bb29a41f6e31328d30e",
+      "shortHash": "5bda707",
+      "message": "fix: CompletionTimeline component was still calling /completions directly (#29)",
+      "date": "2026-03-18",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "CompletionTimeline component was still calling /completions directly (#29)"
+    },
+    {
+      "hash": "21fb8800f8cb783a46abd10fe006d4cb409466d2",
+      "shortHash": "21fb880",
+      "message": "feat: rename /completions to /activity, last 30 days, sync frontend",
+      "date": "2026-03-18",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Rename /completions to /activity, last 30 days, sync frontend"
+    },
+    {
+      "hash": "298003007ca1c634f8c3e50f0c7bb5209f6034b8",
+      "shortHash": "2980030",
+      "message": "feat: activity timeline now returns current month instead of last 7 days",
+      "date": "2026-03-18",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Activity timeline now returns current month instead of last 7 days"
+    },
+    {
+      "hash": "03481a095f9ed649a9d063112fcc4c963b483e80",
+      "shortHash": "03481a0",
+      "message": "fix: frontend is /choremonkey/ not /labs/",
+      "date": "2026-03-16",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Frontend is /choremonkey/ not /labs/"
+    },
+    {
+      "hash": "b5c81d57e110ba0504ff8fa32737f51959e5d4f9",
+      "shortHash": "b5c81d5",
+      "message": "fix: correct FTP path /labs/ not /public_html/labs/",
+      "date": "2026-03-16",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Correct FTP path /labs/ not /public_html/labs/"
+    },
+    {
+      "hash": "6e799daff177d22d2b014db39552c5532065edb7",
+      "shortHash": "6e799da",
+      "message": "fix: include deductionRate and bonusRate in fetchChores mapper",
+      "date": "2026-03-16",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Include deductionRate and bonusRate in fetchChores mapper"
+    },
     {
       "hash": "da0cc42db7a2e12ab780863ee7b19a66cb2d8458",
       "shortHash": "da0cc42",
@@ -36,150 +180,6 @@
       "author": "ItsyBOT",
       "type": "feature",
       "displayMessage": "ChoreList includes deductionRate and bonusRate from salary stream"
-    },
-    {
-      "hash": "d7e49a0a8ee29b881cf9a5fbe4137f97128bdb04",
-      "shortHash": "d7e49a0",
-      "message": "fix: required chores have deductions, bonus chores have bonuses",
-      "date": "2026-03-16",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Required chores have deductions, bonus chores have bonuses"
-    },
-    {
-      "hash": "860aef35533b0edc4105aa30b7673917ea6bd89e",
-      "shortHash": "860aef3",
-      "message": "fix: datepicker timezone bug - use noon UTC to preserve date",
-      "date": "2026-03-16",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Datepicker timezone bug - use noon UTC to preserve date"
-    },
-    {
-      "hash": "9ad3221e67ea05a08e37d0b769e004c2379bb026",
-      "shortHash": "9ad3221",
-      "message": "feat: unified Admin Panel with Chores + Salaries tabs",
-      "date": "2026-03-16",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Unified Admin Panel with Chores + Salaries tabs"
-    },
-    {
-      "hash": "3346c71493eb66f9e2a35509e462b7813c60d3c0",
-      "shortHash": "3346c71",
-      "message": "fix: AddChore dialog scrollable on small screens",
-      "date": "2026-03-16",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "AddChore dialog scrollable on small screens"
-    },
-    {
-      "hash": "36e9fbe78d1bc029cbd5e7e72a24b094f66957b8",
-      "shortHash": "36e9fbe",
-      "message": "fix: make Save button more visible in salary form",
-      "date": "2026-03-16",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Make Save button more visible in salary form"
-    },
-    {
-      "hash": "6499b35bf8e15692d673506a5f4032c012faed9b",
-      "shortHash": "6499b35",
-      "message": "fix: salary views use MemberLookup for active members only",
-      "date": "2026-03-16",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Salary views use MemberLookup for active members only"
-    },
-    {
-      "hash": "998aa9f6b5fae7e10c2134735151ba6cdab2c65d",
-      "shortHash": "998aa9f",
-      "message": "fix: add instructions and empty state to salary admin",
-      "date": "2026-03-16",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Add instructions and empty state to salary admin"
-    },
-    {
-      "hash": "3897f3443b74d10a572c133d30bd4e5e75b4dac5",
-      "shortHash": "3897f34",
-      "message": "fix: clearer salary admin UX",
-      "date": "2026-03-16",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Clearer salary admin UX"
-    },
-    {
-      "hash": "294d5076ff113075238a506b384cb779af03a6b1",
-      "shortHash": "294d507",
-      "message": "feat: salary navigation via profile and settings",
-      "date": "2026-03-16",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Salary navigation via profile and settings"
-    },
-    {
-      "hash": "6ac558b26dceabf5c4724bf08d9d5493d7fc7848",
-      "shortHash": "6ac558b",
-      "message": "fix: frontend generates choreId for idempotency",
-      "date": "2026-03-16",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Frontend generates choreId for idempotency"
-    },
-    {
-      "hash": "a324d8f1a2797c71a026bd54d72deec6cb4d0112",
-      "shortHash": "a324d8f",
-      "message": "feat: add bonus rate field to AddChore dialog",
-      "date": "2026-03-16",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Add bonus rate field to AddChore dialog"
-    },
-    {
-      "hash": "1d55151aca71f861887ee69329c1b1a66b9f56ce",
-      "shortHash": "1d55151",
-      "message": "feat: new salary UI for per-member system",
-      "date": "2026-03-16",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "New salary UI for per-member system"
-    },
-    {
-      "hash": "aa5b9379f35a0e0f1fb4a7594a9a80bd2e1dfd7f",
-      "shortHash": "aa5b937",
-      "message": "fix: address Copilot review comments",
-      "date": "2026-03-16",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Address Copilot review comments"
-    },
-    {
-      "hash": "5ef694c762a36ab2c2198884b999dae946445a68",
-      "shortHash": "5ef694c",
-      "message": "feat: auto-calculate missed chores based on frequency",
-      "date": "2026-03-16",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Auto-calculate missed chores based on frequency"
-    },
-    {
-      "hash": "4b51dbb80363b8d3eb549264a75a3113d27886a9",
-      "shortHash": "4b51dbb",
-      "message": "feat: replace SalaryReports with per-member Salary system",
-      "date": "2026-03-16",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Replace SalaryReports with per-member Salary system"
-    },
-    {
-      "hash": "2e81412634959f81e102303cea6c1e94633a361f",
-      "shortHash": "2e81412",
-      "message": "Add /health endpoint for monitoring",
-      "date": "2026-03-14",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Add /health endpoint for monitoring"
     }
   ]
 }
