@@ -9,6 +9,29 @@ import type {
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7422';
 
+// ============ Configure Payday ============
+
+export async function configurePayday(
+  householdId: string,
+  paydayDayOfMonth: number,
+  pinCode: number
+): Promise<{ paydayDayOfMonth: number } | null> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/households/${householdId}/salary/payday`,
+    {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ paydayDayOfMonth, pinCode }),
+    }
+  );
+
+  if (!response.ok) {
+    return null;
+  }
+
+  return response.json();
+}
+
 // ============ Member Salary ============
 
 export async function setMemberSalary(

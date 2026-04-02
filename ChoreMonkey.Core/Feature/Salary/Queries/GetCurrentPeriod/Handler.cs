@@ -37,8 +37,6 @@ internal class Handler(IEventStore store, ISender mediator)
     {
         var now = DateTime.UtcNow;
         var today = now.Date;
-        var periodStart = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
-        var periodEndExclusive = periodStart.AddMonths(1); // End-exclusive for accurate boundary
 
         // Fetch all relevant streams
         var salaryStreamId = SalaryAggregate.StreamId(request.HouseholdId);
@@ -46,6 +44,22 @@ internal class Handler(IEventStore store, ISender mediator)
 
         var salaryEvents = await store.FetchEventsAsync(salaryStreamId);
         var choreEvents = await store.FetchEventsAsync(choreStreamId);
+
+        // Get configured payday (default 28)
+        int payday = salaryEvents.OfType<PaydayConfigured>().LastOrDefault()?.PaydayDayOfMonth ?? 28;
+
+        DateTime periodEnd, periodStart;
+        if (today.Day <= payday)
+        {
+            periodEnd = new DateTime(today.Year, today.Month, payday, 0, 0, 0, DateTimeKind.Utc);
+        }
+        else
+        {
+            var nextMonth = today.AddMonths(1);
+            periodEnd = new DateTime(nextMonth.Year, nextMonth.Month, payday, 0, 0, 0, DateTimeKind.Utc);
+        }
+        periodStart = periodEnd.AddMonths(-1).AddDays(1);
+        var periodEndExclusive = periodEnd.AddDays(1);
 
         // Get active members with current nicknames (handles renames and removals)
         var memberLookup = await mediator.Send(new MemberLookupQuery(request.HouseholdId));
@@ -169,7 +183,7 @@ internal class Handler(IEventStore store, ISender mediator)
                 bonusChores));
         }
 
-        return new CurrentPeriodResponse(periodStart, periodEndExclusive.AddDays(-1), members);
+        return new CurrentPeriodResponse(periodStart, periodEnd, members);
     }
 
     private List<string> CalculateMissedInstances(

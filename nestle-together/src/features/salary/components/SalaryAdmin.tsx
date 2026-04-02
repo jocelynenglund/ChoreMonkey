@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getCurrentPeriod, setMemberSalary, closePeriod, getPayoutHistory, getOfficialSalarySlip } from '../api';
+import { getCurrentPeriod, setMemberSalary, closePeriod, getPayoutHistory, getOfficialSalarySlip, configurePayday } from '../api';
 import type { CurrentPeriodResponse, MemberPeriodSummary, PeriodPayout, OfficialSalarySlipResponse } from '../types';
 import { useHouseholdStore } from '../../store';
 import { SalarySlip } from './SalarySlip';
@@ -27,6 +27,9 @@ export function SalaryAdmin() {
   const [history, setHistory] = useState<PeriodPayout[]>([]);
   const [activeSlip, setActiveSlip] = useState<OfficialSalarySlipResponse | null>(null);
   const [loadingSlip, setLoadingSlip] = useState<string | null>(null);
+  const [paydayDay, setPaydayDay] = useState<string>('28');
+  const [paydayPin, setPaydayPin] = useState<string>('');
+  const [savingPayday, setSavingPayday] = useState(false);
 
   useEffect(() => {
     loadPeriod();
@@ -103,6 +106,31 @@ export function SalaryAdmin() {
     setClosing(false);
   }
 
+  async function handleSavePayday() {
+    if (!currentHouseholdId) return;
+    const day = parseInt(paydayDay, 10);
+    const pin = parseInt(paydayPin, 10);
+    if (isNaN(day) || day < 1 || day > 28) {
+      alert('Payday must be between 1 and 28.');
+      return;
+    }
+    if (isNaN(pin)) {
+      alert('Please enter the admin PIN.');
+      return;
+    }
+    setSavingPayday(true);
+    const result = await configurePayday(currentHouseholdId, day, pin);
+    if (result) {
+      setSavedMessage('Payday saved!');
+      setTimeout(() => setSavedMessage(null), 2000);
+      setPaydayPin('');
+      loadPeriod();
+    } else {
+      alert('Failed to save payday. Check your admin PIN.');
+    }
+    setSavingPayday(false);
+  }
+
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString('sv-SE', { 
       month: 'long',
@@ -125,6 +153,47 @@ export function SalaryAdmin() {
         )}
       </header>
       
+      {/* Payday Configuration */}
+      <div className="payday-config">
+        <h3>Payday</h3>
+        <div className="payday-form">
+          <label>
+            Salary paid on the
+            <input
+              type="number"
+              min="1"
+              max="28"
+              value={paydayDay}
+              onChange={(e) => setPaydayDay(e.target.value)}
+              className="payday-input"
+            />
+            th of each month
+          </label>
+          <label>
+            Admin PIN
+            <input
+              type="password"
+              value={paydayPin}
+              onChange={(e) => setPaydayPin(e.target.value)}
+              className="payday-pin-input"
+              placeholder="PIN"
+            />
+          </label>
+          <button
+            onClick={handleSavePayday}
+            disabled={savingPayday}
+            className="save-btn"
+          >
+            {savingPayday ? 'Saving...' : 'Save Payday'}
+          </button>
+        </div>
+        {periodData && (
+          <p className="period-info">
+            Current period: {new Date(periodData.periodStart).toLocaleDateString('sv-SE')} — {new Date(periodData.periodEnd).toLocaleDateString('sv-SE')}
+          </p>
+        )}
+      </div>
+
       <p className="instructions">Click "Set Up" or "Edit" on a member to configure their salary, then click Save.</p>
 
       <div className="member-salaries">

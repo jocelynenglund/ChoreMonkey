@@ -38,7 +38,6 @@ internal class Handler(IEventStore store, ISender mediator)
     {
         var periodId = Guid.NewGuid();
         var periodEnd = request.PeriodEnd.Date;
-        var periodStart = new DateTime(periodEnd.Year, periodEnd.Month, 1, 0, 0, 0, DateTimeKind.Utc);
 
         // Fetch all relevant streams
         var salaryStreamId = SalaryAggregate.StreamId(request.HouseholdId);
@@ -46,6 +45,10 @@ internal class Handler(IEventStore store, ISender mediator)
 
         var salaryEvents = await store.FetchEventsAsync(salaryStreamId);
         var choreEvents = await store.FetchEventsAsync(choreStreamId);
+
+        // Get configured payday (default 28)
+        int payday = salaryEvents.OfType<PaydayConfigured>().LastOrDefault()?.PaydayDayOfMonth ?? 28;
+        var periodStart = periodEnd.AddMonths(-1).AddDays(1);
 
         // Get active members with current nicknames
         var memberLookup = await mediator.Send(new MemberLookupQuery(request.HouseholdId));
