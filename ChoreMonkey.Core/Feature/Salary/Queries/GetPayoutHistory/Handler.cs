@@ -19,6 +19,7 @@ public record PayoutSummaryDto(
 
 public record PeriodSummaryDto(
     Guid PeriodId,
+    DateTime PeriodStart,
     DateTime PeriodEnd,
     List<PayoutSummaryDto> Payouts);
 
@@ -36,6 +37,7 @@ internal class Handler(IEventStore store)
             .OrderByDescending(e => e.PeriodEnd)
             .Select(e => new PeriodSummaryDto(
                 e.PeriodId,
+                e.PeriodStart,
                 e.PeriodEnd,
                 e.Payouts.Select(p => new PayoutSummaryDto(
                     p.MemberId,

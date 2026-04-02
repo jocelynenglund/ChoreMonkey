@@ -54,6 +54,7 @@ using ChoreMonkey.Core.Feature.Salary.Commands.SetChoreRates;
 using ChoreMonkey.Core.Feature.Salary.Commands.ClosePeriod;
 using ChoreMonkey.Core.Feature.Salary.Queries.GetCurrentPeriod;
 using ChoreMonkey.Core.Feature.Salary.Queries.GetPayoutHistory;
+using ChoreMonkey.Core.Feature.Salary.Queries.GetOfficialSalarySlip;
 
 using ChoreMonkey.Core.Infrastructure;
 using ChoreMonkey.Core.Infrastructure.SignalR;
@@ -150,6 +151,7 @@ public static class Initialization
         services.AddScoped<Feature.Salary.Commands.ClosePeriod.Handler>();
         services.AddScoped<Feature.Salary.Queries.GetCurrentPeriod.Handler>();
         services.AddScoped<Feature.Salary.Queries.GetPayoutHistory.Handler>();
+        services.AddScoped<Feature.Salary.Queries.GetOfficialSalarySlip.Handler>();
 
         return services;
     }
@@ -208,6 +210,7 @@ public static class Initialization
         ClosePeriodEndpoint.Map(householdEndpoints);
         GetCurrentPeriodEndpoint.Map(householdEndpoints);
         GetPayoutHistoryEndpoint.Map(householdEndpoints);
+        GetOfficialSalarySlipEndpoint.Map(householdEndpoints);
 
         return app;
     }

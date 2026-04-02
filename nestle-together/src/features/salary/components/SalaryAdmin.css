@@ -235,3 +235,73 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+/* History Section */
+.history-section {
+  margin-top: 2rem;
+}
+
+.history-section h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+}
+
+.history-period {
+  border: 1px solid var(--border, #e0e0e0);
+  border-radius: 12px;
+  margin-bottom: 0.75rem;
+  overflow: hidden;
+}
+
+.history-period-header {
+  padding: 0.5rem 1rem;
+  background: var(--surface-elevated, #f5f5f5);
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.history-payouts {
+  padding: 0.5rem 1rem;
+}
+
+.history-payout-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.history-payout-row:last-child {
+  border-bottom: none;
+}
+
+.payout-name {
+  flex: 1;
+  font-size: 0.875rem;
+}
+
+.payout-amount {
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.view-slip-btn {
+  padding: 0.25rem 0.75rem;
+  border: 1px solid #1976d2;
+  background: transparent;
+  color: #1976d2;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.view-slip-btn:hover {
+  background: #e3f2fd;
+}
+
+.view-slip-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { getCurrentPeriod, setMemberSalary, closePeriod } from '../api';
-import type { CurrentPeriodResponse, MemberPeriodSummary } from '../types';
+import { getCurrentPeriod, setMemberSalary, closePeriod, getPayoutHistory, getOfficialSalarySlip } from '../api';
+import type { CurrentPeriodResponse, MemberPeriodSummary, PeriodPayout, OfficialSalarySlipResponse } from '../types';
 import { useHouseholdStore } from '../../store';
+import { SalarySlip } from './SalarySlip';
 import './SalaryAdmin.css';
 
 interface MemberSalaryForm {
@@ -23,9 +24,13 @@ export function SalaryAdmin() {
   const [saving, setSaving] = useState(false);
   const [closing, setClosing] = useState(false);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
+  const [history, setHistory] = useState<PeriodPayout[]>([]);
+  const [activeSlip, setActiveSlip] = useState<OfficialSalarySlipResponse | null>(null);
+  const [loadingSlip, setLoadingSlip] = useState<string | null>(null);
 
   useEffect(() => {
     loadPeriod();
+    loadHistory();
   }, [currentHouseholdId]);
 
   async function loadPeriod() {
@@ -34,6 +39,25 @@ export function SalaryAdmin() {
     const data = await getCurrentPeriod(currentHouseholdId);
     setPeriodData(data);
     setLoading(false);
+  }
+
+  async function loadHistory() {
+    if (!currentHouseholdId) return;
+    const data = await getPayoutHistory(currentHouseholdId);
+    // API returns { periods: [...] }
+    const periods = Array.isArray(data) ? data : (data as any)?.periods ?? [];
+    setHistory(periods);
+  }
+
+  async function viewSlip(periodId: string, memberId: string) {
+    if (!currentHouseholdId) return;
+    const key = `${periodId}-${memberId}`;
+    setLoadingSlip(key);
+    const slip = await getOfficialSalarySlip(currentHouseholdId, periodId, memberId);
+    if (slip) {
+      setActiveSlip(slip);
+    }
+    setLoadingSlip(null);
   }
 
   function startEditing(member: MemberPeriodSummary) {
@@ -211,10 +235,10 @@ export function SalaryAdmin() {
       <div className="close-period-section">
         <h3>End of Month</h3>
         <p className="warning-text">
-          Closing the period finalizes all salaries and generates payslips. 
+          Closing the period finalizes all salaries and generates payslips.
           This cannot be undone.
         </p>
-        <button 
+        <button
           onClick={handleClosePeriod}
           disabled={closing}
           className="close-period-btn"
@@ -222,6 +246,40 @@ export function SalaryAdmin() {
           {closing ? 'Closing...' : '📋 Close Period & Generate Payslips'}
         </button>
       </div>
+
+      {/* Payout History */}
+      {history.length > 0 && (
+        <div className="history-section">
+          <h3>Past Periods</h3>
+          {history.map((period) => (
+            <div key={period.periodId} className="history-period">
+              <div className="history-period-header">
+                {new Date(period.periodEnd).toLocaleDateString('sv-SE', { month: 'long', year: 'numeric' })}
+              </div>
+              <div className="history-payouts">
+                {period.payouts.map((p) => (
+                  <div key={p.memberId} className="history-payout-row">
+                    <span className="payout-name">{p.name}</span>
+                    <span className="payout-amount">{p.netPay.toFixed(0)} kr</span>
+                    <button
+                      className="view-slip-btn"
+                      disabled={loadingSlip === `${period.periodId}-${p.memberId}`}
+                      onClick={() => viewSlip(period.periodId, p.memberId)}
+                    >
+                      {loadingSlip === `${period.periodId}-${p.memberId}` ? '...' : 'View Slip'}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Salary Slip Modal */}
+      {activeSlip && (
+        <SalarySlip slip={activeSlip} onClose={() => setActiveSlip(null)} />
+      )}
     </div>
   );
 }

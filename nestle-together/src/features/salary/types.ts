@@ -66,3 +66,30 @@ export interface ClosePeriodResponse {
   periodEnd: string;
   payouts: PayoutSummary[];
 }
+
+export interface SlipDeduction {
+  choreName: string;
+  baseRate: number;
+  multiplier: number;
+  amount: number;
+}
+
+export interface SlipBonus {
+  choreName: string;
+  baseRate: number;
+  multiplier: number;
+  amount: number;
+}
+
+export interface OfficialSalarySlipResponse {
+  periodId: string;
+  periodStart: string;
+  periodEnd: string;
+  memberName: string;
+  baseSalary: number;
+  deductions: SlipDeduction[];
+  bonuses: SlipBonus[];
+  grossDeductions: number;
+  grossBonuses: number;
+  netPay: number;
+}

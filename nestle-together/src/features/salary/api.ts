@@ -4,6 +4,7 @@ import type {
   CurrentPeriodResponse,
   ClosePeriodResponse,
   PeriodPayout,
+  OfficialSalarySlipResponse,
 } from './types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7422';
@@ -93,10 +94,28 @@ export async function getPayoutHistory(
   const response = await fetch(
     `${API_BASE_URL}/api/households/${householdId}/salary/history`
   );
-  
+
   if (!response.ok) {
     return [];
   }
-  
+
+  return response.json();
+}
+
+// ============ Official Salary Slip ============
+
+export async function getOfficialSalarySlip(
+  householdId: string,
+  periodId: string,
+  memberId: string
+): Promise<OfficialSalarySlipResponse | null> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/households/${householdId}/salary/periods/${periodId}/slip/${memberId}`
+  );
+
+  if (!response.ok) {
+    return null;
+  }
+
   return response.json();
 }
