@@ -216,3 +216,29 @@ export async function fetchOverdueChores(
   const data = await response.json();
   return data.memberOverdue || [];
 }
+
+export interface UpdateChorePayload {
+  displayName: string;
+  description: string;
+  frequency: { type: string; days?: string[]; intervalDays?: number } | null;
+  isOptional: boolean;
+  startDate?: string;
+  isRequired: boolean;
+  missedDeduction: number;
+}
+
+export async function updateChore(
+  householdId: string,
+  choreId: string,
+  payload: UpdateChorePayload
+): Promise<boolean> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/households/${householdId}/chores/${choreId}`,
+    {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    }
+  );
+  return response.ok;
+}

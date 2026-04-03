@@ -58,9 +58,7 @@ internal class Handler(IEventStore store)
             .Select(e => e.ChoreId)
             .ToHashSet();
         
-        var chores = choreEvents.OfType<ChoreCreated>()
-            .Where(c => !deletedChoreIds.Contains(c.ChoreId))
-            .ToDictionary(e => e.ChoreId);
+        var chores = ChoreAggregate.BuildChores(choreEvents);
         
         // Get latest assignments
         var assignments = choreEvents.OfType<ChoreAssigned>()

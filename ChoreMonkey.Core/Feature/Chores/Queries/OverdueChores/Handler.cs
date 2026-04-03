@@ -61,9 +61,7 @@ internal class Handler(IEventStore store, ISender mediator)
             .ToHashSet();
         
         // Get all chores with frequencies (excluding deleted)
-        var chores = choreEvents.OfType<ChoreCreated>()
-            .Where(e => !deletedChoreIds.Contains(e.ChoreId))
-            .ToDictionary(e => e.ChoreId);
+        var chores = ChoreAggregate.BuildChores(choreEvents);
         
         // Get latest assignments
         var assignments = choreEvents.OfType<ChoreAssigned>()

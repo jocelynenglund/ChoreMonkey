@@ -1,9 +1,20 @@
 import { useState, useEffect } from 'react';
-import { Trash2, Users, DollarSign, Star } from 'lucide-react';
+import { Trash2, Users, DollarSign, Star, Pencil } from 'lucide-react';
 import { useHouseholdStore } from '../../store';
 import { setChoreRates } from '../../salary/api';
+import { updateChore } from '../../chores/api';
 import type { Chore } from '../../chores/types';
 import './ChoreManagement.css';
+
+interface EditForm {
+  displayName: string;
+  description: string;
+  frequencyType: string;
+  intervalDays: string;
+  days: string[];
+  isOptional: boolean;
+  missedDeduction: string;
+}
 
 export function ChoreManagement() {
   const { 
@@ -18,7 +29,13 @@ export function ChoreManagement() {
   
   const [chores, setChores] = useState<Chore[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editingChore, setEditingChore] = useState<string | null>(null);
+  const [editingChore, setEditingChore] = useState<string | null>(null); // rates editing
+  const [editingChoreDetails, setEditingChoreDetails] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<EditForm>({
+    displayName: '', description: '', frequencyType: 'once',
+    intervalDays: '7', days: [], isOptional: false, missedDeduction: '10',
+  });
+  const [editSaving, setEditSaving] = useState(false);
   const [assigningChore, setAssigningChore] = useState<string | null>(null);
   const [ratesForm, setRatesForm] = useState({ deductionRate: '10', bonusRate: '10' });
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
@@ -74,6 +91,45 @@ export function ChoreManagement() {
     loadData();
   }
 
+  function startEditingDetails(chore: Chore) {
+    setEditingChoreDetails(chore.id);
+    setEditForm({
+      displayName: chore.displayName,
+      description: chore.description || '',
+      frequencyType: chore.frequency?.type || 'once',
+      intervalDays: chore.frequency?.intervalDays?.toString() || '7',
+      days: chore.frequency?.days || [],
+      isOptional: chore.isOptional || false,
+      missedDeduction: (chore.missedDeduction ?? 10).toString(),
+    });
+  }
+
+  async function saveChoreDetails(chore: Chore) {
+    if (!currentHouseholdId) return;
+    setEditSaving(true);
+    const freq = editForm.frequencyType === 'once' ? null : {
+      type: editForm.frequencyType,
+      days: editForm.frequencyType === 'weekly' && editForm.days.length > 0 ? editForm.days : undefined,
+      intervalDays: editForm.frequencyType === 'interval' ? parseInt(editForm.intervalDays) || 7 : undefined,
+    };
+    const ok = await updateChore(currentHouseholdId, chore.id, {
+      displayName: editForm.displayName,
+      description: editForm.description,
+      frequency: freq,
+      isOptional: editForm.isOptional,
+      isRequired: !editForm.isOptional,
+      missedDeduction: parseFloat(editForm.missedDeduction) || 0,
+    });
+    if (ok) {
+      setEditingChoreDetails(null);
+      showMessage('Chore updated!');
+      loadData();
+    }
+    setEditSaving(false);
+  }
+
+  const WEEKDAYS = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+
   function startEditing(chore: Chore) {
     setEditingChore(chore.id);
     // Use saved rates, or fallback to defaults
@@ -121,7 +177,60 @@ export function ChoreManagement() {
         )}
         {requiredChores.map(chore => (
           <div key={chore.id} className="chore-card">
-            {editingChore === chore.id ? (
+            {editingChoreDetails === chore.id ? (
+              <div className="edit-form">
+                <h4>Edit Chore</h4>
+                <label>Name
+                  <input type="text" value={editForm.displayName}
+                    onChange={e => setEditForm({...editForm, displayName: e.target.value})} />
+                </label>
+                <label>Description
+                  <input type="text" value={editForm.description}
+                    onChange={e => setEditForm({...editForm, description: e.target.value})} />
+                </label>
+                <label>Frequency
+                  <select value={editForm.frequencyType}
+                    onChange={e => setEditForm({...editForm, frequencyType: e.target.value})}>
+                    <option value="once">Once</option>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="interval">Every X days</option>
+                  </select>
+                </label>
+                {editForm.frequencyType === 'interval' && (
+                  <label>Every (days)
+                    <input type="number" min="1" value={editForm.intervalDays}
+                      onChange={e => setEditForm({...editForm, intervalDays: e.target.value})} />
+                  </label>
+                )}
+                {editForm.frequencyType === 'weekly' && (
+                  <div className="day-picker">
+                    {WEEKDAYS.map(day => (
+                      <label key={day} className="day-option">
+                        <input type="checkbox"
+                          checked={editForm.days.includes(day)}
+                          onChange={() => setEditForm({...editForm,
+                            days: editForm.days.includes(day)
+                              ? editForm.days.filter(d => d !== day)
+                              : [...editForm.days, day]
+                          })} />
+                        {day.slice(0,3)}
+                      </label>
+                    ))}
+                  </div>
+                )}
+                <label>Deduction if missed (kr)
+                  <input type="number" value={editForm.missedDeduction}
+                    onChange={e => setEditForm({...editForm, missedDeduction: e.target.value})} />
+                </label>
+                <div className="form-actions">
+                  <button className="cancel-btn" onClick={() => setEditingChoreDetails(null)}>Cancel</button>
+                  <button className="save-btn" disabled={editSaving} onClick={() => saveChoreDetails(chore)}>
+                    {editSaving ? 'Saving...' : '💾 Save'}
+                  </button>
+                </div>
+              </div>
+            ) : editingChore === chore.id ? (
               <div className="edit-form">
                 <h4>{chore.displayName}</h4>
                 <label>
@@ -184,6 +293,9 @@ export function ChoreManagement() {
                   </span>
                 </div>
                 <div className="chore-actions">
+                  <button onClick={() => startEditingDetails(chore)} title="Edit chore">
+                    <Pencil className="w-4 h-4" />
+                  </button>
                   <button onClick={() => startAssigning(chore)} title="Assign">
                     <Users className="w-4 h-4" />
                   </button>
@@ -207,7 +319,25 @@ export function ChoreManagement() {
         )}
         {bonusChores.map(chore => (
           <div key={chore.id} className="chore-card bonus">
-            {editingChore === chore.id ? (
+            {editingChoreDetails === chore.id ? (
+              <div className="edit-form">
+                <h4>Edit Chore</h4>
+                <label>Name
+                  <input type="text" value={editForm.displayName}
+                    onChange={e => setEditForm({...editForm, displayName: e.target.value})} />
+                </label>
+                <label>Description
+                  <input type="text" value={editForm.description}
+                    onChange={e => setEditForm({...editForm, description: e.target.value})} />
+                </label>
+                <div className="form-actions">
+                  <button className="cancel-btn" onClick={() => setEditingChoreDetails(null)}>Cancel</button>
+                  <button className="save-btn" disabled={editSaving} onClick={() => saveChoreDetails(chore)}>
+                    {editSaving ? 'Saving...' : '💾 Save'}
+                  </button>
+                </div>
+              </div>
+            ) : editingChore === chore.id ? (
               <div className="edit-form">
                 <h4>{chore.displayName}</h4>
                 <label>
@@ -230,6 +360,9 @@ export function ChoreManagement() {
                   <span className="chore-meta">bonus{chore.bonusRate ? ` • +${chore.bonusRate} kr` : ''}</span>
                 </div>
                 <div className="chore-actions">
+                  <button onClick={() => startEditingDetails(chore)} title="Edit chore">
+                    <Pencil className="w-4 h-4" />
+                  </button>
                   <button onClick={() => startEditing(chore)} title="Edit rates">
                     <DollarSign className="w-4 h-4" />
                   </button>
