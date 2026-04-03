@@ -229,11 +229,17 @@ Do this in small safe steps, one PR each:
 ## 5. Open Questions
 
 1. **Bottom tabs vs top tabs?** Bottom tab bar is more mobile-friendly (thumb reach). Top tabs keep the current aesthetic. Which do you prefer?
+-- let's go with bottom tabs, i guess it would work in desktop too? 
 
 2. **Admin tab vs separate route?** Could do `/household/:id/admin` as a full page instead of a tab. Easier to link to directly. Worth it?
+-- yes this makes sense. We should do a check for the admin pin here 
 
 3. **Profile + Logout placement?** Currently: avatar → ProfileDialog → inside dialog you can view allowance. Proposed: avatar → Profile Sheet (slides up), with logout at the bottom of the sheet. Ok?
+-- yes!
 
 4. **Vanity URL in onboarding?** Should slug setup be offered during household creation, or only discoverable in settings after the fact?
+-- yes, this is a good enhancement for onboarding.
 
 5. **SalaryAdmin component name?** It's used for admin management but there's also a member-facing `MyAllowance`. Renaming to `SalaryManagement` (dropping the duplicate) would be cleaner — agree?
+-- yes that's much cleaner. 
+
