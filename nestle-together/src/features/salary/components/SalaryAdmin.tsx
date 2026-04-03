@@ -95,7 +95,7 @@ export function SalaryAdmin() {
   }
 
   const selectedPeriod = availablePeriods[selectedPeriodIdx] ?? null;
-  const periodEnded = periodData ? new Date() >= new Date(periodData.periodEnd) : false;
+  const periodEnded = selectedPeriod ? new Date() > new Date(selectedPeriod.periodEnd) : false;
 
   async function handleClosePeriod() {
     if (!currentHouseholdId || !selectedPeriod || selectedPeriod.isClosed) return;
