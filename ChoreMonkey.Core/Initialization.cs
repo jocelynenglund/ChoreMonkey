@@ -54,6 +54,7 @@ using ChoreMonkey.Core.Feature.FamilyQuest.Queries.Calendar;
 using ChoreMonkey.Core.Feature.Salary.Commands.SetMemberSalary;
 using ChoreMonkey.Core.Feature.Salary.Commands.SetChoreRates;
 using ChoreMonkey.Core.Feature.Salary.Commands.ClosePeriod;
+using ChoreMonkey.Core.Feature.Salary.Commands.SetPayday;
 using ChoreMonkey.Core.Feature.Salary.Queries.GetCurrentPeriod;
 using ChoreMonkey.Core.Feature.Salary.Queries.GetPayoutHistory;
 using ChoreMonkey.Core.Feature.Salary.Queries.GetOfficialSalarySlip;
@@ -153,6 +154,7 @@ public static class Initialization
         services.AddScoped<Feature.Salary.Commands.SetMemberSalary.Handler>();
         services.AddScoped<Feature.Salary.Commands.SetChoreRates.Handler>();
         services.AddScoped<Feature.Salary.Commands.ClosePeriod.Handler>();
+        services.AddScoped<Feature.Salary.Commands.SetPayday.Handler>();
         services.AddScoped<Feature.Salary.Queries.GetCurrentPeriod.Handler>();
         services.AddScoped<Feature.Salary.Queries.GetPayoutHistory.Handler>();
         services.AddScoped<Feature.Salary.Queries.GetOfficialSalarySlip.Handler>();
@@ -214,6 +216,7 @@ public static class Initialization
         SetMemberSalaryEndpoint.Map(householdEndpoints);
         SetChoreRatesEndpoint.Map(householdEndpoints);
         ClosePeriodEndpoint.Map(householdEndpoints);
+        SetPaydayEndpoint.Map(householdEndpoints);
         GetCurrentPeriodEndpoint.Map(householdEndpoints);
         GetPayoutHistoryEndpoint.Map(householdEndpoints);
         GetOfficialSalarySlipEndpoint.Map(householdEndpoints);
