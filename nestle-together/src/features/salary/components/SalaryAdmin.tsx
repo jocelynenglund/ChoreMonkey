@@ -220,8 +220,35 @@ export function SalaryAdmin() {
       <div className="close-period-section">
         <h3>Periods</h3>
 
-        {availablePeriods.length === 0 ? (
+        {availablePeriods.length === 0 && history.length === 0 ? (
           <p className="period-not-ended-note">⏳ No completed periods yet.</p>
+        ) : availablePeriods.length === 0 && history.length > 0 ? (
+          // Fallback: available-periods failed but we have history
+          <div className="history-section">
+            <p className="text-xs text-muted-foreground mb-3">Closed periods:</p>
+            {history.map((period) => (
+              <div key={period.periodId} className="history-period">
+                <div className="history-period-header">
+                  {new Date(period.periodEnd).toLocaleDateString('sv-SE', { month: 'long', year: 'numeric' })} ✓
+                </div>
+                <div className="history-payouts">
+                  {period.payouts.map((p) => (
+                    <div key={p.memberId} className="history-payout-row">
+                      <span className="payout-name">{p.name}</span>
+                      <span className="payout-amount">{p.netPay.toFixed(0)} kr</span>
+                      <button
+                        className="view-slip-btn"
+                        disabled={loadingSlip === `${period.periodId}-${p.memberId}`}
+                        onClick={() => viewSlip(period.periodId, p.memberId)}
+                      >
+                        {loadingSlip === `${period.periodId}-${p.memberId}` ? '...' : 'View Slip'}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         ) : (
           <>
             <div className="period-selector">

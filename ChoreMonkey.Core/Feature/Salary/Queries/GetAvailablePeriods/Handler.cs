@@ -41,11 +41,11 @@ internal class Handler(IEventStore store)
             .LastOrDefault()?.PaydayDayOfMonth ?? 25;
 
         // Already closed periods by their (start, end) for lookup
+        // Use last-wins if same period was somehow closed twice
         var closedPeriods = salaryEvents
             .OfType<PeriodClosed>()
-            .ToDictionary(
-                e => (e.PeriodStart.Date, e.PeriodEnd.Date),
-                e => e.PeriodId);
+            .GroupBy(e => (e.PeriodStart.Date, e.PeriodEnd.Date))
+            .ToDictionary(g => g.Key, g => g.Last().PeriodId);
 
         // Generate all completed pay periods from household creation up to today
         var periods = new List<AvailablePeriodDto>();

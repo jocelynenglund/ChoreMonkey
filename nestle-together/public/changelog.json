@@ -1,6 +1,105 @@
 {
-  "generated": "2026-04-02T18:18:33.895Z",
+  "generated": "2026-04-03T08:38:40.379Z",
   "commits": [
+    {
+      "hash": "d5c89540d8e809a8f19ae55a7a2679d20227f0b5",
+      "shortHash": "d5c8954",
+      "message": "refactor: step 5 — settings sheet + pin management in admin",
+      "date": "2026-04-03",
+      "author": "ItsyBOT",
+      "type": "refactor",
+      "displayMessage": "Step 5 — settings sheet + pin management in admin"
+    },
+    {
+      "hash": "824404d1a75968a09fb9059c82c8a15df07ace3c",
+      "shortHash": "824404d",
+      "message": "refactor: step 5 — settings sheet, pin management in admin, dead code removed",
+      "date": "2026-04-03",
+      "author": "ItsyBOT",
+      "type": "refactor",
+      "displayMessage": "Step 5 — settings sheet, pin management in admin, dead code removed"
+    },
+    {
+      "hash": "0bb305749c9abb7d9d2d39e67983ce4c464cc126",
+      "shortHash": "0bb3057",
+      "message": "refactor: steps 2+3+4 — hooks, tabs, admin route",
+      "date": "2026-04-03",
+      "author": "ItsyBOT",
+      "type": "refactor",
+      "displayMessage": "Steps 2+3+4 — hooks, tabs, admin route"
+    },
+    {
+      "hash": "ae03b65cf35941141575ae303d3798a42fc37036",
+      "shortHash": "ae03b65",
+      "message": "fix: period ended check uses selected period, not current period",
+      "date": "2026-04-03",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Period ended check uses selected period, not current period"
+    },
+    {
+      "hash": "110a6e3e577c5f238847f0bbdf1c954e04dda8a2",
+      "shortHash": "110a6e3",
+      "message": "feat: period selector for close/view payslips",
+      "date": "2026-04-03",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Period selector for close/view payslips"
+    },
+    {
+      "hash": "9e7503f266fb5c8bbc324a645fb1a8507307d3f7",
+      "shortHash": "9e7503f",
+      "message": "fix: prevent closing a period that hasn't ended yet",
+      "date": "2026-04-03",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Prevent closing a period that hasn't ended yet"
+    },
+    {
+      "hash": "86cf43e56d4ed31d6f60dfcf0ee04a27752080df",
+      "shortHash": "86cf43e",
+      "message": "refactor: extract useHouseholdData + useChoreActions hooks",
+      "date": "2026-04-03",
+      "author": "ItsyBOT",
+      "type": "refactor",
+      "displayMessage": "Extract useHouseholdData + useChoreActions hooks"
+    },
+    {
+      "hash": "cc33021c87eec45d52896401752eec409eb61eaf",
+      "shortHash": "cc33021",
+      "message": "refactor: swap SalaryManagement for SalaryAdmin — enables payslip history",
+      "date": "2026-04-03",
+      "author": "ItsyBOT",
+      "type": "refactor",
+      "displayMessage": "Swap SalaryManagement for SalaryAdmin — enables payslip history"
+    },
+    {
+      "hash": "078b73036d6e80db67bece4101323a592cbb8523",
+      "shortHash": "078b730",
+      "message": "Questions answered",
+      "date": "2026-04-03",
+      "author": "Jocelyn Englund 🍜",
+      "type": "update",
+      "displayMessage": "Questions answered"
+    },
+    {
+      "hash": "5c685e826293677b46e1bddef7a989a71bd460cc",
+      "shortHash": "5c685e8",
+      "message": "feat: configurable payday — pay period is payday-based, default 25th",
+      "date": "2026-04-03",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Configurable payday — pay period is payday-based, default 25th"
+    },
+    {
+      "hash": "a34a87663eda0dad872e25e6ecea207717850776",
+      "shortHash": "a34a876",
+      "message": "feat: vanity URLs — households accessible at /h/{slug}",
+      "date": "2026-04-02",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Vanity URLs — households accessible at /h/{slug}"
+    },
     {
       "hash": "73638f51651cc7154b92f836607e0b665e8d0667",
       "shortHash": "73638f5",
@@ -81,105 +180,6 @@
       "author": "ItsyBOT",
       "type": "fix",
       "displayMessage": "Increase e2e timeouts for Azure cold starts (#31)"
-    },
-    {
-      "hash": "bb7b3d4db3255ef3302ebe60eb1a59910d8ad59e",
-      "shortHash": "bb7b3d4",
-      "message": "feat: add family-quest read-only endpoints (#30)",
-      "date": "2026-03-23",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Add family-quest read-only endpoints (#30)"
-    },
-    {
-      "hash": "5bda707981aac0d8a6962bb29a41f6e31328d30e",
-      "shortHash": "5bda707",
-      "message": "fix: CompletionTimeline component was still calling /completions directly (#29)",
-      "date": "2026-03-18",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "CompletionTimeline component was still calling /completions directly (#29)"
-    },
-    {
-      "hash": "21fb8800f8cb783a46abd10fe006d4cb409466d2",
-      "shortHash": "21fb880",
-      "message": "feat: rename /completions to /activity, last 30 days, sync frontend",
-      "date": "2026-03-18",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Rename /completions to /activity, last 30 days, sync frontend"
-    },
-    {
-      "hash": "298003007ca1c634f8c3e50f0c7bb5209f6034b8",
-      "shortHash": "2980030",
-      "message": "feat: activity timeline now returns current month instead of last 7 days",
-      "date": "2026-03-18",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Activity timeline now returns current month instead of last 7 days"
-    },
-    {
-      "hash": "03481a095f9ed649a9d063112fcc4c963b483e80",
-      "shortHash": "03481a0",
-      "message": "fix: frontend is /choremonkey/ not /labs/",
-      "date": "2026-03-16",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Frontend is /choremonkey/ not /labs/"
-    },
-    {
-      "hash": "b5c81d57e110ba0504ff8fa32737f51959e5d4f9",
-      "shortHash": "b5c81d5",
-      "message": "fix: correct FTP path /labs/ not /public_html/labs/",
-      "date": "2026-03-16",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Correct FTP path /labs/ not /public_html/labs/"
-    },
-    {
-      "hash": "6e799daff177d22d2b014db39552c5532065edb7",
-      "shortHash": "6e799da",
-      "message": "fix: include deductionRate and bonusRate in fetchChores mapper",
-      "date": "2026-03-16",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Include deductionRate and bonusRate in fetchChores mapper"
-    },
-    {
-      "hash": "da0cc42db7a2e12ab780863ee7b19a66cb2d8458",
-      "shortHash": "da0cc42",
-      "message": "fix: bonus chores send deductionRate=0, required chores send bonusRate=0",
-      "date": "2026-03-16",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Bonus chores send deductionRate=0, required chores send bonusRate=0"
-    },
-    {
-      "hash": "2c67c5d846983ed775afe89557ca5214811d2a40",
-      "shortHash": "2c67c5d",
-      "message": "fix: reload chores after saving rates to show updated values",
-      "date": "2026-03-16",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Reload chores after saving rates to show updated values"
-    },
-    {
-      "hash": "e06b4be7a141dd2f24fa2a737c5c0d78320ebffc",
-      "shortHash": "e06b4be",
-      "message": "test: add ChoreRatesTests - bonus and deduction rates in ChoreList",
-      "date": "2026-03-16",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Add ChoreRatesTests - bonus and deduction rates in ChoreList"
-    },
-    {
-      "hash": "32712e5b525dd79b6d1e4d0ba15385b461824455",
-      "shortHash": "32712e5",
-      "message": "feat: ChoreList includes deductionRate and bonusRate from salary stream",
-      "date": "2026-03-16",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "ChoreList includes deductionRate and bonusRate from salary stream"
     }
   ]
 }
