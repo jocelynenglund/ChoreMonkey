@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ClipboardList, Wallet } from 'lucide-react';
 import { ChoreManagement } from './ChoreManagement';
-import { SalaryManagement } from './SalaryManagement';
+import { SalaryAdmin } from '../../salary/components/SalaryAdmin';
 import './AdminPanel.css';
 
 type Tab = 'chores' | 'salaries';
@@ -30,7 +30,7 @@ export function AdminPanel() {
 
       <div className="admin-content">
         {activeTab === 'chores' && <ChoreManagement />}
-        {activeTab === 'salaries' && <SalaryManagement />}
+        {activeTab === 'salaries' && <SalaryAdmin />}
       </div>
     </div>
   );
