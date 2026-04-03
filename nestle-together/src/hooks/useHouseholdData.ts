@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useHouseholdStore } from '@/stores/householdStore';
 import type { Household, Chore } from '@/types/household';
 
-interface UseHouseholdDataResult {
+export interface UseHouseholdDataResult {
   household: Household | null;
   chores: Chore[];
   isDataLoading: boolean;
@@ -58,15 +58,5 @@ export function useHouseholdData(householdId: string | undefined): UseHouseholdD
     fetchData();
   }, [householdId, getHousehold, getHouseholdChores, fetchHouseholdMembers]);
 
-  return {
-    household,
-    chores,
-    isDataLoading,
-    isRefreshing,
-    refreshKey,
-    refreshData,
-    setHousehold,
-    setChores,
-    bumpRefreshKey,
-  };
+  return { household, chores, isDataLoading, isRefreshing, refreshKey, refreshData, setHousehold, setChores, bumpRefreshKey };
 }

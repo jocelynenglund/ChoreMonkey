@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Settings, Lock, Shield, Wallet, Link, Check, Copy } from 'lucide-react';
+import { Settings, Lock, Shield, Link, Check, Copy } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -18,11 +18,11 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7422';
 interface SettingsDialogProps {
   householdId: string;
   currentSlug?: string;
-  onManageSalaries?: () => void;
+
   onSlugChanged?: (slug: string) => void;
 }
 
-export function SettingsDialog({ householdId, currentSlug, onManageSalaries, onSlugChanged }: SettingsDialogProps) {
+export function SettingsDialog({ householdId, currentSlug, onSlugChanged }: SettingsDialogProps) {
   const [open, setOpen] = useState(false);
   const [currentPin, setCurrentPin] = useState('');
   const [newAdminPin, setNewAdminPin] = useState('');
@@ -132,31 +132,6 @@ export function SettingsDialog({ householdId, currentSlug, onManageSalaries, onS
         </DialogHeader>
 
         <div className="space-y-6 mt-4">
-          {/* Admin Panel */}
-          {onManageSalaries && (
-            <div className="space-y-3">
-              <h3 className="font-semibold flex items-center gap-2">
-                <Wallet className="w-4 h-4" />
-                Chores & Salaries
-              </h3>
-              <p className="text-xs text-muted-foreground">
-                Manage chores, set allowances, and close monthly periods.
-              </p>
-              <Button 
-                onClick={() => {
-                  setOpen(false);
-                  onManageSalaries();
-                }}
-                variant="outline"
-                className="w-full"
-              >
-                Open Admin Panel
-              </Button>
-            </div>
-          )}
-
-          {onManageSalaries && <hr />}
-
           {/* Household URL */}
           <div className="space-y-3">
             <h3 className="font-semibold flex items-center gap-2">

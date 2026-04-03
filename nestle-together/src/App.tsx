@@ -8,6 +8,7 @@ import CreateHousehold from "./pages/CreateHousehold";
 import JoinHousehold from "./pages/JoinHousehold";
 import AccessHousehold from "./pages/AccessHousehold";
 import HouseholdDashboard from "./pages/HouseholdDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 import SlugResolver from "./pages/SlugResolver";
 import NotFound from "./pages/NotFound";
 
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/join/:householdId/:inviteId" element={<JoinHousehold />} />
           <Route path="/access/:id" element={<AccessHousehold />} />
           <Route path="/household/:id" element={<HouseholdDashboard />} />
+          <Route path="/household/:id/admin" element={<AdminDashboard />} />
           <Route path="/h/:slug" element={<SlugResolver />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
