@@ -305,3 +305,9 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+.period-not-ended-note {
+  font-size: 0.8rem;
+  color: var(--muted-foreground, #888);
+  margin-bottom: 0.5rem;
+}

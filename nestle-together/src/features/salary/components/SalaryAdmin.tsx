@@ -88,17 +88,25 @@ export function SalaryAdmin() {
     setSaving(false);
   }
 
+  const periodEnded = periodData ? new Date() >= new Date(periodData.periodEnd) : false;
+
   async function handleClosePeriod() {
     if (!currentHouseholdId) return;
-    if (!confirm('Close this period? This will finalize all salaries for this month.')) {
+    if (!periodEnded) return;
+    if (!confirm('Close this period? This will finalize all salaries and cannot be undone.')) {
       return;
     }
     
     setClosing(true);
-    const result = await closePeriod(currentHouseholdId, new Date());
-    if (result) {
-      alert(`Period closed! ${result.payouts.length} payouts recorded.`);
-      loadPeriod();
+    try {
+      const result = await closePeriod(currentHouseholdId);
+      if (result) {
+        alert(`Period closed! ${result.payouts.length} payouts recorded.`);
+        loadPeriod();
+        loadHistory();
+      }
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Failed to close period');
     }
     setClosing(false);
   }
@@ -238,9 +246,14 @@ export function SalaryAdmin() {
           Closing the period finalizes all salaries and generates payslips.
           This cannot be undone.
         </p>
+        {!periodEnded && periodData && (
+          <p className="period-not-ended-note">
+            ⏳ Period ends on {new Date(periodData.periodEnd).toLocaleDateString('sv-SE')}. You can close it after that date.
+          </p>
+        )}
         <button
           onClick={handleClosePeriod}
-          disabled={closing}
+          disabled={closing || !periodEnded}
           className="close-period-btn"
         >
           {closing ? 'Closing...' : '📋 Close Period & Generate Payslips'}
