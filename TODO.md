@@ -29,12 +29,12 @@ _Last updated: 2026-04-03_
 ## ✨ Features / Enhancements
 
 - [ ] **Vanity URL in onboarding** — slug setup offered during household creation, not just in settings after the fact. (Agreed in design doc.)
-- [ ] **Payday configurator UI** — `SetPayday` endpoint exists in backend but there's no UI to change it. Currently hardcoded to 25th. Add to Admin → Settings tab.
+- [x] **Payday configurator UI** — Added to Admin → Settings tab. _(2026-04-03)_
 - [ ] **Profile sheet with logout** — per design doc, avatar → Profile Sheet (slides up) with logout at bottom. Currently logout is a button in the header.
 - [ ] **Acknowledge-missed UI** — `AcknowledgeMissed` command exists in backend, no UI. Useful for "we agreed to skip this week".
 - [ ] **Chore history view** — `ChoreHistory` query exists, not exposed in UI. Could be useful in chore detail or admin view.
-- [ ] **Salary: deduction multiplier display** — when editing a member's salary, the deduction/bonus multipliers reset to 1.0 every time (not loaded from current config). Should pre-fill with last saved values.
-- [ ] **Mobile: bottom tab bar safe area** — on iOS the tab bar needs `padding-bottom: env(safe-area-inset-bottom)` to avoid the home indicator overlap.
+- [x] **Salary: deduction multiplier display** — multipliers now pre-filled from last saved values. _(2026-04-03)_
+- [x] **Mobile: bottom tab bar safe area** — fixed with `env(safe-area-inset-bottom)` + `viewport-fit=cover`. _(2026-04-03)_
 - [ ] **Admin tab visibility** — currently only shows if `isAdmin` from store. If someone logs in as a member then the admin logs in on the same device, the tab won't appear without re-login. Consider showing tab always but gating at the route level only.
 - [ ] **Slug uniqueness error message** — when slug is already taken, the API returns an error but the message isn't very user-friendly. Improve error text.
 
