@@ -81,6 +81,17 @@ export interface SlipBonus {
   amount: number;
 }
 
+export interface AvailablePeriod {
+  periodStart: string;
+  periodEnd: string;
+  isClosed: boolean;
+  periodId: string | null;
+}
+
+export interface AvailablePeriodsResponse {
+  periods: AvailablePeriod[];
+}
+
 export interface OfficialSalarySlipResponse {
   periodId: string;
   periodStart: string;

@@ -5,6 +5,7 @@ import type {
   ClosePeriodResponse,
   PeriodPayout,
   OfficialSalarySlipResponse,
+  AvailablePeriod,
 } from './types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7422';
@@ -83,6 +84,19 @@ export async function closePeriod(
   }
   
   return response.json();
+}
+
+// ============ Available Periods ============
+
+export async function getAvailablePeriods(
+  householdId: string
+): Promise<AvailablePeriod[]> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/households/${householdId}/salary/available-periods`
+  );
+  if (!response.ok) return [];
+  const data = await response.json();
+  return data.periods ?? [];
 }
 
 // ============ Payout History ============
