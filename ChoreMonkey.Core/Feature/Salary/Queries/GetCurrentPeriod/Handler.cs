@@ -74,7 +74,18 @@ internal class Handler(IEventStore store, ISender mediator)
         var deletedChoreIds = choreEvents.OfType<ChoreDeleted>()
             .Select(e => e.ChoreId)
             .ToHashSet();
-        var chores = ChoreAggregate.BuildChores(choreEvents);
+        var chores = choreEvents.OfType<ChoreCreated>()
+            .Where(c => !deletedChoreIds.Contains(c.ChoreId))
+            .ToDictionary(e => e.ChoreId);
+        foreach (var update in choreEvents.OfType<ChoreUpdated>())
+            if (chores.ContainsKey(update.ChoreId))
+                chores[update.ChoreId] = chores[update.ChoreId] with
+                {
+                    DisplayName = update.DisplayName, Description = update.Description,
+                    Frequency = update.Frequency, IsOptional = update.IsOptional,
+                    StartDate = update.StartDate, IsRequired = update.IsRequired,
+                    MissedDeduction = update.MissedDeduction,
+                };
 
         // Get assignments
         var assignments = choreEvents.OfType<ChoreAssigned>()
