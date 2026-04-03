@@ -81,7 +81,7 @@ export default function HouseholdDashboard() {
   };
 
   return (
-    <div className="min-h-screen pb-20"> {/* pb-20 for bottom nav */}
+    <div className="min-h-screen pb-20" style={{ paddingBottom: 'calc(5rem + env(safe-area-inset-bottom))' }}>
       {/* Header */}
       <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-lg border-b border-border">
         <div className="max-w-3xl mx-auto px-4 py-4">
@@ -182,7 +182,7 @@ export default function HouseholdDashboard() {
       </main>
 
       {/* Bottom Tab Bar */}
-      <nav className="fixed bottom-0 left-0 right-0 z-20 bg-background/90 backdrop-blur-lg border-t border-border">
+      <nav className="fixed bottom-0 left-0 right-0 z-20 bg-background/90 backdrop-blur-lg border-t border-border" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
         <div className="max-w-3xl mx-auto flex">
           <button
             className={`flex-1 flex flex-col items-center gap-1 py-3 text-xs transition-colors ${activeTab === 'chores' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}

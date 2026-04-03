@@ -31,6 +31,8 @@ export interface MemberPeriodSummary {
   memberId: string;
   name: string;
   baseSalary: number;
+  deductionMultiplier: number;
+  bonusMultiplier: number;
   deductions: number;
   bonuses: number;
   projected: number;

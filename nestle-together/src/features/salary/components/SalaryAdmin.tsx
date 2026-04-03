@@ -71,8 +71,8 @@ export function SalaryAdmin() {
     setEditingMember(member.memberId);
     setForm({
       baseSalary: member.baseSalary.toString(),
-      deductionMultiplier: '1.0',
-      bonusMultiplier: '1.0',
+      deductionMultiplier: member.deductionMultiplier?.toString() ?? '1.0',
+      bonusMultiplier: member.bonusMultiplier?.toString() ?? '1.0',
     });
   }
 

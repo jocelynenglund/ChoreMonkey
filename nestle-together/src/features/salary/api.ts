@@ -134,3 +134,30 @@ export async function getOfficialSalarySlip(
 
   return response.json();
 }
+
+// ============ Payday Config ============
+
+export async function setPayday(householdId: string, paydayDayOfMonth: number): Promise<boolean> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/households/${householdId}/salary/payday`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ paydayDayOfMonth }),
+    }
+  );
+  return response.ok;
+}
+
+export async function getPayday(householdId: string): Promise<number> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/households/${householdId}/salary/current`
+  );
+  if (!response.ok) return 25;
+  // Payday isn't directly exposed — derive from period end day
+  const data = await response.json();
+  if (data?.periodEnd) {
+    return new Date(data.periodEnd).getDate();
+  }
+  return 25;
+}
