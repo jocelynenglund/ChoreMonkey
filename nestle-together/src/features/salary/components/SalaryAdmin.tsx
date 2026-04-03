@@ -103,7 +103,7 @@ export function SalaryAdmin() {
 
     setClosing(true);
     try {
-      const result = await closePeriod(currentHouseholdId);
+      const result = await closePeriod(currentHouseholdId, new Date(selectedPeriod.periodEnd));
       if (result) {
         alert(`Period closed! ${result.payouts.length} payouts recorded.`);
         await loadAll();

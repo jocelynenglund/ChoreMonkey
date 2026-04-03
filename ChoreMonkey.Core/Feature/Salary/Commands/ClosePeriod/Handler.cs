@@ -9,9 +9,9 @@ using Microsoft.AspNetCore.Routing;
 
 namespace ChoreMonkey.Core.Feature.Salary.Commands.ClosePeriod;
 
-public record ClosePeriodCommand(Guid HouseholdId);
+public record ClosePeriodCommand(Guid HouseholdId, DateTime? TargetPeriodEnd = null);
 
-public record ClosePeriodRequest();
+public record ClosePeriodRequest(DateTime? PeriodEnd = null);
 
 public record MissedChoreDto(Guid ChoreId, string ChoreName, string Period, decimal Deduction);
 public record BonusChoreDto(Guid ChoreId, string ChoreName, DateTime CompletedAt, decimal Bonus);
@@ -50,13 +50,32 @@ internal class Handler(IEventStore store, ISender mediator)
             .OfType<PaydayConfigured>()
             .LastOrDefault()?.PaydayDayOfMonth ?? 25;
 
-        // Compute the most recently completed period (payday must have passed)
-        var (periodStart, periodEnd) = GetLastCompletedPayPeriod(today, paydayDay);
+        // If a specific period end was requested, use it; otherwise default to most recent completed period
+        DateTime periodStart, periodEnd;
+        if (request.TargetPeriodEnd.HasValue)
+        {
+            periodEnd = request.TargetPeriodEnd.Value.Date;
+            var prevPayday = new DateTime(periodEnd.Year, periodEnd.Month, paydayDay, 0, 0, 0, DateTimeKind.Utc).AddMonths(-1);
+            periodStart = new DateTime(prevPayday.Year, prevPayday.Month, paydayDay, 0, 0, 0, DateTimeKind.Utc).AddDays(1);
+        }
+        else
+        {
+            (periodStart, periodEnd) = GetLastCompletedPayPeriod(today, paydayDay);
+        }
 
         // Guard: refuse to close a period that hasn't ended yet
         if (today < periodEnd)
         {
             return Results.BadRequest(new { error = $"Period has not ended yet. It closes on {periodEnd:yyyy-MM-dd}." });
+        }
+
+        // Guard: already closed?
+        var alreadyClosed = salaryEvents
+            .OfType<PeriodClosed>()
+            .Any(e => e.PeriodEnd.Date == periodEnd);
+        if (alreadyClosed)
+        {
+            return Results.BadRequest(new { error = "This period has already been closed." });
         }
 
         var periodId = Guid.NewGuid();
@@ -354,9 +373,10 @@ internal static class ClosePeriodEndpoint
     {
         group.MapPost("households/{householdId:guid}/salary/close-period", async (
             Guid householdId,
+            ClosePeriodRequest request,
             Handler handler) =>
         {
-            var command = new ClosePeriodCommand(householdId);
+            var command = new ClosePeriodCommand(householdId, request.PeriodEnd);
             return await handler.HandleAsync(command);
         });
     }

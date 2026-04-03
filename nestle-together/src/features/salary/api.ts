@@ -68,13 +68,15 @@ export async function getCurrentPeriod(
 // ============ Close Period ============
 
 export async function closePeriod(
-  householdId: string
+  householdId: string,
+  periodEnd?: Date
 ): Promise<ClosePeriodResponse | null> {
   const response = await fetch(
     `${API_BASE_URL}/api/households/${householdId}/salary/close-period`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(periodEnd ? { periodEnd: periodEnd.toISOString() } : {}),
     }
   );
   
