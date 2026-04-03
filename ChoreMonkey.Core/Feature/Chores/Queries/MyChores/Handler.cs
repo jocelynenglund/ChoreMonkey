@@ -25,7 +25,8 @@ public record MyOverdueChoreDto(
 public record MyCompletedChoreDto(
     Guid ChoreId,
     string DisplayName,
-    DateTime CompletedAt);
+    DateTime CompletedAt,
+    string? CompletedByName = null);  // null = completed by me; set when someone else did a shared chore
 
 public record GetMyChoresResponse(
     List<MyChoreDto> Pending,
@@ -71,6 +72,18 @@ internal class Handler(IEventStore store)
             .Where(c => c.CompletedByMemberId == request.MemberId)
             .GroupBy(e => e.ChoreId)
             .ToDictionary(g => g.Key, g => g.ToList());
+
+        // Get ALL household completions (for shared/assignedToAll chores)
+        var allCompletions = choreEvents.OfType<ChoreCompleted>()
+            .GroupBy(e => e.ChoreId)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        // Member nicknames for "done by X" display — use latest nickname
+        var memberNicknames = householdEvents.OfType<MemberJoinedHousehold>()
+            .GroupBy(e => e.MemberId)
+            .ToDictionary(g => g.Key, g => g.Last().Nickname);
+        foreach (var rename in householdEvents.OfType<MemberNicknameChanged>())
+            memberNicknames[rename.MemberId] = rename.NewNickname;
         
         // Get this member's acknowledged misses
         var myAcknowledgments = choreEvents.OfType<ChoreMissedAcknowledged>()
@@ -95,20 +108,35 @@ internal class Handler(IEventStore store)
             var acknowledgedPeriods = myAcknowledgments.GetValueOrDefault(choreId) ?? [];
             var choreStartDate = chore.StartDate?.Date 
                 ?? (DateTime.TryParse(chore.TimestampUtc, out var parsed) ? parsed.Date : today);
+
+            // For assignedToAll chores: check if ANYONE has done it this period
+            var isShared = assignment?.AssignToAll == true;
+            var completionsToCheck = isShared
+                ? allCompletions.GetValueOrDefault(choreId) ?? []
+                : choreCompletions;
             
             // Categorize for CURRENT period (pending vs completed)
             var currentPeriodResult = GetCurrentPeriodStatus(
                 chore.Frequency, 
-                choreCompletions, 
+                completionsToCheck, 
                 today, 
                 currentWeekStart);
             
             if (currentPeriodResult.IsCompleted)
             {
+                // Was it done by someone else?
+                string? completedByName = null;
+                if (isShared && currentPeriodResult.CompletedByMemberId.HasValue 
+                    && currentPeriodResult.CompletedByMemberId.Value != request.MemberId)
+                {
+                    memberNicknames.TryGetValue(currentPeriodResult.CompletedByMemberId.Value, out completedByName);
+                }
+
                 completed.Add(new MyCompletedChoreDto(
                     choreId,
                     chore.DisplayName,
-                    currentPeriodResult.CompletedAt!.Value));
+                    currentPeriodResult.CompletedAt!.Value,
+                    completedByName));
             }
             else
             {
@@ -150,7 +178,7 @@ internal class Handler(IEventStore store)
             completed.OrderByDescending(c => c.CompletedAt).ToList());
     }
     
-    private record CurrentPeriodResult(bool IsCompleted, DateTime? CompletedAt);
+    private record CurrentPeriodResult(bool IsCompleted, DateTime? CompletedAt, Guid? CompletedByMemberId = null);
     private record OverdueResult(bool IsOverdue, string? OverduePeriod, string? PeriodKey);
     
     private static CurrentPeriodResult GetCurrentPeriodStatus(
@@ -162,7 +190,7 @@ internal class Handler(IEventStore store)
         if (frequency == null || frequency.Type.ToLower() == "once")
         {
             var completion = completions.MaxBy(c => c.CompletedAt);
-            return new CurrentPeriodResult(completion != null, completion?.CompletedAt);
+            return new CurrentPeriodResult(completion != null, completion?.CompletedAt, completion?.CompletedByMemberId);
         }
         
         return frequency.Type.ToLower() switch
@@ -177,7 +205,7 @@ internal class Handler(IEventStore store)
     private static CurrentPeriodResult GetDailyCurrentStatus(List<ChoreCompleted> completions, DateTime today)
     {
         var todayCompletion = completions.FirstOrDefault(c => c.CompletedAt.Date == today);
-        return new CurrentPeriodResult(todayCompletion != null, todayCompletion?.CompletedAt);
+        return new CurrentPeriodResult(todayCompletion != null, todayCompletion?.CompletedAt, todayCompletion?.CompletedByMemberId);
     }
     
     private static CurrentPeriodResult GetWeeklyCurrentStatus(List<ChoreCompleted> completions, DateTime currentWeekStart)
@@ -185,7 +213,7 @@ internal class Handler(IEventStore store)
         var thisWeekCompletion = completions
             .Where(c => c.CompletedAt.Date >= currentWeekStart)
             .MaxBy(c => c.CompletedAt);
-        return new CurrentPeriodResult(thisWeekCompletion != null, thisWeekCompletion?.CompletedAt);
+        return new CurrentPeriodResult(thisWeekCompletion != null, thisWeekCompletion?.CompletedAt, thisWeekCompletion?.CompletedByMemberId);
     }
     
     private static CurrentPeriodResult GetIntervalCurrentStatus(int intervalDays, List<ChoreCompleted> completions, DateTime today)
@@ -194,7 +222,7 @@ internal class Handler(IEventStore store)
         if (lastCompletion == null) return new CurrentPeriodResult(false, null);
         
         var nextDue = lastCompletion.CompletedAt.Date.AddDays(intervalDays);
-        return new CurrentPeriodResult(today < nextDue, lastCompletion.CompletedAt);
+        return new CurrentPeriodResult(today < nextDue, lastCompletion.CompletedAt, lastCompletion.CompletedByMemberId);
     }
     
     private static OverdueResult GetPreviousPeriodOverdue(

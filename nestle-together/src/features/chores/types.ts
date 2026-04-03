@@ -74,6 +74,7 @@ export interface MyCompletedChore {
   choreId: string;
   displayName: string;
   completedAt: Date;
+  completedByName?: string;  // set when someone else did a shared chore
 }
 
 export interface MyChoresResponse {
