@@ -57,10 +57,6 @@ internal class Handler(IEventStore store)
         var deletedChoreIds = choreEvents.OfType<ChoreDeleted>()
             .Select(e => e.ChoreId)
             .ToHashSet();
-        
-        var deletedChoreIds = choreEvents.OfType<ChoreDeleted>()
-            .Select(e => e.ChoreId)
-            .ToHashSet();
         var chores = choreEvents.OfType<ChoreCreated>()
             .Where(c => !deletedChoreIds.Contains(c.ChoreId))
             .ToDictionary(e => e.ChoreId);
