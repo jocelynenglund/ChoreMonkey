@@ -40,17 +40,21 @@ internal class Handler(IEventStore store, ISender mediator)
         var householdEvents = await store.FetchEventsAsync(householdStreamId);
         var choreEvents = await store.FetchEventsAsync(choreStreamId);
         
-        // Verify admin access
+        // Verify household access (admin or member PIN)
         var householdCreated = householdEvents.OfType<HouseholdCreated>().FirstOrDefault();
         if (householdCreated == null) return null;
-        
+
         var adminPinHash = householdEvents.OfType<AdminPinChanged>()
             .OrderByDescending(e => e.TimestampUtc)
             .FirstOrDefault()?.NewPinHash ?? householdCreated.PinHash;
-        
-        if (!PinHasher.VerifyPin(request.PinCode, adminPinHash))
+
+        var isAdmin = PinHasher.VerifyPin(request.PinCode, adminPinHash);
+        if (!isAdmin)
         {
-            return null;
+            var memberPinHash = householdEvents.OfType<MemberPinChanged>()
+                .LastOrDefault()?.NewMemberPinHash ?? householdCreated.MemberPinHash;
+            var isMember = memberPinHash != null && PinHasher.VerifyPin(request.PinCode, memberPinHash);
+            if (!isMember) return null;
         }
         
         var today = DateTime.UtcNow.Date;
