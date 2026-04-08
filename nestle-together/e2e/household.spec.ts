@@ -1,35 +1,5 @@
-import { test, expect, type Page } from '@playwright/test';
-
-// Generate unique names to avoid conflicts between test runs
-const uniqueId = () => Math.random().toString(36).substring(7);
-
-// Helper: navigate the 2-step CreateHousehold form and wait for the dashboard
-async function createHousehold(page: Page, householdName: string, pin = '1234') {
-  await page.goto('/');
-  await page.click('text=Create Household');
-
-  // Step 1: Household name
-  await page.getByLabel('Household Name').fill(householdName);
-  await page.getByRole('button', { name: 'Continue' }).click();
-
-  // Step 2: Admin PIN (both fields must match)
-  await page.getByLabel('PIN Code').fill(pin);
-  await page.getByLabel('Confirm Admin PIN').fill(pin);
-  await page.getByRole('button', { name: 'Create Household' }).click();
-
-  // Wait for redirect to dashboard
-  await page.waitForURL(/\/household\//, { timeout: 30000 });
-  await expect(page.locator('h1')).toContainText(householdName, { timeout: 15000 });
-}
-
-// Helper: fill the PinInput component (4 individual tel inputs, auto-submits when complete)
-async function fillPinInput(page: Page, pin: string) {
-  const inputs = page.locator('input[type="tel"]');
-  await inputs.first().waitFor({ state: 'visible', timeout: 10000 });
-  for (let i = 0; i < pin.length; i++) {
-    await inputs.nth(i).fill(pin[i]);
-  }
-}
+import { test, expect } from '@playwright/test';
+import { createHousehold, fillPinInput, uniqueId } from './helpers';
 
 test.describe('Household Creation', () => {
   test('can create a new household', async ({ page }) => {

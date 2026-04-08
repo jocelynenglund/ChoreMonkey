@@ -1,18 +1,9 @@
 import { test, expect } from '@playwright/test';
-
-const uniqueId = () => Math.random().toString(36).substring(7);
+import { createHousehold, uniqueId } from './helpers';
 
 async function createHouseholdAsAdmin(page: import('@playwright/test').Page) {
   const householdName = `Admin Test ${uniqueId()}`;
-  await page.goto('/');
-  await page.click('text=Create Household');
-  await page.getByLabel(/household name/i).fill(householdName);
-  await page.getByLabel(/your name|nickname/i).first().fill('Admin');
-  await page.getByRole('button', { name: /continue/i }).click();
-  await page.getByLabel(/admin.*pin|pin.*code/i).first().fill('1234');
-  await page.getByRole('button', { name: /create/i }).click();
-  await page.waitForURL(/\/household\//, { timeout: 45000 });
-  await expect(page.locator('h1')).toContainText(householdName, { timeout: 10000 });
+  await createHousehold(page, householdName);
   return page.url();
 }
 
