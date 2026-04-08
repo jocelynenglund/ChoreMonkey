@@ -7,8 +7,9 @@ export async function createHousehold(page: Page, householdName: string, pin = '
   await page.goto('/');
   await page.click('text=Create Household');
 
-  // Step 1: Household name
+  // Step 1: Household name + admin nickname
   await page.getByLabel('Household Name').fill(householdName);
+  await page.getByLabel('Your Name').fill('Admin');
   await page.getByRole('button', { name: 'Continue' }).click();
 
   // Step 2: Admin PIN — both fields required
