@@ -128,6 +128,7 @@ export default function HouseholdDashboard() {
                   onClick={() => setProfileOpen(true)}
                   className="rounded-full hover:ring-2 hover:ring-primary transition-all"
                   title="Edit profile"
+                  aria-label="Edit profile"
                 >
                   <MemberAvatar nickname={currentMember.nickname} color={currentMember.avatarColor} size="sm" />
                 </button>
@@ -137,7 +138,13 @@ export default function HouseholdDashboard() {
                 currentSlug={household.slug}
                 onSlugChanged={(slug) => setHousehold((prev) => prev ? { ...prev, slug } : prev)}
               />
-              <Button variant="ghost" size="icon" onClick={logout} className="text-muted-foreground hover:text-foreground">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={logout}
+                className="text-muted-foreground hover:text-foreground"
+                aria-label="Log out"
+              >
                 <LogOut className="w-5 h-5" />
               </Button>
             </div>

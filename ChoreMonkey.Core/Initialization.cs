@@ -83,6 +83,17 @@ public static class Initialization
         // Add FileEventStore with PublishingEventStore decorator
         services.AddFileEventStore(dataPath);
         
+        // Fix DI lifetime mismatch: IEventSessionFactory depends on IEventStore,
+        // so both need to be Scoped (not Singleton + Scoped)
+        var sessionFactoryDescriptor = services.FirstOrDefault(d => 
+            d.ServiceType == typeof(FileEventStore.Session.IEventSessionFactory));
+        if (sessionFactoryDescriptor != null)
+        {
+            services.Remove(sessionFactoryDescriptor);
+            services.AddScoped(typeof(FileEventStore.Session.IEventSessionFactory), 
+                sessionFactoryDescriptor.ImplementationType!);
+        }
+        
         // Manually decorate IEventStore with PublishingEventStore
         var innerDescriptor = services.FirstOrDefault(d => d.ServiceType == typeof(FileEventStore.IEventStore));
         if (innerDescriptor != null)

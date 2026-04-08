@@ -29,6 +29,8 @@ builder.Services.AddCors(options =>
                 "https://www.ninjafredde.com",
                 "http://localhost:5173",
                 "https://localhost:5173",
+                "http://localhost:4173",
+                "https://localhost:4173",
                 "http://labs.ninjafredde.com",
                 "https://labs.ninjafredde.com")
               .AllowAnyMethod()
