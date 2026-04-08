@@ -23,10 +23,16 @@ builder.Services.AddCors(options =>
                 "https://labs.itsybit.se",
                 "http://choremonkey.itsybit.se",
                 "https://choremonkey.itsybit.se",
+                "http://ninjafredde.com",
+                "https://ninjafredde.com",
+                "http://www.ninjafredde.com",
+                "https://www.ninjafredde.com",
                 "http://localhost:5173",
                 "https://localhost:5173",
                 "http://localhost:4173",
-                "https://localhost:4173")
+                "https://localhost:4173",
+                "http://labs.ninjafredde.com",
+                "https://labs.ninjafredde.com")
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();
@@ -90,6 +96,9 @@ app.MapDefaultEndpoints();
 
 app.MapChoreMonkeyEndpoints();
 app.MapChoreMonkeyHub();
+
+// Health endpoint for monitoring
+app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
 
 // Version endpoint
 app.MapGet("/api/version", () => {

@@ -1,5 +1,3 @@
-using System;
-
 namespace ChoreMonkey.Core.Domain;
 
 internal class ChoreAggregate

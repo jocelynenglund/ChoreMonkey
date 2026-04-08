@@ -11,6 +11,7 @@ export default function CreateHousehold() {
   const createHousehold = useHouseholdStore((s) => s.createHousehold);
 
   const [name, setName] = useState('');
+  const [nickname, setNickname] = useState('');
   const [pin, setPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
   const [useSeparateMemberPin, setUseSeparateMemberPin] = useState(false);
@@ -21,6 +22,10 @@ export default function CreateHousehold() {
   const handleNext = () => {
     if (!name.trim()) {
       setError('Please enter a household name');
+      return;
+    }
+    if (!nickname.trim()) {
+      setError('Please enter your name or nickname');
       return;
     }
     setError('');
@@ -44,7 +49,7 @@ export default function CreateHousehold() {
     const household = await createHousehold(
       name.trim(), 
       pin, 
-      'Admin',
+      nickname.trim(),
       useSeparateMemberPin ? memberPin : undefined
     );
     if (household) {
@@ -117,6 +122,17 @@ export default function CreateHousehold() {
                     onChange={(e) => setName(e.target.value)}
                     className="h-12 text-base"
                     autoFocus
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="nickname">Your Name</Label>
+                  <Input
+                    id="nickname"
+                    placeholder="e.g., Mom, Dad, Alex"
+                    value={nickname}
+                    onChange={(e) => setNickname(e.target.value)}
+                    className="h-12 text-base"
                   />
                 </div>
 

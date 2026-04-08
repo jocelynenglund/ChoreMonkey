@@ -55,10 +55,6 @@ test.describe('Household Creation', () => {
     // App redirects to /access/:id automatically
     await page.waitForURL(`**/access/${householdId}`, { timeout: 15000 });
 
-    // Wait for PIN input to be ready
-    const pinInputs = page.locator('input[type="tel"]');
-    await pinInputs.first().waitFor({ state: 'visible', timeout: 10000 });
-
     // Only one member was created so it is auto-selected; just enter the PIN
     await fillPinInput(page, pin);
 
@@ -102,7 +98,7 @@ test.describe('Chores', () => {
     await page.getByLabel(/chore name/i).waitFor({ state: 'visible' });
     await page.getByLabel(/chore name/i).fill('Make bed');
 
-    // Select daily frequency - the option text is "Every day"
+    // Select daily frequency
     await page.getByRole('combobox').click();
     await page.getByRole('option', { name: /every day/i }).click();
 
@@ -119,14 +115,14 @@ test.describe('Chores', () => {
     await page.getByRole('button', { name: /add chore/i }).click();
     await page.getByLabel(/chore name/i).waitFor({ state: 'visible' });
     await page.getByLabel(/chore name/i).fill('Test completion');
-    
+
     const submitButton = page.getByRole('button', { name: /add chore/i }).last();
     await submitButton.scrollIntoViewIfNeeded();
     await submitButton.click();
 
     await expect(page.locator('text=Test completion')).toBeVisible({ timeout: 10000 });
 
-    // Find the chore card and click the complete button (checkmark icon)
+    // Find the chore card and click the complete button
     const choreCard = page.locator('[class*="card"]').filter({ hasText: 'Test completion' });
     await choreCard.getByRole('button').first().click();
 
@@ -144,7 +140,7 @@ test.describe('Chores', () => {
     await page.getByLabel(/chore name/i).waitFor({ state: 'visible' });
     await page.getByLabel(/chore name/i).fill('Bonus task');
 
-    // Toggle the Bonus Chore switch (it's a Switch, not a checkbox)
+    // Toggle the Bonus Chore switch
     await page.getByRole('switch', { name: /bonus chore/i }).click();
 
     // Scroll submit button into view and click
@@ -152,7 +148,6 @@ test.describe('Chores', () => {
     await submitButton.scrollIntoViewIfNeeded();
     await submitButton.click();
 
-    // Should appear in bonus section (use more specific locator to avoid matching activity log)
     await expect(page.getByRole('heading', { name: 'Bonus task' })).toBeVisible({ timeout: 10000 });
     await expect(page.locator('text=/bonus chores/i')).toBeVisible({ timeout: 5000 });
   });
@@ -165,31 +160,25 @@ test.describe('Profile', () => {
   });
 
   test('can change nickname', async ({ page }) => {
-    // Click avatar button (has title="Edit profile")
     await page.getByRole('button', { name: /edit profile/i }).click();
 
-    // Wait for dialog and change nickname
     await page.getByLabel(/nickname/i).waitFor({ state: 'visible', timeout: 5000 });
     await page.getByLabel(/nickname/i).fill('NewName');
     await page.getByRole('button', { name: /save/i }).click();
 
-    // Wait for dialog to close and verify change in member strip (use exact match to avoid activity log)
     await expect(page.getByText('NewName', { exact: true })).toBeVisible({ timeout: 10000 });
   });
 
   test('can set and clear status', async ({ page }) => {
-    // Click avatar button to open profile
     await page.getByRole('button', { name: /edit profile/i }).click();
 
-    // Wait for dialog and set status
     await page.getByLabel(/status/i).waitFor({ state: 'visible', timeout: 5000 });
     await page.getByLabel(/status/i).fill('Busy testing!');
     await page.getByRole('button', { name: /save/i }).click();
 
-    // Wait for dialog to close
     await page.waitForTimeout(1500);
 
-    // Avatar should have status ring (pulsing) - check in member strip
+    // Avatar should have status ring (pulsing)
     await expect(page.locator('.animate-pulse')).toBeVisible({ timeout: 5000 });
 
     // Reopen and clear
@@ -198,10 +187,8 @@ test.describe('Profile', () => {
     await page.getByRole('button', { name: /clear/i }).click();
     await page.getByRole('button', { name: /save/i }).click();
 
-    // Wait for dialog to close
     await page.waitForTimeout(1500);
 
-    // Ring should be gone
     await expect(page.locator('.animate-pulse')).not.toBeVisible({ timeout: 5000 });
   });
 });
@@ -211,7 +198,6 @@ test.describe('Invites', () => {
     const householdName = `Invite Test ${uniqueId()}`;
     await createHousehold(page, householdName);
 
-    // Click invite button in the Family Members section
     await page.getByRole('button', { name: /invite/i }).click();
 
     // Dialog opens - should show "Invite Family Member" title
@@ -239,4 +225,3 @@ test.describe("What's New", () => {
     await expect(page.locator('text=/api:/i')).toBeVisible();
   });
 });
-

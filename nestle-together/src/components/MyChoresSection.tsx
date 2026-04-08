@@ -205,6 +205,11 @@ export function MyChoresSection({ householdId, memberId, onCompleteChore }: MyCh
                   >
                     <span className="text-muted-foreground line-through">
                       {chore.displayName}
+                      {chore.completedByName && (
+                        <span className="ml-2 text-xs not-line-through text-muted-foreground/70">
+                          ✓ {chore.completedByName}
+                        </span>
+                      )}
                     </span>
                     <span className="text-xs text-muted-foreground">
                       {chore.completedAt instanceof Date 

@@ -44,6 +44,10 @@ export async function fetchChores(householdId: string): Promise<Chore[]> {
       lastCompletedBy: c.lastCompletedBy as string | undefined,
       memberCompletions: c.memberCompletions as MemberCompletion[] | undefined,
       isOptional: c.isOptional as boolean | undefined,
+      isRequired: c.isRequired as boolean | undefined,
+      missedDeduction: c.missedDeduction as number | undefined,
+      deductionRate: c.deductionRate as number | undefined,
+      bonusRate: c.bonusRate as number | undefined,
     };
   });
 }
@@ -70,7 +74,14 @@ export async function completeChore(
 ): Promise<{ completedAt: string; completedBy: string }> {
   const body: Record<string, unknown> = { memberId };
   if (completedAt) {
-    body.completedAt = completedAt.toISOString();
+    // Set to noon UTC to avoid timezone date shifts
+    const noonUtc = new Date(Date.UTC(
+      completedAt.getFullYear(),
+      completedAt.getMonth(),
+      completedAt.getDate(),
+      12, 0, 0
+    ));
+    body.completedAt = noonUtc.toISOString();
   }
 
   const response = await fetch(
@@ -204,4 +215,30 @@ export async function fetchOverdueChores(
 
   const data = await response.json();
   return data.memberOverdue || [];
+}
+
+export interface UpdateChorePayload {
+  displayName: string;
+  description: string;
+  frequency: { type: string; days?: string[]; intervalDays?: number } | null;
+  isOptional: boolean;
+  startDate?: string;
+  isRequired: boolean;
+  missedDeduction: number;
+}
+
+export async function updateChore(
+  householdId: string,
+  choreId: string,
+  payload: UpdateChorePayload
+): Promise<boolean> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/households/${householdId}/chores/${choreId}`,
+    {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    }
+  );
+  return response.ok;
 }

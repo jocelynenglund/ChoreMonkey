@@ -1,185 +1,185 @@
 {
-  "generated": "2026-03-11T12:20:29.551Z",
+  "generated": "2026-04-03T08:38:40.379Z",
   "commits": [
     {
-      "hash": "e4d4da4547ea0e218c4aa60fe6ac146cf6ddeca6",
-      "shortHash": "e4d4da4",
-      "message": "fix: DI lifetime mismatch - make IEventSessionFactory scoped",
-      "date": "2026-03-09",
+      "hash": "d5c89540d8e809a8f19ae55a7a2679d20227f0b5",
+      "shortHash": "d5c8954",
+      "message": "refactor: step 5 — settings sheet + pin management in admin",
+      "date": "2026-04-03",
       "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "DI lifetime mismatch - make IEventSessionFactory scoped"
+      "type": "refactor",
+      "displayMessage": "Step 5 — settings sheet + pin management in admin"
     },
     {
-      "hash": "5d6a1f257fd242b5cb50af68e3473d2191d0982c",
-      "shortHash": "5d6a1f2",
-      "message": "ci: run full stack locally for E2E tests",
-      "date": "2026-03-09",
+      "hash": "824404d1a75968a09fb9059c82c8a15df07ace3c",
+      "shortHash": "824404d",
+      "message": "refactor: step 5 — settings sheet, pin management in admin, dead code removed",
+      "date": "2026-04-03",
       "author": "ItsyBOT",
+      "type": "refactor",
+      "displayMessage": "Step 5 — settings sheet, pin management in admin, dead code removed"
+    },
+    {
+      "hash": "0bb305749c9abb7d9d2d39e67983ce4c464cc126",
+      "shortHash": "0bb3057",
+      "message": "refactor: steps 2+3+4 — hooks, tabs, admin route",
+      "date": "2026-04-03",
+      "author": "ItsyBOT",
+      "type": "refactor",
+      "displayMessage": "Steps 2+3+4 — hooks, tabs, admin route"
+    },
+    {
+      "hash": "ae03b65cf35941141575ae303d3798a42fc37036",
+      "shortHash": "ae03b65",
+      "message": "fix: period ended check uses selected period, not current period",
+      "date": "2026-04-03",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Period ended check uses selected period, not current period"
+    },
+    {
+      "hash": "110a6e3e577c5f238847f0bbdf1c954e04dda8a2",
+      "shortHash": "110a6e3",
+      "message": "feat: period selector for close/view payslips",
+      "date": "2026-04-03",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Period selector for close/view payslips"
+    },
+    {
+      "hash": "9e7503f266fb5c8bbc324a645fb1a8507307d3f7",
+      "shortHash": "9e7503f",
+      "message": "fix: prevent closing a period that hasn't ended yet",
+      "date": "2026-04-03",
+      "author": "ItsyBOT",
+      "type": "fix",
+      "displayMessage": "Prevent closing a period that hasn't ended yet"
+    },
+    {
+      "hash": "86cf43e56d4ed31d6f60dfcf0ee04a27752080df",
+      "shortHash": "86cf43e",
+      "message": "refactor: extract useHouseholdData + useChoreActions hooks",
+      "date": "2026-04-03",
+      "author": "ItsyBOT",
+      "type": "refactor",
+      "displayMessage": "Extract useHouseholdData + useChoreActions hooks"
+    },
+    {
+      "hash": "cc33021c87eec45d52896401752eec409eb61eaf",
+      "shortHash": "cc33021",
+      "message": "refactor: swap SalaryManagement for SalaryAdmin — enables payslip history",
+      "date": "2026-04-03",
+      "author": "ItsyBOT",
+      "type": "refactor",
+      "displayMessage": "Swap SalaryManagement for SalaryAdmin — enables payslip history"
+    },
+    {
+      "hash": "078b73036d6e80db67bece4101323a592cbb8523",
+      "shortHash": "078b730",
+      "message": "Questions answered",
+      "date": "2026-04-03",
+      "author": "Jocelyn Englund 🍜",
       "type": "update",
-      "displayMessage": "Ci: run full stack locally for E2E tests"
+      "displayMessage": "Questions answered"
     },
     {
-      "hash": "c17b5d5c67beaa1afb84169fe3dae0d62f217ad3",
-      "shortHash": "c17b5d5",
-      "message": "ci: switch to local preview server for E2E tests",
-      "date": "2026-03-09",
+      "hash": "5c685e826293677b46e1bddef7a989a71bd460cc",
+      "shortHash": "5c685e8",
+      "message": "feat: configurable payday — pay period is payday-based, default 25th",
+      "date": "2026-04-03",
       "author": "ItsyBOT",
-      "type": "update",
-      "displayMessage": "Ci: switch to local preview server for E2E tests"
+      "type": "feature",
+      "displayMessage": "Configurable payday — pay period is payday-based, default 25th"
     },
     {
-      "hash": "7090a12750c63a9808d6963fab1375a038295f0f",
-      "shortHash": "7090a12",
-      "message": "fix: remove 'Your Name' field from E2E tests - not in UI yet",
-      "date": "2026-03-09",
+      "hash": "a34a87663eda0dad872e25e6ecea207717850776",
+      "shortHash": "a34a876",
+      "message": "feat: vanity URLs — households accessible at /h/{slug}",
+      "date": "2026-04-02",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Vanity URLs — households accessible at /h/{slug}"
+    },
+    {
+      "hash": "73638f51651cc7154b92f836607e0b665e8d0667",
+      "shortHash": "73638f5",
+      "message": "feat: official salary slip — printable per-member payout breakdown",
+      "date": "2026-04-02",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Official salary slip — printable per-member payout breakdown"
+    },
+    {
+      "hash": "208c4983c2366f2f4cd1ca19f539ae9a7babd9ae",
+      "shortHash": "208c498",
+      "message": "fix: fast-forward RRULE cursor to current week — no more old/outdated recurring events",
+      "date": "2026-03-23",
       "author": "ItsyBOT",
       "type": "fix",
-      "displayMessage": "Remove 'Your Name' field from E2E tests - not in UI yet"
+      "displayMessage": "Fast-forward RRULE cursor to current week — no more old/outdated recurring events"
     },
     {
-      "hash": "71cd1d8057480b3178bc0ee9ef956ada86c45863",
-      "shortHash": "71cd1d8",
-      "message": "fix: make AddChoreDialog scrollable for tall content",
-      "date": "2026-03-09",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Make AddChoreDialog scrollable for tall content"
-    },
-    {
-      "hash": "c0fc36f4c615fba86623cdb0e43c876ebd7aa4a6",
-      "shortHash": "c0fc36f",
-      "message": "ci: deploy to labs before running E2E tests",
-      "date": "2026-03-09",
-      "author": "ItsyBOT",
-      "type": "update",
-      "displayMessage": "Ci: deploy to labs before running E2E tests"
-    },
-    {
-      "hash": "bf8ea4e8a6a3f4a448aa8c9c8e466688c5b07f34",
-      "shortHash": "bf8ea4e",
-      "message": "fix: E2E tests - viewport, aria-label, scroll issues",
-      "date": "2026-03-09",
+      "hash": "1e12e033222f5d782f4e85a4b70b1a0a299a9762",
+      "shortHash": "1e12e03",
+      "message": "fix: expand recurring events (RRULE) in calendar ICS parser",
+      "date": "2026-03-23",
       "author": "ItsyBOT",
       "type": "fix",
-      "displayMessage": "E2E tests - viewport, aria-label, scroll issues"
+      "displayMessage": "Expand recurring events (RRULE) in calendar ICS parser"
     },
     {
-      "hash": "b82657d729aec217c6e79dbf3c5e016160b94138",
-      "shortHash": "b82657d",
-      "message": "fix: E2E tests - correct selectors and add waits",
-      "date": "2026-03-09",
+      "hash": "34e4dae6531f0ca9d9e13174611e8f12d93fd47a",
+      "shortHash": "34e4dae",
+      "message": "fix: add ninjafredde.com to CORS allowed origins",
+      "date": "2026-03-23",
       "author": "ItsyBOT",
       "type": "feature",
-      "displayMessage": "E2E tests - correct selectors and add waits"
+      "displayMessage": "Add ninjafredde.com to CORS allowed origins"
     },
     {
-      "hash": "14429522e1a41d195f846c5bf94afd408baa37a2",
-      "shortHash": "1442952",
-      "message": "fix: add missing 'Your Name' field in E2E test helper",
-      "date": "2026-03-08",
+      "hash": "c6ed702b6a1ad561e4e4d34bfadbb3e60fcc84c1",
+      "shortHash": "c6ed702",
+      "message": "feat: family-quest calendar + victories endpoints (#35)",
+      "date": "2026-03-23",
       "author": "ItsyBOT",
       "type": "feature",
-      "displayMessage": "Add missing 'Your Name' field in E2E test helper"
+      "displayMessage": "Family-quest calendar + victories endpoints (#35)"
     },
     {
-      "hash": "ce83879c9487285ebd3528a12769befa743e3564",
-      "shortHash": "ce83879",
-      "message": "Fix E2E tests - match 2-step form, add waits, fix PinInput and logout access",
-      "date": "2026-03-08",
-      "author": "copilot-swe-agent[bot]",
+      "hash": "7dea88a1f5462158f3d21dab3ee549f7e58798fc",
+      "shortHash": "7dea88a",
+      "message": "feat: add family-quest/victories endpoint + status in party (#34)",
+      "date": "2026-03-23",
+      "author": "ItsyBOT",
       "type": "feature",
-      "displayMessage": "Fix E2E tests - match 2-step form, add waits, fix PinInput and logout access"
+      "displayMessage": "Add family-quest/victories endpoint + status in party (#34)"
     },
     {
-      "hash": "cd929e0c7ac848f4f201b6b683e344e4d2220068",
-      "shortHash": "cd929e0",
-      "message": "Initial plan",
-      "date": "2026-03-08",
-      "author": "copilot-swe-agent[bot]",
-      "type": "update",
-      "displayMessage": "Initial plan"
+      "hash": "b7e25967781333cfbfd79752b860715f9d09acb4",
+      "shortHash": "b7e2596",
+      "message": "feat: add status field to HeroDto in party endpoint (#33)",
+      "date": "2026-03-23",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Add status field to HeroDto in party endpoint (#33)"
     },
     {
-      "hash": "b678bb9dec751f15f544790ec4440ad2a853ae19",
-      "shortHash": "b678bb9",
-      "message": "fix: disable rate limiting in Testing environment",
-      "date": "2026-03-07",
+      "hash": "c3a26e08569980d64477db7bd41bc6329a5bae0b",
+      "shortHash": "c3a26e0",
+      "message": "fix: add labs.ninjafredde.com to CORS allowed origins (#32)",
+      "date": "2026-03-23",
+      "author": "ItsyBOT",
+      "type": "feature",
+      "displayMessage": "Add labs.ninjafredde.com to CORS allowed origins (#32)"
+    },
+    {
+      "hash": "2316e48daf7581d2243b25eaad02f6a09622bee4",
+      "shortHash": "2316e48",
+      "message": "fix: increase e2e timeouts for Azure cold starts (#31)",
+      "date": "2026-03-23",
       "author": "ItsyBOT",
       "type": "fix",
-      "displayMessage": "Disable rate limiting in Testing environment"
-    },
-    {
-      "hash": "e1584465ea6531640466758c8a363d2058937a68",
-      "shortHash": "e158446",
-      "message": "Add debug stats endpoint",
-      "date": "2026-03-07",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Add debug stats endpoint"
-    },
-    {
-      "hash": "c0e51b57c329578159e06008c210d6a082d716d3",
-      "shortHash": "c0e51b5",
-      "message": "debug: Add path info to stats endpoint",
-      "date": "2026-02-18",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Debug: Add path info to stats endpoint"
-    },
-    {
-      "hash": "c654c625acf52c09d62c2763435eac50b69dbe34",
-      "shortHash": "c654c62",
-      "message": "debug: Add path info to stats endpoint",
-      "date": "2026-02-18",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Debug: Add path info to stats endpoint"
-    },
-    {
-      "hash": "a3923c1fe38da505b8545c77d48a6a3ec720d4fd",
-      "shortHash": "a3923c1",
-      "message": "feat: Rate limiting for auth endpoints (#22)",
-      "date": "2026-02-18",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Rate limiting for auth endpoints (#22)"
-    },
-    {
-      "hash": "d14258e680c8b6dca3442111965f1cbb56794498",
-      "shortHash": "d14258e",
-      "message": "feat: Add platform stats endpoint (GET /api/stats)",
-      "date": "2026-02-18",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Add platform stats endpoint (GET /api/stats)"
-    },
-    {
-      "hash": "a732616c4eedb7cd8c5059f54a7a4055284f4aee",
-      "shortHash": "a732616",
-      "message": "fix: disable rate limiting in development/test mode",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "fix",
-      "displayMessage": "Disable rate limiting in development/test mode"
-    },
-    {
-      "hash": "841cda2bbefeb668c3896f7f7880f8d534d3114e",
-      "shortHash": "841cda2",
-      "message": "feat: add rate limiting for auth endpoints",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Add rate limiting for auth endpoints"
-    },
-    {
-      "hash": "cc0bcfb01a9f7778ec6ae86a8d24aa712b44cc27",
-      "shortHash": "cc0bcfb",
-      "message": "Revert \"feat: add time-travel support (frontend)\"",
-      "date": "2026-02-15",
-      "author": "ItsyBOT",
-      "type": "feature",
-      "displayMessage": "Revert \"feat: add time-travel support (frontend)\""
+      "displayMessage": "Increase e2e timeouts for Azure cold starts (#31)"
     }
   ]
 }

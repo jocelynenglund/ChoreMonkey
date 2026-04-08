@@ -2,24 +2,23 @@ import { defineConfig, devices } from '@playwright/test';
 
 const baseURL = process.env.E2E_BASE_URL || 'http://localhost:5173';
 const isLocalPreview = baseURL.includes('localhost:4173');
-const isLocalDev = baseURL.includes('localhost:5173');
 const isExternal = !baseURL.includes('localhost');
+
+// When running against staging (Azure Free tier), the API cold-starts can add 20-30s.
+const isStagingCI = isExternal && !!process.env.CI;
 
 // Determine webServer config based on target
 function getWebServer() {
   if (isExternal) {
-    // Testing against external URL (e.g., labs.itsybit.se) - no local server
     return undefined;
   }
   if (isLocalPreview) {
-    // CI: serve built files with vite preview
     return {
       command: 'npm run preview',
       url: 'http://localhost:4173',
       reuseExistingServer: !process.env.CI,
     };
   }
-  // Local dev: use vite dev server
   return {
     command: 'npm run dev',
     url: 'http://localhost:5173',
@@ -34,11 +33,14 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
-  
+  timeout: isStagingCI ? 60000 : 30000,
+
   use: {
     baseURL,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
+    actionTimeout: isStagingCI ? 20000 : 5000,
+    navigationTimeout: isStagingCI ? 45000 : 15000,
   },
 
   projects: [

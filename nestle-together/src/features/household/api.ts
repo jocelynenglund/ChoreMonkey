@@ -1,4 +1,4 @@
-import type { Household, AccessResponse, CreateHouseholdRequest, CreateHouseholdResponse } from './types';
+import type { Household, AccessResponse, CreateHouseholdRequest, CreateHouseholdResponse, SetSlugResponse, HouseholdBySlugResponse } from './types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7422';
 
@@ -43,5 +43,38 @@ export async function getHousehold(householdId: string): Promise<Household | nul
     name: data.householdName || data.name || 'My Household',
     pinCode: '',
     createdAt: data.createdAt ? new Date(data.createdAt) : new Date(),
+    slug: data.slug || undefined,
   };
+}
+
+export async function setHouseholdSlug(
+  householdId: string,
+  slug: string,
+  adminPin: number
+): Promise<SetSlugResponse> {
+  const response = await fetch(`${API_BASE_URL}/api/households/${householdId}/slug`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Pin-Code': adminPin.toString(),
+    },
+    body: JSON.stringify({ slug }),
+  });
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({ error: 'Failed to set slug' }));
+    throw new Error(data.error || 'Failed to set slug');
+  }
+
+  return response.json();
+}
+
+export async function getHouseholdBySlug(slug: string): Promise<HouseholdBySlugResponse | null> {
+  const response = await fetch(`${API_BASE_URL}/api/h/${slug}`);
+
+  if (!response.ok) {
+    return null;
+  }
+
+  return response.json();
 }

@@ -21,7 +21,11 @@ public record ChoreDto(
     DateTime? LastCompletedAt = null,
     Guid? LastCompletedBy = null,
     List<MemberCompletionDto>? MemberCompletions = null,
-    bool IsOptional = false);
+    bool IsOptional = false,
+    bool IsRequired = true,
+    decimal MissedDeduction = 10m,
+    decimal? DeductionRate = null,
+    decimal? BonusRate = null);
 
 public record MemberCompletionDto(
     Guid MemberId,
@@ -48,9 +52,16 @@ internal class Handler(IEventStore store)
     {
         var streamId = ChoreAggregate.StreamId(request.HouseholdId);
         var householdStreamId = HouseholdAggregate.StreamId(request.HouseholdId);
+        var salaryStreamId = SalaryAggregate.StreamId(request.HouseholdId);
         
         var events = await store.FetchEventsAsync(streamId);
         var householdEvents = await store.FetchEventsAsync(householdStreamId);
+        var salaryEvents = await store.FetchEventsAsync(salaryStreamId);
+        
+        // Get latest rates for each chore from salary stream
+        var choreRates = salaryEvents.OfType<ChoreRatesSet>()
+            .GroupBy(e => e.ChoreId)
+            .ToDictionary(g => g.Key, g => g.Last());
         
         var today = DateTime.UtcNow.Date;
         var weekStart = GetMondayOfWeek(today);
@@ -67,7 +78,17 @@ internal class Handler(IEventStore store)
             .ToHashSet();
         var createdChores = events.OfType<ChoreCreated>()
             .Where(c => !deletedChoreIds.Contains(c.ChoreId))
-            .ToList();
+            .ToDictionary(e => e.ChoreId);
+        foreach (var update in events.OfType<ChoreUpdated>())
+            if (createdChores.ContainsKey(update.ChoreId))
+                createdChores[update.ChoreId] = createdChores[update.ChoreId] with
+                {
+                    DisplayName = update.DisplayName, Description = update.Description,
+                    Frequency = update.Frequency, IsOptional = update.IsOptional,
+                    StartDate = update.StartDate, IsRequired = update.IsRequired,
+                    MissedDeduction = update.MissedDeduction,
+                };
+        var createdChoresList = createdChores.Values.ToList();
         
         // Get latest assignment for each chore
         var assignments = events.OfType<ChoreAssigned>()
@@ -79,11 +100,12 @@ internal class Handler(IEventStore store)
             .GroupBy(e => e.ChoreId)
             .ToDictionary(g => g.Key, g => g.ToList());
 
-        var chores = createdChores
+        var chores = createdChoresList
             .Select(e => {
                 var assignment = assignments.GetValueOrDefault(e.ChoreId);
                 var choreCompletions = completionsByChore.GetValueOrDefault(e.ChoreId) ?? new List<ChoreCompleted>();
                 var lastCompletion = choreCompletions.OrderByDescending(c => c.CompletedAt).FirstOrDefault();
+                var rates = choreRates.GetValueOrDefault(e.ChoreId);
                 
                 var frequency = e.Frequency != null 
                     ? new FrequencyDto(e.Frequency.Type, e.Frequency.Days, e.Frequency.IntervalDays)
@@ -125,7 +147,11 @@ internal class Handler(IEventStore store)
                     lastCompletion?.CompletedAt,
                     lastCompletion?.CompletedByMemberId,
                     memberCompletions,
-                    e.IsOptional);
+                    e.IsOptional,
+                    e.IsRequired,
+                    e.MissedDeduction,
+                    rates?.DeductionRate,
+                    rates?.BonusRate);
             })
             .ToList();
 

@@ -10,6 +10,8 @@ using ChoreMonkey.Core.Feature.Household.Commands.SetAdminPin;
 using ChoreMonkey.Core.Feature.Household.Commands.SetMemberPin;
 using ChoreMonkey.Core.Feature.Household.Queries.HouseholdName;
 using ChoreMonkey.Core.Feature.Household.Queries.AccessHousehold;
+using ChoreMonkey.Core.Feature.Household.Commands.SetHouseholdSlug;
+using ChoreMonkey.Core.Feature.Household.Queries.GetHouseholdBySlug;
 
 // Members module
 using ChoreMonkey.Core.Feature.Members.Commands.JoinHousehold;
@@ -28,6 +30,7 @@ using ChoreMonkey.Core.Feature.Chores.Commands.AddChore;
 using ChoreMonkey.Core.Feature.Chores.Commands.AssignChore;
 using ChoreMonkey.Core.Feature.Chores.Commands.CompleteChore;
 using ChoreMonkey.Core.Feature.Chores.Commands.DeleteChore;
+using ChoreMonkey.Core.Feature.Chores.Commands.UpdateChore;
 using ChoreMonkey.Core.Feature.Chores.Commands.AcknowledgeMissed;
 using ChoreMonkey.Core.Feature.Chores.Queries.ChoreList;
 using ChoreMonkey.Core.Feature.Chores.Queries.ChoreHistory;
@@ -40,6 +43,23 @@ using ChoreMonkey.Core.Feature.Activity.Queries.TeamOverview;
 
 // Stats module
 using ChoreMonkey.Core.Feature.Stats.Queries.PlatformStats;
+
+// FamilyQuest module
+using ChoreMonkey.Core.Feature.FamilyQuest.Queries.Party;
+using ChoreMonkey.Core.Feature.FamilyQuest.Queries.Quests;
+using ChoreMonkey.Core.Feature.FamilyQuest.Queries.XP;
+using ChoreMonkey.Core.Feature.FamilyQuest.Queries.Victories;
+using ChoreMonkey.Core.Feature.FamilyQuest.Queries.Calendar;
+
+// Salary module
+using ChoreMonkey.Core.Feature.Salary.Commands.SetMemberSalary;
+using ChoreMonkey.Core.Feature.Salary.Commands.SetChoreRates;
+using ChoreMonkey.Core.Feature.Salary.Commands.ClosePeriod;
+using ChoreMonkey.Core.Feature.Salary.Commands.SetPayday;
+using ChoreMonkey.Core.Feature.Salary.Queries.GetCurrentPeriod;
+using ChoreMonkey.Core.Feature.Salary.Queries.GetPayoutHistory;
+using ChoreMonkey.Core.Feature.Salary.Queries.GetOfficialSalarySlip;
+using ChoreMonkey.Core.Feature.Salary.Queries.GetAvailablePeriods;
 
 using ChoreMonkey.Core.Infrastructure;
 using ChoreMonkey.Core.Infrastructure.SignalR;
@@ -102,6 +122,8 @@ public static class Initialization
         services.AddScoped<Feature.Household.Commands.SetMemberPin.Handler>();
         services.AddScoped<Feature.Household.Queries.HouseholdName.Handler>();
         services.AddScoped<Feature.Household.Queries.AccessHousehold.Handler>();
+        services.AddScoped<Feature.Household.Commands.SetHouseholdSlug.Handler>();
+        services.AddScoped<Feature.Household.Queries.GetHouseholdBySlug.Handler>();
 
         // Members module
         services.AddScoped<Feature.Members.Commands.JoinHousehold.Handler>();
@@ -120,6 +142,7 @@ public static class Initialization
         services.AddScoped<Feature.Chores.Commands.AssignChore.Handler>();
         services.AddScoped<Feature.Chores.Commands.CompleteChore.Handler>();
         services.AddScoped<Feature.Chores.Commands.DeleteChore.Handler>();
+        services.AddScoped<Feature.Chores.Commands.UpdateChore.Handler>();
         services.AddScoped<Feature.Chores.Commands.AcknowledgeMissed.Handler>();
         services.AddScoped<Feature.Chores.Queries.ChoreList.Handler>();
         services.AddScoped<Feature.Chores.Queries.ChoreHistory.Handler>();
@@ -132,6 +155,24 @@ public static class Initialization
 
         // Stats module
         services.AddScoped<Feature.Stats.Queries.PlatformStats.Handler>();
+
+        // FamilyQuest module
+        services.AddScoped<Feature.FamilyQuest.Queries.Party.Handler>();
+        services.AddScoped<Feature.FamilyQuest.Queries.Quests.Handler>();
+        services.AddScoped<Feature.FamilyQuest.Queries.XP.Handler>();
+        services.AddScoped<Feature.FamilyQuest.Queries.Victories.Handler>();
+        services.AddScoped<Feature.FamilyQuest.Queries.Calendar.Handler>();
+        services.AddHttpClient<Feature.FamilyQuest.Queries.Calendar.Handler>();
+
+        // Salary module
+        services.AddScoped<Feature.Salary.Commands.SetMemberSalary.Handler>();
+        services.AddScoped<Feature.Salary.Commands.SetChoreRates.Handler>();
+        services.AddScoped<Feature.Salary.Commands.ClosePeriod.Handler>();
+        services.AddScoped<Feature.Salary.Commands.SetPayday.Handler>();
+        services.AddScoped<Feature.Salary.Queries.GetCurrentPeriod.Handler>();
+        services.AddScoped<Feature.Salary.Queries.GetPayoutHistory.Handler>();
+        services.AddScoped<Feature.Salary.Queries.GetOfficialSalarySlip.Handler>();
+        services.AddScoped<Feature.Salary.Queries.GetAvailablePeriods.Handler>();
 
         return services;
     }
@@ -147,6 +188,8 @@ public static class Initialization
         SetMemberPinEndpoint.Map(householdEndpoints);
         HouseholdNameEndpoint.Map(householdEndpoints);
         AccessHouseholdEndpoint.Map(householdEndpoints);
+        SetHouseholdSlugEndpoint.Map(householdEndpoints);
+        GetHouseholdBySlugEndpoint.Map(householdEndpoints);
 
         // Members module
         JoinHouseholdEndpoint.Map(householdEndpoints);
@@ -164,6 +207,7 @@ public static class Initialization
         AssignChoreEndpoint.Map(householdEndpoints);
         CompleteChoreEndpoint.Map(householdEndpoints);
         DeleteChoreEndpoint.Map(householdEndpoints);
+        UpdateChoreEndpoint.Map(householdEndpoints);
         AcknowledgeMissedEndpoint.Map(householdEndpoints);
         ChoreListEndpoint.Map(householdEndpoints);
         ChoreHistoryEndpoint.Map(householdEndpoints);
@@ -176,6 +220,23 @@ public static class Initialization
 
         // Stats module
         PlatformStatsEndpoint.Map(householdEndpoints);
+
+        // FamilyQuest module
+        PartyEndpoint.Map(householdEndpoints);
+        QuestsEndpoint.Map(householdEndpoints);
+        XpEndpoint.Map(householdEndpoints);
+        VictoriesEndpoint.Map(householdEndpoints);
+        CalendarEndpoint.Map(householdEndpoints);
+
+        // Salary module
+        SetMemberSalaryEndpoint.Map(householdEndpoints);
+        SetChoreRatesEndpoint.Map(householdEndpoints);
+        ClosePeriodEndpoint.Map(householdEndpoints);
+        SetPaydayEndpoint.Map(householdEndpoints);
+        GetCurrentPeriodEndpoint.Map(householdEndpoints);
+        GetPayoutHistoryEndpoint.Map(householdEndpoints);
+        GetOfficialSalarySlipEndpoint.Map(householdEndpoints);
+        GetAvailablePeriodsEndpoint.Map(householdEndpoints);
 
         return app;
     }

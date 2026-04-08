@@ -26,6 +26,10 @@ export interface Chore {
   lastCompletedBy?: string;
   memberCompletions?: MemberCompletion[];
   isOptional?: boolean;
+  isRequired?: boolean;
+  missedDeduction?: number;
+  deductionRate?: number;
+  bonusRate?: number;
 }
 
 export interface ChoreCompletion {
@@ -34,11 +38,14 @@ export interface ChoreCompletion {
 }
 
 export interface AddChoreRequest {
+  choreId?: string;  // Client-generated for idempotency
   displayName: string;
   description: string;
   frequency?: ChoreFrequency;
   isOptional?: boolean;
   startDate?: string;
+  isRequired?: boolean;
+  missedDeduction?: number;
 }
 
 export interface AssignChoreRequest {
@@ -67,6 +74,7 @@ export interface MyCompletedChore {
   choreId: string;
   displayName: string;
   completedAt: Date;
+  completedByName?: string;  // set when someone else did a shared chore
 }
 
 export interface MyChoresResponse {

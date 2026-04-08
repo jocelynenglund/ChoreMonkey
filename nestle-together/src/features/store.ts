@@ -52,7 +52,7 @@ interface AppState {
   
   // Chores
   getHouseholdChores: (householdId: string) => Promise<Chore[]>;
-  addChore: (householdId: string, displayName: string, description: string, frequency?: ChoreFrequency, isOptional?: boolean, startDate?: Date) => Promise<Chore | null>;
+  addChore: (householdId: string, displayName: string, description: string, frequency?: ChoreFrequency, isOptional?: boolean, startDate?: Date, isRequired?: boolean, missedDeduction?: number) => Promise<Chore | null>;
   completeChore: (householdId: string, choreId: string, memberId: string, completedAt?: Date) => Promise<void>;
   assignChore: (householdId: string, choreId: string, memberIds?: string[], assignToAll?: boolean) => Promise<void>;
   deleteChore: (householdId: string, choreId: string) => Promise<boolean>;
@@ -66,7 +66,7 @@ interface AppState {
   fetchOverdueChores: (householdId: string) => Promise<MemberOverdue[]>;
   
   // Activity
-  fetchActivityTimeline: (householdId: string, limit?: number) => Promise<Activity[]>;
+  fetchActivityTimeline: (householdId: string) => Promise<Activity[]>;
   
   // Team Overview (admin only)
   fetchTeamOverview: (householdId: string) => Promise<MemberOverview[]>;
@@ -230,19 +230,23 @@ export const useAppStore = create<AppState>()(
 
       getHouseholdChores: (householdId) => choresApi.fetchChores(householdId),
 
-      addChore: async (householdId, displayName, description, frequency, isOptional, startDate) => {
+      addChore: async (householdId, displayName, description, frequency, isOptional, startDate, isRequired = true, missedDeduction = 10) => {
         try {
+          const choreId = crypto.randomUUID();
           await choresApi.addChore(householdId, {
+            choreId,
             displayName,
             description,
             frequency,
             isOptional,
             startDate: startDate?.toISOString(),
+            isRequired,
+            missedDeduction,
           });
 
           // Return a minimal chore object - full data comes from refresh
           return {
-            id: crypto.randomUUID(),
+            id: choreId,
             householdId,
             displayName,
             description,
@@ -250,6 +254,8 @@ export const useAppStore = create<AppState>()(
             createdAt: new Date(),
             frequency: frequency || { type: 'once' },
             isOptional,
+            isRequired,
+            missedDeduction,
           };
         } catch {
           return null;
@@ -290,12 +296,12 @@ export const useAppStore = create<AppState>()(
         return choresApi.fetchOverdueChores(householdId, parseInt(currentPinCode, 10));
       },
 
-      fetchActivityTimeline: (householdId, limit) =>
-        activityApi.fetchActivityTimeline(householdId, limit),
+      fetchActivityTimeline: (householdId) =>
+        activityApi.fetchActivityTimeline(householdId),
 
       fetchTeamOverview: async (householdId) => {
-        const { currentPinCode, isAdmin } = get();
-        if (!isAdmin || !currentPinCode) return [];
+        const { currentPinCode } = get();
+        if (!currentPinCode) return [];
         return activityApi.fetchTeamOverview(householdId, parseInt(currentPinCode, 10));
       },
     }),

@@ -1,0 +1,196 @@
+.salary-slip-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.salary-slip {
+  background: #fff;
+  max-width: 520px;
+  width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.slip-content {
+  padding: 2rem;
+}
+
+/* Header */
+.slip-header {
+  text-align: center;
+  border-bottom: 2px solid #333;
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.slip-header h2 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.25rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.slip-period {
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.slip-member {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 1rem 0 0 0;
+}
+
+/* Tables */
+.slip-section {
+  margin-bottom: 1.25rem;
+}
+
+.slip-section h3 {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #666;
+  margin: 0 0 0.5rem 0;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 0.25rem;
+}
+
+.slip-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.slip-table th {
+  text-align: left;
+  font-weight: 500;
+  color: #888;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.slip-table th:last-child,
+.slip-table td:last-child {
+  text-align: right;
+}
+
+.slip-table td {
+  padding: 0.35rem 0.5rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.slip-table .chore-name {
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.empty-note {
+  font-size: 0.8rem;
+  color: #999;
+  font-style: italic;
+  padding: 0.25rem 0;
+}
+
+/* Summary */
+.slip-summary {
+  border-top: 2px solid #333;
+  padding-top: 1rem;
+  margin-top: 1rem;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.3rem 0;
+  font-size: 0.9rem;
+}
+
+.summary-row.deductions {
+  color: #c62828;
+}
+
+.summary-row.bonuses {
+  color: #2e7d32;
+}
+
+.summary-row.net-pay {
+  font-size: 1.25rem;
+  font-weight: 700;
+  border-top: 1px solid #e0e0e0;
+  padding-top: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+/* Actions */
+.slip-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  padding: 1rem 2rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.slip-actions button {
+  padding: 0.5rem 1rem;
+  border: 1px solid #e0e0e0;
+  background: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.slip-actions .print-btn {
+  background: #1976d2;
+  color: white;
+  border-color: #1976d2;
+  font-weight: 600;
+}
+
+.slip-actions .print-btn:hover {
+  background: #1565c0;
+}
+
+/* Print styles */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .salary-slip-overlay,
+  .salary-slip,
+  .salary-slip * {
+    visibility: visible;
+  }
+
+  .salary-slip-overlay {
+    position: absolute;
+    inset: 0;
+    background: none;
+    padding: 0;
+  }
+
+  .salary-slip {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    max-width: 100%;
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  .slip-actions {
+    display: none;
+  }
+}
