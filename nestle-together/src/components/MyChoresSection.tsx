@@ -46,7 +46,8 @@ export function MyChoresSection({ householdId, memberId, onCompleteChore }: MyCh
 
   useEffect(() => {
     loadMyChores();
-  }, [householdId, memberId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [householdId, memberId, fetchMyChores]);
 
   const handleDidntDo = async (choreId: string, periodKey: string, e: React.MouseEvent) => {
     e.stopPropagation(); // Don't trigger the complete action

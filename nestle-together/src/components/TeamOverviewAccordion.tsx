@@ -41,11 +41,6 @@ export function TeamOverviewAccordion({ householdId, onAssignmentChange, refresh
   const [isSaving, setIsSaving] = useState(false);
   
   const { fetchTeamOverview, members, isAdmin, assignChore } = useAppStore();
-  
-  // Only admins can see team overview
-  if (!isAdmin) {
-    return null;
-  }
 
   const loadTeam = async () => {
     setIsLoading(true);
@@ -55,8 +50,15 @@ export function TeamOverviewAccordion({ householdId, onAssignmentChange, refresh
   };
 
   useEffect(() => {
+    if (!isAdmin) return;
     loadTeam();
-  }, [householdId, fetchTeamOverview, refreshKey]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [householdId, fetchTeamOverview, refreshKey, isAdmin]);
+
+  // Only admins can see team overview
+  if (!isAdmin) {
+    return null;
+  }
 
   const handleEditChore = (chore: ChoreStatus) => {
     // Find all members currently assigned to this chore

@@ -40,6 +40,7 @@ export function SalaryAdmin() {
 
   useEffect(() => {
     loadAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentHouseholdId]);
 
   async function loadAll() {
@@ -53,8 +54,7 @@ export function SalaryAdmin() {
     setPeriodData(currentData);
     setAvailablePeriods(periodsData);
     setSelectedPeriodIdx(0); // default to most recent
-    const periods = Array.isArray(historyData) ? historyData : (historyData as any)?.periods ?? [];
-    setHistory(periods);
+    setHistory(historyData);
     setLoading(false);
   }
 

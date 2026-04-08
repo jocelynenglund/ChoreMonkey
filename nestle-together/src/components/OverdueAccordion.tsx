@@ -19,13 +19,9 @@ export function OverdueAccordion({ householdId }: OverdueAccordionProps) {
   const [memberOverdue, setMemberOverdue] = useState<MemberOverdue[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { fetchOverdueChores, members, isAdmin } = useHouseholdStore();
-  
-  // Only admins can see overdue chores
-  if (!isAdmin) {
-    return null;
-  }
 
   useEffect(() => {
+    if (!isAdmin) return;
     const loadOverdue = async () => {
       setIsLoading(true);
       const data = await fetchOverdueChores(householdId);
@@ -33,7 +29,12 @@ export function OverdueAccordion({ householdId }: OverdueAccordionProps) {
       setIsLoading(false);
     };
     loadOverdue();
-  }, [householdId, fetchOverdueChores]);
+  }, [householdId, fetchOverdueChores, isAdmin]);
+
+  // Only admins can see overdue chores
+  if (!isAdmin) {
+    return null;
+  }
 
   if (isLoading) {
     return (

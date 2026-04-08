@@ -114,7 +114,8 @@ export async function getPayoutHistory(
     return [];
   }
 
-  return response.json();
+  const data: PeriodPayout[] | { periods: PeriodPayout[] } = await response.json();
+  return Array.isArray(data) ? data : data.periods ?? [];
 }
 
 // ============ Official Salary Slip ============

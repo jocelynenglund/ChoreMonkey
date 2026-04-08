@@ -44,7 +44,8 @@ export function ChoreManagement() {
 
   useEffect(() => {
     loadData();
-  }, [currentHouseholdId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentHouseholdId, getHouseholdChores, fetchHouseholdMembers]);
 
   async function loadData() {
     if (!currentHouseholdId) return;
