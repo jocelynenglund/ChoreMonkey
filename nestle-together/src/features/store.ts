@@ -300,8 +300,8 @@ export const useAppStore = create<AppState>()(
         activityApi.fetchActivityTimeline(householdId),
 
       fetchTeamOverview: async (householdId) => {
-        const { currentPinCode, isAdmin } = get();
-        if (!isAdmin || !currentPinCode) return [];
+        const { currentPinCode } = get();
+        if (!currentPinCode) return [];
         return activityApi.fetchTeamOverview(householdId, parseInt(currentPinCode, 10));
       },
     }),
