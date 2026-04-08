@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Trash2, Users, DollarSign, Star, Pencil } from 'lucide-react';
-import { useHouseholdStore } from '../../store';
+import { useHouseholdStore } from '@/stores/householdStore';
 import { setChoreRates } from '../../salary/api';
 import { updateChore } from '../../chores/api';
 import type { Chore } from '../../chores/types';

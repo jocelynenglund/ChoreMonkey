@@ -205,15 +205,15 @@ export default function HouseholdDashboard() {
             <Clock className="w-5 h-5" />
             Activity
           </button>
-          {isAdmin && (
-            <Link
-              to={`/household/${id}/admin`}
-              className="flex-1 flex flex-col items-center gap-1 py-3 text-xs text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <ShieldCheck className="w-5 h-5" />
-              Admin
-            </Link>
-          )}
+          <Link
+            to={`/household/${id}/admin`}
+            className={`flex-1 flex flex-col items-center gap-1 py-3 text-xs transition-colors ${isAdmin ? 'text-muted-foreground hover:text-foreground' : 'text-muted-foreground/40 pointer-events-none'}`}
+            aria-disabled={!isAdmin}
+            tabIndex={isAdmin ? undefined : -1}
+          >
+            <ShieldCheck className="w-5 h-5" />
+            Admin
+          </Link>
         </div>
       </nav>
 

@@ -46,7 +46,10 @@ export function SettingsDialog({ householdId, currentSlug, onSlugChanged }: Sett
       setSlugMessage({ type: 'success', text: 'Saved!' });
       onSlugChanged?.(slugInput);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to save slug';
+      const raw = err instanceof Error ? err.message : '';
+      const msg = /taken|conflict|already|exist/i.test(raw)
+        ? 'That URL is already taken, please try another.'
+        : raw || 'Failed to save slug';
       setSlugMessage({ type: 'error', text: msg });
     }
     setSlugSaving(false);
@@ -55,7 +58,7 @@ export function SettingsDialog({ householdId, currentSlug, onSlugChanged }: Sett
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+        <Button variant="ghost" size="icon" aria-label="Settings" className="text-muted-foreground hover:text-foreground">
           <Settings className="w-5 h-5" />
         </Button>
       </SheetTrigger>

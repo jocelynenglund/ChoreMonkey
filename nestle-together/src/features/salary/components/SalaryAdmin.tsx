@@ -99,7 +99,14 @@ export function SalaryAdmin() {
 
   async function handleClosePeriod() {
     if (!currentHouseholdId || !selectedPeriod || selectedPeriod.isClosed) return;
-    if (!confirm('Close this period? This will finalize all salaries and cannot be undone.')) return;
+
+    const hasActivity = periodData?.members?.some(
+      (m) => m.missedChores.length > 0 || m.bonusChores.length > 0
+    );
+    const message = hasActivity
+      ? 'Close this period? This will finalize all salaries and cannot be undone.'
+      : 'No chore activity was recorded for this period — payslips will be empty. Close anyway?';
+    if (!confirm(message)) return;
 
     setClosing(true);
     try {

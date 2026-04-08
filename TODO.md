@@ -3,7 +3,7 @@ _Last updated: 2026-04-03_
 
 ## 🐛 Known Bugs / Fixes Needed
 
-- [ ] **ClosePeriod: February with no events** — closing a period that has zero chore completions works but produces empty payslips. Consider showing a warning "No activity found for this period" before closing.
+- [x] **ClosePeriod: February with no events** — closing a period that has zero chore completions works but produces empty payslips. Warning shown before closing if no activity detected. _(2026-04-08)_
 - [ ] **Available periods list may miss old periods** — `GetAvailablePeriods` walks back 24 months max and uses `HouseholdCreated` timestamp to limit. If the timestamp parsing fails (e.g. non-UTC format), periods before a certain date may not appear. Add a test for this.
 - [ ] **Duplicate PeriodClosed events** — possible to close the same period twice in quick succession (race condition). Backend now handles it gracefully but we should add an idempotency check at the command level.
 - [ ] **SignalR disabled on Azure Free tier** — WebSockets not supported. Either upgrade to Azure Basic (~13 USD/month) or switch to polling fallback. `ConnectionStatus` component shows this gracefully already.
@@ -11,7 +11,7 @@ _Last updated: 2026-04-03_
 ## 🏗️ Architecture / Tech Debt
 
 - [ ] **`src/types/household.ts` + `src/stores/householdStore.ts`** — both have TODO comments to migrate to feature-based imports. Low priority but should happen in Step 6 (folder reorganisation).
-- [ ] **`ChoreManagement.tsx` imports from `../../store`** — should import from `@/stores/householdStore` for consistency.
+- [x] **`ChoreManagement.tsx` imports from `../../store`** — fixed to import from `@/stores/householdStore`. _(2026-04-08)_
 - [ ] **`FamilyQuest` feature** — Party, XP, Quests, Victories, Calendar endpoints exist in backend but appear unused in the frontend. Confirm if this is abandoned or upcoming. Clean up or wire up.
 - [ ] **Step 6 (folder reorganisation)** — move components into feature folders (chores/, household/, salary/). Low urgency since it's cosmetic, but keeps the codebase honest.
 - [ ] **`SalaryAdmin.tsx` fallback render** — the "fallback to history" path in SalaryAdmin is a workaround for `GetAvailablePeriods` failures. Once the root cause is fixed, the fallback can be removed.
@@ -35,8 +35,8 @@ _Last updated: 2026-04-03_
 - [ ] **Chore history view** — `ChoreHistory` query exists, not exposed in UI. Could be useful in chore detail or admin view.
 - [x] **Salary: deduction multiplier display** — multipliers now pre-filled from last saved values. _(2026-04-03)_
 - [x] **Mobile: bottom tab bar safe area** — fixed with `env(safe-area-inset-bottom)` + `viewport-fit=cover`. _(2026-04-03)_
-- [ ] **Admin tab visibility** — currently only shows if `isAdmin` from store. If someone logs in as a member then the admin logs in on the same device, the tab won't appear without re-login. Consider showing tab always but gating at the route level only.
-- [ ] **Slug uniqueness error message** — when slug is already taken, the API returns an error but the message isn't very user-friendly. Improve error text.
+- [x] **Admin tab visibility** — tab always rendered; visually dimmed and non-interactive for non-admins (`pointer-events-none`, `tabIndex=-1`). Route still gates access. _(2026-04-08)_
+- [x] **Slug uniqueness error message** — maps "taken/conflict/already/exist" responses to "That URL is already taken, please try another." _(2026-04-08)_
 
 ## 🚀 Infrastructure
 
