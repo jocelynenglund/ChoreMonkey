@@ -41,11 +41,6 @@ export function TeamOverviewAccordion({ householdId, onAssignmentChange, refresh
   const [isSaving, setIsSaving] = useState(false);
   
   const { fetchTeamOverview, members, isAdmin, assignChore } = useAppStore();
-  
-  // Only admins can see team overview
-  if (!isAdmin) {
-    return null;
-  }
 
   const loadTeam = async () => {
     setIsLoading(true);
@@ -142,9 +137,11 @@ export function TeamOverviewAccordion({ householdId, onAssignmentChange, refresh
               </Badge>
             )}
           </h3>
-          <p className="text-sm text-muted-foreground mt-1">
-            Click the gear icon to reassign chores
-          </p>
+          {isAdmin && (
+            <p className="text-sm text-muted-foreground mt-1">
+              Click the gear icon to reassign chores
+            </p>
+          )}
         </div>
         <Accordion type="multiple" className="w-full">
           {teamData.map((member) => (
@@ -218,16 +215,18 @@ export function TeamOverviewAccordion({ householdId, onAssignmentChange, refresh
                               ? '✓ done'
                               : 'pending'}
                           </span>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleEditChore(chore);
-                            }}
-                            className="p-1 rounded hover:bg-black/10 transition-colors"
-                            title="Edit assignment"
-                          >
-                            <Settings2 className="h-4 w-4 text-muted-foreground" />
-                          </button>
+                          {isAdmin && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEditChore(chore);
+                              }}
+                              className="p-1 rounded hover:bg-black/10 transition-colors"
+                              title="Edit assignment"
+                            >
+                              <Settings2 className="h-4 w-4 text-muted-foreground" />
+                            </button>
+                          )}
                         </div>
                       </li>
                     ))}

@@ -18,6 +18,8 @@ public record MemberPeriodSummary(
     Guid MemberId,
     string Name,
     decimal BaseSalary,
+    decimal DeductionMultiplier,
+    decimal BonusMultiplier,
     decimal Deductions,
     decimal Bonuses,
     decimal Projected,
@@ -37,8 +39,6 @@ internal class Handler(IEventStore store, ISender mediator)
     {
         var now = DateTime.UtcNow;
         var today = now.Date;
-        var periodStart = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
-        var periodEndExclusive = periodStart.AddMonths(1); // End-exclusive for accurate boundary
 
         // Fetch all relevant streams
         var salaryStreamId = SalaryAggregate.StreamId(request.HouseholdId);
@@ -46,6 +46,13 @@ internal class Handler(IEventStore store, ISender mediator)
 
         var salaryEvents = await store.FetchEventsAsync(salaryStreamId);
         var choreEvents = await store.FetchEventsAsync(choreStreamId);
+
+        // Determine payday — use last PaydayConfigured event, default to 25
+        var paydayDay = salaryEvents
+            .OfType<PaydayConfigured>()
+            .LastOrDefault()?.PaydayDayOfMonth ?? 25;
+
+        var (periodStart, periodEnd) = GetCurrentPayPeriod(today, paydayDay);
 
         // Get active members with current nicknames (handles renames and removals)
         var memberLookup = await mediator.Send(new MemberLookupQuery(request.HouseholdId));
@@ -67,10 +74,18 @@ internal class Handler(IEventStore store, ISender mediator)
         var deletedChoreIds = choreEvents.OfType<ChoreDeleted>()
             .Select(e => e.ChoreId)
             .ToHashSet();
-        var chores = choreEvents
-            .OfType<ChoreCreated>()
+        var chores = choreEvents.OfType<ChoreCreated>()
             .Where(c => !deletedChoreIds.Contains(c.ChoreId))
             .ToDictionary(e => e.ChoreId);
+        foreach (var update in choreEvents.OfType<ChoreUpdated>())
+            if (chores.ContainsKey(update.ChoreId))
+                chores[update.ChoreId] = chores[update.ChoreId] with
+                {
+                    DisplayName = update.DisplayName, Description = update.Description,
+                    Frequency = update.Frequency, IsOptional = update.IsOptional,
+                    StartDate = update.StartDate, IsRequired = update.IsRequired,
+                    MissedDeduction = update.MissedDeduction,
+                };
 
         // Get assignments
         var assignments = choreEvents.OfType<ChoreAssigned>()
@@ -80,7 +95,7 @@ internal class Handler(IEventStore store, ISender mediator)
         // Get completions in period grouped by (chore, member)
         var completionsInPeriod = choreEvents
             .OfType<ChoreCompleted>()
-            .Where(e => e.CompletedAt >= periodStart && e.CompletedAt < periodEndExclusive)
+            .Where(e => e.CompletedAt >= periodStart && e.CompletedAt <= periodEnd)
             .GroupBy(e => (e.ChoreId, e.CompletedByMemberId))
             .ToDictionary(g => g.Key, g => g.ToList());
 
@@ -162,6 +177,8 @@ internal class Handler(IEventStore store, ISender mediator)
                 memberId,
                 activeMembers.GetValueOrDefault(memberId)?.Nickname ?? "Unknown",
                 baseSalary,
+                deductionMultiplier,
+                bonusMultiplier,
                 totalDeductions,
                 totalBonuses,
                 projected,
@@ -169,7 +186,25 @@ internal class Handler(IEventStore store, ISender mediator)
                 bonusChores));
         }
 
-        return new CurrentPeriodResponse(periodStart, periodEndExclusive.AddDays(-1), members);
+        return new CurrentPeriodResponse(periodStart, periodEnd, members);
+    }
+
+    private static (DateTime start, DateTime end) GetCurrentPayPeriod(DateTime today, int paydayDay)
+    {
+        var paydayThisMonth = new DateTime(today.Year, today.Month, paydayDay, 0, 0, 0, DateTimeKind.Utc);
+        if (today.Date <= paydayThisMonth.Date)
+        {
+            var prevMonth = paydayThisMonth.AddMonths(-1);
+            var start = new DateTime(prevMonth.Year, prevMonth.Month, paydayDay, 0, 0, 0, DateTimeKind.Utc).AddDays(1);
+            return (start, paydayThisMonth);
+        }
+        else
+        {
+            var nextMonth = paydayThisMonth.AddMonths(1);
+            var start = paydayThisMonth.AddDays(1);
+            var end = new DateTime(nextMonth.Year, nextMonth.Month, paydayDay, 0, 0, 0, DateTimeKind.Utc);
+            return (start, end);
+        }
     }
 
     private List<string> CalculateMissedInstances(

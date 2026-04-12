@@ -31,6 +31,8 @@ export interface MemberPeriodSummary {
   memberId: string;
   name: string;
   baseSalary: number;
+  deductionMultiplier: number;
+  bonusMultiplier: number;
   deductions: number;
   bonuses: number;
   projected: number;
@@ -79,6 +81,17 @@ export interface SlipBonus {
   baseRate: number;
   multiplier: number;
   amount: number;
+}
+
+export interface AvailablePeriod {
+  periodStart: string;
+  periodEnd: string;
+  isClosed: boolean;
+  periodId: string | null;
+}
+
+export interface AvailablePeriodsResponse {
+  periods: AvailablePeriod[];
 }
 
 export interface OfficialSalarySlipResponse {

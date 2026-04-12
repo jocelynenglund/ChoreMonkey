@@ -9,9 +9,9 @@ using Microsoft.AspNetCore.Routing;
 
 namespace ChoreMonkey.Core.Feature.Salary.Commands.ClosePeriod;
 
-public record ClosePeriodCommand(Guid HouseholdId, DateTime PeriodEnd);
+public record ClosePeriodCommand(Guid HouseholdId, DateTime? TargetPeriodEnd = null);
 
-public record ClosePeriodRequest(DateTime PeriodEnd);
+public record ClosePeriodRequest(DateTime? PeriodEnd = null);
 
 public record MissedChoreDto(Guid ChoreId, string ChoreName, string Period, decimal Deduction);
 public record BonusChoreDto(Guid ChoreId, string ChoreName, DateTime CompletedAt, decimal Bonus);
@@ -34,11 +34,9 @@ public record ClosePeriodResponse(
 
 internal class Handler(IEventStore store, ISender mediator)
 {
-    public async Task<ClosePeriodResponse> HandleAsync(ClosePeriodCommand request)
+    public async Task<IResult> HandleAsync(ClosePeriodCommand request)
     {
-        var periodId = Guid.NewGuid();
-        var periodEnd = request.PeriodEnd.Date;
-        var periodStart = new DateTime(periodEnd.Year, periodEnd.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+        var today = DateTime.UtcNow.Date;
 
         // Fetch all relevant streams
         var salaryStreamId = SalaryAggregate.StreamId(request.HouseholdId);
@@ -46,6 +44,41 @@ internal class Handler(IEventStore store, ISender mediator)
 
         var salaryEvents = await store.FetchEventsAsync(salaryStreamId);
         var choreEvents = await store.FetchEventsAsync(choreStreamId);
+
+        // Determine payday from configuration, default to 25
+        var paydayDay = salaryEvents
+            .OfType<PaydayConfigured>()
+            .LastOrDefault()?.PaydayDayOfMonth ?? 25;
+
+        // If a specific period end was requested, use it; otherwise default to most recent completed period
+        DateTime periodStart, periodEnd;
+        if (request.TargetPeriodEnd.HasValue)
+        {
+            periodEnd = request.TargetPeriodEnd.Value.Date;
+            var prevPayday = new DateTime(periodEnd.Year, periodEnd.Month, paydayDay, 0, 0, 0, DateTimeKind.Utc).AddMonths(-1);
+            periodStart = new DateTime(prevPayday.Year, prevPayday.Month, paydayDay, 0, 0, 0, DateTimeKind.Utc).AddDays(1);
+        }
+        else
+        {
+            (periodStart, periodEnd) = GetLastCompletedPayPeriod(today, paydayDay);
+        }
+
+        // Guard: refuse to close a period that hasn't ended yet
+        if (today < periodEnd)
+        {
+            return Results.BadRequest(new { error = $"Period has not ended yet. It closes on {periodEnd:yyyy-MM-dd}." });
+        }
+
+        // Guard: already closed?
+        var alreadyClosed = salaryEvents
+            .OfType<PeriodClosed>()
+            .Any(e => e.PeriodEnd.Date == periodEnd);
+        if (alreadyClosed)
+        {
+            return Results.BadRequest(new { error = "This period has already been closed." });
+        }
+
+        var periodId = Guid.NewGuid();
 
         // Get active members with current nicknames
         var memberLookup = await mediator.Send(new MemberLookupQuery(request.HouseholdId));
@@ -67,10 +100,18 @@ internal class Handler(IEventStore store, ISender mediator)
         var deletedChoreIds = choreEvents.OfType<ChoreDeleted>()
             .Select(e => e.ChoreId)
             .ToHashSet();
-        var chores = choreEvents
-            .OfType<ChoreCreated>()
+        var chores = choreEvents.OfType<ChoreCreated>()
             .Where(c => !deletedChoreIds.Contains(c.ChoreId))
             .ToDictionary(e => e.ChoreId);
+        foreach (var update in choreEvents.OfType<ChoreUpdated>())
+            if (chores.ContainsKey(update.ChoreId))
+                chores[update.ChoreId] = chores[update.ChoreId] with
+                {
+                    DisplayName = update.DisplayName, Description = update.Description,
+                    Frequency = update.Frequency, IsOptional = update.IsOptional,
+                    StartDate = update.StartDate, IsRequired = update.IsRequired,
+                    MissedDeduction = update.MissedDeduction,
+                };
 
         // Get assignments
         var assignments = choreEvents.OfType<ChoreAssigned>()
@@ -189,7 +230,27 @@ internal class Handler(IEventStore store, ISender mediator)
 
         await store.AppendToStreamAsync(salaryStreamId, closedEvent, ExpectedVersion.Any);
 
-        return new ClosePeriodResponse(periodId, periodStart, periodEnd, payoutDtos);
+        return Results.Ok(new ClosePeriodResponse(periodId, periodStart, periodEnd, payoutDtos));
+    }
+
+    private static (DateTime start, DateTime end) GetLastCompletedPayPeriod(DateTime today, int paydayDay)
+    {
+        var paydayThisMonth = new DateTime(today.Year, today.Month, paydayDay, 0, 0, 0, DateTimeKind.Utc);
+        if (today >= paydayThisMonth.Date)
+        {
+            // We're past payday this month — the period that just ended is: (payday last month + 1 day) → payday this month
+            var prevMonth = paydayThisMonth.AddMonths(-1);
+            var start = new DateTime(prevMonth.Year, prevMonth.Month, paydayDay, 0, 0, 0, DateTimeKind.Utc).AddDays(1);
+            return (start, paydayThisMonth);
+        }
+        else
+        {
+            // Before payday this month — last completed period ended on payday last month
+            var paydayLastMonth = new DateTime(today.Year, today.Month, paydayDay, 0, 0, 0, DateTimeKind.Utc).AddMonths(-1);
+            var twoMonthsAgo = paydayLastMonth.AddMonths(-1);
+            var start = new DateTime(twoMonthsAgo.Year, twoMonthsAgo.Month, paydayDay, 0, 0, 0, DateTimeKind.Utc).AddDays(1);
+            return (start, paydayLastMonth);
+        }
     }
 
     private List<string> CalculateMissedInstances(
@@ -324,8 +385,7 @@ internal static class ClosePeriodEndpoint
             Handler handler) =>
         {
             var command = new ClosePeriodCommand(householdId, request.PeriodEnd);
-            var result = await handler.HandleAsync(command);
-            return Results.Ok(result);
+            return await handler.HandleAsync(command);
         });
     }
 }

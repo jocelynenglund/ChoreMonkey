@@ -78,7 +78,17 @@ internal class Handler(IEventStore store)
             .ToHashSet();
         var createdChores = events.OfType<ChoreCreated>()
             .Where(c => !deletedChoreIds.Contains(c.ChoreId))
-            .ToList();
+            .ToDictionary(e => e.ChoreId);
+        foreach (var update in events.OfType<ChoreUpdated>())
+            if (createdChores.ContainsKey(update.ChoreId))
+                createdChores[update.ChoreId] = createdChores[update.ChoreId] with
+                {
+                    DisplayName = update.DisplayName, Description = update.Description,
+                    Frequency = update.Frequency, IsOptional = update.IsOptional,
+                    StartDate = update.StartDate, IsRequired = update.IsRequired,
+                    MissedDeduction = update.MissedDeduction,
+                };
+        var createdChoresList = createdChores.Values.ToList();
         
         // Get latest assignment for each chore
         var assignments = events.OfType<ChoreAssigned>()
@@ -90,7 +100,7 @@ internal class Handler(IEventStore store)
             .GroupBy(e => e.ChoreId)
             .ToDictionary(g => g.Key, g => g.ToList());
 
-        var chores = createdChores
+        var chores = createdChoresList
             .Select(e => {
                 var assignment = assignments.GetValueOrDefault(e.ChoreId);
                 var choreCompletions = completionsByChore.GetValueOrDefault(e.ChoreId) ?? new List<ChoreCompleted>();

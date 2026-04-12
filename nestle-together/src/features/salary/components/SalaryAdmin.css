@@ -305,3 +305,40 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+.period-not-ended-note {
+  font-size: 0.8rem;
+  color: var(--muted-foreground, #888);
+  margin-bottom: 0.5rem;
+}
+
+.period-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+
+.period-selector label {
+  font-size: 0.8rem;
+  color: var(--muted-foreground, #888);
+}
+
+.period-select {
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--border, #e2e8f0);
+  background: var(--background, #fff);
+  font-size: 0.9rem;
+  width: 100%;
+}
+
+.period-closed-note {
+  font-size: 0.8rem;
+  color: #22c55e;
+  margin-bottom: 0.5rem;
+}
+
+.period-actions {
+  margin-top: 0.5rem;
+}

@@ -47,3 +47,4 @@ claude.md
 # Ignore obj from tests and build output
 **/bin/
 **/obj/
+nuget.config
