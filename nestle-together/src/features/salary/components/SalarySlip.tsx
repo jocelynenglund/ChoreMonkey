@@ -4,9 +4,10 @@ import './SalarySlip.css';
 interface SalarySlipProps {
   slip: OfficialSalarySlipResponse;
   onClose: () => void;
+  isPreview?: boolean;
 }
 
-export function SalarySlip({ slip, onClose }: SalarySlipProps) {
+export function SalarySlip({ slip, onClose, isPreview = false }: SalarySlipProps) {
   const formatDate = (dateStr: string) =>
     new Date(dateStr).toLocaleDateString('sv-SE', {
       year: 'numeric',
@@ -20,8 +21,13 @@ export function SalarySlip({ slip, onClose }: SalarySlipProps) {
     <div className="salary-slip-overlay" onClick={onClose}>
       <div className="salary-slip" onClick={(e) => e.stopPropagation()}>
         <div className="slip-content">
+          {isPreview && (
+            <div className="slip-preview-banner">
+              ⚠️ Preview — period not closed. Final amounts may change.
+            </div>
+          )}
           <header className="slip-header">
-            <h2>Salary Slip</h2>
+            <h2>{isPreview ? 'Salary Slip (Preview)' : 'Salary Slip'}</h2>
             <div className="slip-period">
               {formatDate(slip.periodStart)} &mdash; {formatDate(slip.periodEnd)}
             </div>
