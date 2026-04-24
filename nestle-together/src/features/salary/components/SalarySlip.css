@@ -23,6 +23,18 @@
   padding: 2rem;
 }
 
+/* Preview banner */
+.slip-preview-banner {
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  color: #795548;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
 /* Header */
 .slip-header {
   text-align: center;

@@ -47,11 +47,35 @@ internal class Handler(IEventStore store)
             .GroupBy(e => (e.PeriodStart.Date, e.PeriodEnd.Date))
             .ToDictionary(g => g.Key, g => g.Last().PeriodId);
 
-        // Generate all completed pay periods from household creation up to today
         var periods = new List<AvailablePeriodDto>();
-        var cursor = GetPaydayOn(today, paydayDay);
 
-        // Walk backwards, generating period boundaries
+        // Prepend the in-progress period — boundaries must match GetCurrentPeriod so the
+        // frontend can recognize it as "current" and offer previews.
+        var paydayThisMonth = new DateTime(today.Year, today.Month, paydayDay, 0, 0, 0, DateTimeKind.Utc);
+        DateTime currentStart, currentEnd;
+        if (today <= paydayThisMonth.Date)
+        {
+            var prevPayday = paydayThisMonth.AddMonths(-1);
+            currentStart = new DateTime(prevPayday.Year, prevPayday.Month, paydayDay, 0, 0, 0, DateTimeKind.Utc).AddDays(1);
+            currentEnd = paydayThisMonth;
+        }
+        else
+        {
+            var nextPayday = paydayThisMonth.AddMonths(1);
+            currentStart = paydayThisMonth.AddDays(1);
+            currentEnd = new DateTime(nextPayday.Year, nextPayday.Month, paydayDay, 0, 0, 0, DateTimeKind.Utc);
+        }
+
+        // Only prepend if the period is still in progress (ends in the future). When
+        // today == payday, the backwards loop below will emit the same period as a
+        // completed-but-unclosed entry — skipping here avoids duplicates.
+        if (currentEnd > today && (!householdCreatedAt.HasValue || currentEnd >= householdCreatedAt.Value))
+        {
+            periods.Add(new AvailablePeriodDto(currentStart, currentEnd, false, null));
+        }
+
+        // Walk backwards generating completed period boundaries
+        var cursor = GetPaydayOn(today, paydayDay);
         for (var i = 0; i < 24; i++) // max 24 months back
         {
             var periodEnd = cursor;
@@ -63,7 +87,6 @@ internal class Handler(IEventStore store)
             if (householdCreatedAt.HasValue && periodEnd < householdCreatedAt.Value)
                 break;
 
-            // Only include completed periods (periodEnd <= today)
             if (periodEnd <= today)
             {
                 var isClosed = closedPeriods.TryGetValue((periodStart.Date, periodEnd.Date), out var periodId);

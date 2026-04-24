@@ -11,10 +11,43 @@ interface MemberSalaryForm {
   bonusMultiplier: string;
 }
 
-function formatPeriodLabel(period: AvailablePeriod): string {
+function formatPeriodLabel(period: AvailablePeriod, isCurrent: boolean): string {
   const end = new Date(period.periodEnd);
   const label = end.toLocaleDateString('sv-SE', { month: 'long', year: 'numeric' });
-  return period.isClosed ? `${label} ✓` : label;
+  if (period.isClosed) return `${label} ✓`;
+  if (isCurrent) return `${label} (current)`;
+  return label;
+}
+
+function buildPreviewSlip(
+  member: MemberPeriodSummary,
+  periodStart: string,
+  periodEnd: string
+): OfficialSalarySlipResponse {
+  const deductionMult = member.deductionMultiplier || 1;
+  const bonusMult = member.bonusMultiplier || 1;
+  return {
+    periodId: 'preview',
+    periodStart,
+    periodEnd,
+    memberName: member.name,
+    baseSalary: member.baseSalary,
+    deductions: member.missedChores.map((mc) => ({
+      choreName: `${mc.choreName} (${mc.period})`,
+      baseRate: deductionMult !== 0 ? mc.deduction / deductionMult : mc.deduction,
+      multiplier: member.deductionMultiplier,
+      amount: mc.deduction,
+    })),
+    bonuses: member.bonusChores.map((bc) => ({
+      choreName: bc.choreName,
+      baseRate: bonusMult !== 0 ? bc.bonus / bonusMult : bc.bonus,
+      multiplier: member.bonusMultiplier,
+      amount: bc.bonus,
+    })),
+    grossDeductions: member.deductions,
+    grossBonuses: member.bonuses,
+    netPay: member.projected,
+  };
 }
 
 export function SalaryAdmin() {
@@ -32,6 +65,7 @@ export function SalaryAdmin() {
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
   const [history, setHistory] = useState<PeriodPayout[]>([]);
   const [activeSlip, setActiveSlip] = useState<OfficialSalarySlipResponse | null>(null);
+  const [slipIsPreview, setSlipIsPreview] = useState(false);
   const [loadingSlip, setLoadingSlip] = useState<string | null>(null);
 
   // Period selector
@@ -63,8 +97,17 @@ export function SalaryAdmin() {
     const key = `${periodId}-${memberId}`;
     setLoadingSlip(key);
     const slip = await getOfficialSalarySlip(currentHouseholdId, periodId, memberId);
-    if (slip) setActiveSlip(slip);
+    if (slip) {
+      setActiveSlip(slip);
+      setSlipIsPreview(false);
+    }
     setLoadingSlip(null);
+  }
+
+  function previewSlip(member: MemberPeriodSummary) {
+    if (!periodData) return;
+    setActiveSlip(buildPreviewSlip(member, periodData.periodStart, periodData.periodEnd));
+    setSlipIsPreview(true);
   }
 
   function startEditing(member: MemberPeriodSummary) {
@@ -96,6 +139,13 @@ export function SalaryAdmin() {
 
   const selectedPeriod = availablePeriods[selectedPeriodIdx] ?? null;
   const periodEnded = selectedPeriod ? new Date() > new Date(selectedPeriod.periodEnd) : false;
+  const isCurrentPeriod = !!(
+    selectedPeriod &&
+    !selectedPeriod.isClosed &&
+    periodData &&
+    selectedPeriod.periodStart === periodData.periodStart &&
+    selectedPeriod.periodEnd === periodData.periodEnd
+  );
 
   async function handleClosePeriod() {
     if (!currentHouseholdId || !selectedPeriod || selectedPeriod.isClosed) return;
@@ -266,13 +316,43 @@ export function SalaryAdmin() {
                 onChange={(e) => setSelectedPeriodIdx(Number(e.target.value))}
                 className="period-select"
               >
-                {availablePeriods.map((p, i) => (
-                  <option key={i} value={i}>
-                    {formatPeriodLabel(p)}
-                  </option>
-                ))}
+                {availablePeriods.map((p, i) => {
+                  const isCur =
+                    !p.isClosed &&
+                    !!periodData &&
+                    p.periodStart === periodData.periodStart &&
+                    p.periodEnd === periodData.periodEnd;
+                  return (
+                    <option key={i} value={i}>
+                      {formatPeriodLabel(p, isCur)}
+                    </option>
+                  );
+                })}
               </select>
             </div>
+
+            {isCurrentPeriod && periodData && (
+              <div className="history-section" style={{ marginTop: '1rem' }}>
+                <p className="text-xs text-muted-foreground mb-3">
+                  Projected payouts so far — final amounts will be set when the period closes.
+                </p>
+                <div className="history-payouts">
+                  {periodData.members.map((m) => (
+                    <div key={m.memberId} className="history-payout-row">
+                      <span className="payout-name">{m.name}</span>
+                      <span className="payout-amount">{m.projected.toFixed(0)} kr</span>
+                      <button
+                        className="view-slip-btn"
+                        onClick={() => previewSlip(m)}
+                        disabled={m.baseSalary === 0}
+                      >
+                        Preview Slip
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {selectedPeriod && !selectedPeriod.isClosed && (
               <div className="period-actions">
@@ -319,7 +399,16 @@ export function SalaryAdmin() {
       </div>
 
       {/* Salary Slip Modal */}
-      {activeSlip && <SalarySlip slip={activeSlip} onClose={() => setActiveSlip(null)} />}
+      {activeSlip && (
+        <SalarySlip
+          slip={activeSlip}
+          isPreview={slipIsPreview}
+          onClose={() => {
+            setActiveSlip(null);
+            setSlipIsPreview(false);
+          }}
+        />
+      )}
     </div>
   );
 }
