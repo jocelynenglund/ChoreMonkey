@@ -98,12 +98,16 @@
 .slip-table td {
   padding: 0.35rem 0.5rem;
   border-bottom: 1px solid #f0f0f0;
+  vertical-align: top;
 }
 
 .slip-table .chore-name {
-  max-width: 160px;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.slip-table th:not(:first-child),
+.slip-table td:not(.chore-name) {
   white-space: nowrap;
 }
 
