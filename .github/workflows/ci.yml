@@ -33,7 +33,19 @@ jobs:
         run: dotnet build --configuration Release --no-restore
 
       - name: Test
-        run: dotnet test ChoreMonkey.IntegrationTests --configuration Release --no-build --verbosity normal
+        run: |
+          dotnet test ChoreMonkey.IntegrationTests \
+            --configuration Release --no-build --verbosity normal \
+            -- --report-trx --report-trx-filename results.trx \
+            --results-directory test-results
+
+      - name: Upload test results (trx)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: ChoreMonkey.IntegrationTests/test-results/
+          retention-days: 7
 
   build-frontend:
     runs-on: ubuntu-latest

@@ -85,10 +85,12 @@ public class SessionCookieTests(ApiFixture fixture) : IClassFixture<ApiFixture>
     {
         var householdId = await CreateHouseholdAsync("Join Cookie Test", pinCode: 1234);
 
-        // Generate an invite (admin-side)
-        var inviteResponse = await _client.PostAsJsonAsync(
+        // Generate an invite (admin-side). The invite endpoint takes no body —
+        // existing tests use PostAsync(..., null), follow that convention so we
+        // don't accidentally trip body-binding.
+        var inviteResponse = await _client.PostAsync(
             $"/api/households/{householdId}/invite",
-            new { });
+            content: null);
         Assert.Equal(HttpStatusCode.OK, inviteResponse.StatusCode);
         var invite = await inviteResponse.Content.ReadFromJsonAsync<JsonElement>();
         var inviteId = invite.GetProperty("inviteId").GetGuid();
