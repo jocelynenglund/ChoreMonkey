@@ -56,11 +56,22 @@ public class SessionCookieTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         whoAmI.Headers.Add("Cookie", $"cm.session={cookie}");
         var whoAmIResponse = await _client.SendAsync(whoAmI);
 
-        Assert.Equal(HttpStatusCode.OK, whoAmIResponse.StatusCode);
-        var body = await whoAmIResponse.Content.ReadFromJsonAsync<JsonElement>();
+        var raw = await whoAmIResponse.Content.ReadAsStringAsync();
+        Assert.True(whoAmIResponse.StatusCode == HttpStatusCode.OK,
+            $"whoami status={whoAmIResponse.StatusCode}, body={raw}");
+
+        var body = JsonDocument.Parse(raw).RootElement;
         Assert.Equal(householdId, body.GetProperty("householdId").GetGuid().ToString());
         Assert.True(body.GetProperty("isAdmin").GetBoolean());
-        Assert.Equal(JsonValueKind.Null, body.GetProperty("memberId").ValueKind);
+
+        // memberId is allowed to be either an explicit JSON null (default
+        // serializer behavior) or omitted entirely (if the host overrides
+        // DefaultIgnoreCondition). Either is acceptable here — we just need
+        // to assert there's no member id leaked.
+        var memberIdKind = body.TryGetProperty("memberId", out var m) ? m.ValueKind : JsonValueKind.Undefined;
+        Assert.True(
+            memberIdKind == JsonValueKind.Null || memberIdKind == JsonValueKind.Undefined,
+            $"expected memberId to be null or absent, got kind={memberIdKind}, body={raw}");
     }
 
     [Fact]
@@ -91,15 +102,19 @@ public class SessionCookieTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         var inviteResponse = await _client.PostAsync(
             $"/api/households/{householdId}/invite",
             content: null);
-        Assert.Equal(HttpStatusCode.OK, inviteResponse.StatusCode);
-        var invite = await inviteResponse.Content.ReadFromJsonAsync<JsonElement>();
+        var inviteRaw = await inviteResponse.Content.ReadAsStringAsync();
+        Assert.True(inviteResponse.StatusCode == HttpStatusCode.OK,
+            $"invite status={inviteResponse.StatusCode}, body={inviteRaw}");
+        var invite = JsonDocument.Parse(inviteRaw).RootElement;
         var inviteId = invite.GetProperty("inviteId").GetGuid();
 
         var joinResponse = await _client.PostAsJsonAsync(
             $"/api/households/{householdId}/join",
             new { inviteId, nickname = "TestMember" });
-        Assert.Equal(HttpStatusCode.OK, joinResponse.StatusCode);
-        var join = await joinResponse.Content.ReadFromJsonAsync<JsonElement>();
+        var joinRaw = await joinResponse.Content.ReadAsStringAsync();
+        Assert.True(joinResponse.StatusCode == HttpStatusCode.OK,
+            $"join status={joinResponse.StatusCode}, body={joinRaw}");
+        var join = JsonDocument.Parse(joinRaw).RootElement;
         var memberId = join.GetProperty("memberId").GetGuid().ToString();
 
         var cookie = ExtractSessionCookie(joinResponse);
@@ -108,8 +123,10 @@ public class SessionCookieTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         whoAmI.Headers.Add("Cookie", $"cm.session={cookie}");
         var whoAmIResponse = await _client.SendAsync(whoAmI);
 
-        Assert.Equal(HttpStatusCode.OK, whoAmIResponse.StatusCode);
-        var body = await whoAmIResponse.Content.ReadFromJsonAsync<JsonElement>();
+        var whoAmIRaw = await whoAmIResponse.Content.ReadAsStringAsync();
+        Assert.True(whoAmIResponse.StatusCode == HttpStatusCode.OK,
+            $"whoami status={whoAmIResponse.StatusCode}, body={whoAmIRaw}");
+        var body = JsonDocument.Parse(whoAmIRaw).RootElement;
         Assert.Equal(householdId, body.GetProperty("householdId").GetGuid().ToString());
         Assert.False(body.GetProperty("isAdmin").GetBoolean());
         Assert.Equal(memberId, body.GetProperty("memberId").GetGuid().ToString());
