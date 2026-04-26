@@ -105,13 +105,33 @@ jobs:
         working-directory: nestle-together
         run: npx playwright install --with-deps chromium
 
-      # Start API in background
-      - name: Start API
+      # Start API in background, capture logs, and wait for /health to actually respond.
+      # Replaces a fixed `sleep 10` that was racing with API startup on slower runners
+      # and silently masking failures (`curl ... || echo skipped`).
+      - name: Start API and wait for /health
         run: |
-          dotnet run --project ChoreMonkey.ApiService --configuration Release --no-build &
-          echo "Waiting for API to start..."
-          sleep 10
-          curl -s http://localhost:5536/health || echo "Health check skipped"
+          mkdir -p api-logs
+          dotnet run --project ChoreMonkey.ApiService --configuration Release --no-build \
+            > api-logs/api.log 2>&1 &
+          echo $! > api-logs/api.pid
+
+          echo "Waiting for API on http://localhost:5536/health (up to 60s)..."
+          for i in $(seq 1 60); do
+            if curl -fsS http://localhost:5536/health > /dev/null 2>&1; then
+              echo "API ready after ${i}s"
+              exit 0
+            fi
+            if ! kill -0 "$(cat api-logs/api.pid)" 2>/dev/null; then
+              echo "::error::API process exited before becoming healthy"
+              tail -n 200 api-logs/api.log
+              exit 1
+            fi
+            sleep 1
+          done
+
+          echo "::error::API did not become healthy within 60s"
+          tail -n 200 api-logs/api.log
+          exit 1
         env:
           ASPNETCORE_URLS: http://localhost:5536
           ASPNETCORE_ENVIRONMENT: Development
@@ -128,4 +148,12 @@ jobs:
         with:
           name: playwright-report
           path: nestle-together/playwright-report/
+          retention-days: 7
+
+      - name: Upload API logs
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: api-logs
+          path: api-logs/
           retention-days: 7
