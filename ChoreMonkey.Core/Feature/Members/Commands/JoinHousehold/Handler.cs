@@ -1,9 +1,11 @@
 using ChoreMonkey.Core.Domain;
+using ChoreMonkey.Core.Security;
 using ChoreMonkey.Events;
 using FileEventStore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Hosting;
 
 namespace ChoreMonkey.Core.Feature.Members.Commands.JoinHousehold;
 
@@ -46,14 +48,20 @@ internal static class JoinHouseholdEndpoint
         group.MapPost("households/{householdId:guid}/join", async (
             Guid householdId,
             JoinRequest request,
-            Handler handler) =>
+            Handler handler,
+            HttpResponse response,
+            ISessionTokenService tokens,
+            IHostEnvironment env) =>
         {
             var command = new JoinHouseholdCommand(householdId, request.InviteId, request.Nickname);
             var result = await handler.HandleAsync(command);
-            
+
             if (result == null)
                 return Results.BadRequest("Invalid invite");
-                
+
+            var principal = new HouseholdPrincipal(result.HouseholdId, result.MemberId, IsAdmin: false);
+            SessionCookie.Issue(response, principal, tokens, env);
+
             return Results.Ok(result);
         })
         .RequireRateLimiting("auth");

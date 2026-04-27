@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Threading.RateLimiting;
 using ChoreMonkey.Core;
+using ChoreMonkey.Core.Security;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -80,6 +81,11 @@ app.UseExceptionHandler();
 
 // Enable CORS
 app.UseCors("ChoreMonkeyCors");
+
+// Decode session cookie into HouseholdPrincipal for downstream handlers.
+// Must run before endpoints; safe to run before rate limiting (we want rate
+// limits to apply regardless of auth state).
+app.UseChoreMonkeyAuth();
 
 // Enable rate limiting (production only)
 if (!app.Environment.IsDevelopment() && !app.Environment.IsEnvironment("Testing"))

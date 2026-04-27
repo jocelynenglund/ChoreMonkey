@@ -1,4 +1,5 @@
 using FileEventStore;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Builder;
@@ -63,6 +64,8 @@ using ChoreMonkey.Core.Feature.Salary.Queries.GetAvailablePeriods;
 
 using ChoreMonkey.Core.Infrastructure;
 using ChoreMonkey.Core.Infrastructure.SignalR;
+using ChoreMonkey.Core.Security;
+using ChoreMonkey.Core.Feature.Auth.Queries.WhoAmI;
 
 namespace ChoreMonkey.Core;
 
@@ -71,12 +74,26 @@ public static class Initialization
     public static IServiceCollection AddChoreMonkeyCore(this IServiceCollection services)
     {
         // Use environment variable for data path, default to ./data for local dev
-        var dataPath = Environment.GetEnvironmentVariable("EVENTSTORE_PATH") 
+        var dataPath = Environment.GetEnvironmentVariable("EVENTSTORE_PATH")
             ?? Path.Combine(Directory.GetCurrentDirectory(), "data");
-        
+
+        // Auth: session cookies are encrypted with DataProtection. Persist keys to disk
+        // (under EVENTSTORE_PATH/dataprotection-keys) so sessions survive restarts and so
+        // multiple instances on the same volume share the keyring. Without this, every
+        // process restart invalidates every existing session cookie.
+        var keyRingPath = Path.Combine(dataPath, "dataprotection-keys");
+        Directory.CreateDirectory(keyRingPath);
+        services.AddDataProtection()
+            .PersistKeysToFileSystem(new DirectoryInfo(keyRingPath))
+            .SetApplicationName("ChoreMonkey");
+
+        services.AddHttpContextAccessor();
+        services.AddSingleton<ISessionTokenService, SessionTokenService>();
+        services.AddScoped<IHouseholdPrincipalAccessor, HouseholdPrincipalAccessor>();
+
         // Add MediatR for event broadcasting
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<HouseholdHub>());
-        
+
         // Add SignalR
         services.AddSignalR();
         
@@ -237,6 +254,9 @@ public static class Initialization
         GetPayoutHistoryEndpoint.Map(householdEndpoints);
         GetOfficialSalarySlipEndpoint.Map(householdEndpoints);
         GetAvailablePeriodsEndpoint.Map(householdEndpoints);
+
+        // Auth module
+        WhoAmIEndpoint.Map(householdEndpoints);
 
         return app;
     }

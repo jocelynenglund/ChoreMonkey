@@ -5,6 +5,7 @@ using FileEventStore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Hosting;
 
 namespace ChoreMonkey.Core.Feature.Household.Queries.AccessHousehold;
 
@@ -64,7 +65,13 @@ internal static class AccessHouseholdEndpoint
 {
     public static void Map(this RouteGroupBuilder group)
     {
-        group.MapPost("households/{householdId:guid}/access", async (Guid householdId, AccessHouseholdRequest dto, Handler handler) =>
+        group.MapPost("households/{householdId:guid}/access", async (
+            Guid householdId,
+            AccessHouseholdRequest dto,
+            Handler handler,
+            HttpResponse response,
+            ISessionTokenService tokens,
+            IHostEnvironment env) =>
         {
             var query = new AccessHouseholdQuery(householdId, dto.PinCode);
             var result = await handler.HandleAsync(query);
@@ -73,6 +80,12 @@ internal static class AccessHouseholdEndpoint
             {
                 return Results.Unauthorized();
             }
+
+            // AccessHousehold can't disambiguate which member a member-PIN belongs to,
+            // so MemberId is null here. JoinHousehold (invite flow) issues a cookie
+            // with a real MemberId.
+            var principal = new HouseholdPrincipal(result.HouseholdId, MemberId: null, result.IsAdmin);
+            SessionCookie.Issue(response, principal, tokens, env);
 
             return Results.Ok(result);
         })
