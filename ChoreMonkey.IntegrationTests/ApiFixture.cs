@@ -41,7 +41,14 @@ public class ApiFixture : IAsyncLifetime
                 });
             });
 
-        Client = _factory.CreateClient();
+        // Disable auto-cookie handling so each test fully controls Cookie
+        // headers. Without this, a Set-Cookie response from one test
+        // (e.g. AccessHousehold issuing cm.session) leaks into subsequent
+        // tests on the shared client and breaks isolation.
+        Client = _factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            HandleCookies = false,
+        });
         return ValueTask.CompletedTask;
     }
 
