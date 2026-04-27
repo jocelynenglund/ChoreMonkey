@@ -80,8 +80,9 @@ test.describe('Salary admin', () => {
     await page.getByRole('link', { name: /admin/i }).click();
     await page.waitForURL(/\/admin/, { timeout: 10000 });
 
-    // Salary tab should be accessible
-    await page.getByRole('tab', { name: /salary/i }).click();
+    // Salary tab should be accessible. Admin sub-tabs are rendered as plain
+    // <button>s in AdminDashboard.tsx (no role="tab"), so query by button role.
+    await page.getByRole('button', { name: /salaries/i }).click();
     await expect(page.locator('text=/salary management/i')).toBeVisible({ timeout: 5000 });
   });
 
@@ -90,7 +91,7 @@ test.describe('Salary admin', () => {
     await page.getByRole('link', { name: /admin/i }).click();
     await page.waitForURL(/\/admin/, { timeout: 10000 });
 
-    await page.getByRole('tab', { name: /salary/i }).click();
+    await page.getByRole('button', { name: /salaries/i }).click();
 
     // The close period button should be disabled — period hasn't ended yet
     const closeBtn = page.locator('button.close-period-btn');

@@ -5,10 +5,11 @@ const ADMIN_PIN = '1234';
 const MEMBER_PIN = '5678';
 
 async function setMemberPin(page: import('@playwright/test').Page) {
-  // Navigate to Admin → Settings tab to set member PIN
+  // Navigate to Admin → Settings tab to set member PIN. Admin sub-tabs are
+  // plain <button>s in AdminDashboard.tsx (no role="tab"), so query by button role.
   await page.getByRole('link', { name: /admin/i }).click();
   await page.waitForURL(/\/admin/, { timeout: 10000 });
-  await page.getByRole('tab', { name: /settings/i }).click();
+  await page.getByRole('button', { name: /settings/i }).click();
 
   await page.locator('#newMemberPin').fill(MEMBER_PIN);
   await page.getByRole('button', { name: /set member pin/i }).click();
