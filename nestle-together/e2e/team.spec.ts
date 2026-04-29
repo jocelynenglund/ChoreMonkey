@@ -67,11 +67,14 @@ test.describe('Team tab — member view', () => {
     const dashboardUrl = await createHousehold(page, `Team Test ${uniqueId()}`, ADMIN_PIN);
     await setMemberPin(page);
 
-    // Logout and re-access with member PIN
+    // setMemberPin leaves us on /admin, where there's no Log out button —
+    // it lives in the HouseholdDashboard header. Navigate back first.
+    await navigateToTab(page, 'chores');
+
     householdAccessUrl = dashboardUrl.replace('/household/', '/access/');
     await page.getByRole('button', { name: /log out/i }).click();
 
-    await page.goto(householdAccessUrl);
+    await page.waitForURL(/\/access\//, { timeout: 10000 });
     await fillPinInput(page, MEMBER_PIN);
     await page.waitForURL(/\/household\//, { timeout: 30000 });
   });
