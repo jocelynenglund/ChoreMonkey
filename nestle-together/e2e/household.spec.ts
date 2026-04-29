@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { createHousehold, fillPinInput, uniqueId } from './helpers';
+import { createHousehold, fillPinInput, navigateToTab, uniqueId } from './helpers';
 
 test.describe('Household Creation', () => {
   test('can create a new household', async ({ page }) => {
@@ -136,7 +136,11 @@ test.describe('Profile', () => {
     await page.getByLabel(/nickname/i).fill('NewName');
     await page.getByRole('button', { name: /save/i }).click();
 
-    await expect(page.getByText('NewName', { exact: true })).toBeVisible({ timeout: 10000 });
+    // The dashboard avatar shows initials only — to verify the nickname
+    // change persisted, switch to the Team tab where members are listed by
+    // nickname.
+    await navigateToTab(page, 'team');
+    await expect(page.getByText('NewName', { exact: true }).first()).toBeVisible({ timeout: 10000 });
   });
 
   test('can set and clear status', async ({ page }) => {
@@ -146,20 +150,23 @@ test.describe('Profile', () => {
     await page.getByLabel(/status/i).fill('Busy testing!');
     await page.getByRole('button', { name: /save/i }).click();
 
-    await page.waitForTimeout(1500);
+    // The status pulse ring only renders on member avatars in the Team tab.
+    // Use the combo selector .animate-pulse.absolute to skip unrelated pulses
+    // (skeleton loaders, ConnectionStatus reconnection dot).
+    await navigateToTab(page, 'team');
+    const statusPulse = page.locator('.animate-pulse.absolute');
+    await expect(statusPulse.first()).toBeVisible({ timeout: 5000 });
 
-    // Avatar should have status ring (pulsing)
-    await expect(page.locator('.animate-pulse')).toBeVisible({ timeout: 5000 });
-
-    // Reopen and clear
+    // Reopen and clear (Edit Profile lives in the dashboard header, available
+    // from any tab).
     await page.getByRole('button', { name: /edit profile/i }).click();
     await page.getByLabel(/status/i).waitFor({ state: 'visible', timeout: 5000 });
     await page.getByRole('button', { name: /clear/i }).click();
     await page.getByRole('button', { name: /save/i }).click();
 
-    await page.waitForTimeout(1500);
-
-    await expect(page.locator('.animate-pulse')).not.toBeVisible({ timeout: 5000 });
+    // Wait for the dialog to auto-close, then verify the status pulse is gone.
+    await expect(page.getByRole('dialog')).toHaveCount(0, { timeout: 5000 });
+    await expect(statusPulse).toHaveCount(0, { timeout: 5000 });
   });
 });
 
@@ -168,7 +175,9 @@ test.describe('Invites', () => {
     const householdName = `Invite Test ${uniqueId()}`;
     await createHousehold(page, householdName);
 
-    await page.getByRole('button', { name: /invite/i }).click();
+    // The Invite button lives inside the Team tab (TeamTab.tsx).
+    await navigateToTab(page, 'team');
+    await page.getByRole('button', { name: /^invite$/i }).click();
 
     // Dialog opens - should show "Invite Family Member" title
     await expect(page.getByRole('heading', { name: /invite family member/i })).toBeVisible({ timeout: 5000 });

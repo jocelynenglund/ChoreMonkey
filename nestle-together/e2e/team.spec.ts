@@ -1,14 +1,11 @@
 import { test, expect } from '@playwright/test';
-import { createHousehold, fillPinInput, uniqueId } from './helpers';
+import { createHousehold, fillPinInput, navigateToTab, uniqueId } from './helpers';
 
 const ADMIN_PIN = '1234';
 const MEMBER_PIN = '5678';
 
 async function setMemberPin(page: import('@playwright/test').Page) {
-  // Navigate to Admin → Settings tab to set member PIN. Admin sub-tabs are
-  // plain <button>s in AdminDashboard.tsx (no role="tab"), so query by button role.
-  await page.getByRole('link', { name: /admin/i }).click();
-  await page.waitForURL(/\/admin/, { timeout: 10000 });
+  await navigateToTab(page, 'admin');
   await page.getByRole('button', { name: /settings/i }).click();
 
   await page.locator('#newMemberPin').fill(MEMBER_PIN);
@@ -16,15 +13,15 @@ async function setMemberPin(page: import('@playwright/test').Page) {
   await expect(page.locator('text=/member pin updated/i')).toBeVisible({ timeout: 5000 });
 }
 
-async function navigateToTeamTab(page: import('@playwright/test').Page) {
-  await page.getByRole('link', { name: /team/i }).click();
+async function goToTeamTab(page: import('@playwright/test').Page) {
+  await navigateToTab(page, 'team');
   await expect(page.locator('text=Household Overview')).toBeVisible({ timeout: 10000 });
 }
 
 test.describe('Team tab — admin view', () => {
   test('shows Household Overview with reassignment hint', async ({ page }) => {
     await createHousehold(page, `Team Test ${uniqueId()}`);
-    await navigateToTeamTab(page);
+    await goToTeamTab(page);
 
     await expect(page.locator('text=Household Overview')).toBeVisible();
     await expect(page.locator('text=/click the gear icon to reassign/i')).toBeVisible();
@@ -33,21 +30,33 @@ test.describe('Team tab — admin view', () => {
   test('shows gear icon when chore is assigned', async ({ page }) => {
     await createHousehold(page, `Team Test ${uniqueId()}`);
 
-    // Add a chore via Admin → Chores tab
-    await page.getByRole('link', { name: /admin/i }).click();
-    await page.waitForURL(/\/admin/, { timeout: 10000 });
+    // Chores are added from the main Chores tab, not /admin.
+    await navigateToTab(page, 'chores');
     await page.getByRole('button', { name: /add chore/i }).click();
-    await page.getByLabel(/name|title/i).fill('Dishes');
-    await page.getByRole('button', { name: /add|create|save/i }).last().click();
+    await page.getByLabel(/chore name/i).waitFor({ state: 'visible' });
+    await page.getByLabel(/chore name/i).fill('Dishes');
+    const submit = page.getByRole('button', { name: /add chore/i }).last();
+    await submit.scrollIntoViewIfNeeded();
+    await submit.click();
     await expect(page.locator('text=Dishes')).toBeVisible({ timeout: 5000 });
 
-    await navigateToTeamTab(page);
+    // Assign it to everyone via the admin Chores tab so it appears under a
+    // member's accordion in the Team overview (the gear only renders for
+    // assigned chores).
+    await navigateToTab(page, 'admin');
+    await page.getByRole('button', { name: /^chores$/i }).click();
+    await page.getByTitle('Assign').first().click();
+    await page.getByRole('checkbox', { name: /assign to everyone/i }).check();
+    await page.getByRole('button', { name: /save/i }).click();
+    await expect(page.locator('text=Everyone').first()).toBeVisible({ timeout: 5000 });
+
+    await goToTeamTab(page);
 
     // Expand admin's accordion entry
     await page.locator('[data-radix-collection-item]').first().click();
 
     // Gear icon should be present for assigned chores
-    await expect(page.locator('[title="Edit assignment"]')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('[title="Edit assignment"]').first()).toBeVisible({ timeout: 5000 });
   });
 });
 
@@ -58,22 +67,25 @@ test.describe('Team tab — member view', () => {
     const dashboardUrl = await createHousehold(page, `Team Test ${uniqueId()}`, ADMIN_PIN);
     await setMemberPin(page);
 
-    // Logout and re-access with member PIN
+    // setMemberPin leaves us on /admin, where there's no Log out button —
+    // it lives in the HouseholdDashboard header. Navigate back first.
+    await navigateToTab(page, 'chores');
+
     householdAccessUrl = dashboardUrl.replace('/household/', '/access/');
     await page.getByRole('button', { name: /log out/i }).click();
 
-    await page.goto(householdAccessUrl);
+    await page.waitForURL(/\/access\//, { timeout: 10000 });
     await fillPinInput(page, MEMBER_PIN);
     await page.waitForURL(/\/household\//, { timeout: 30000 });
   });
 
   test('shows Household Overview section', async ({ page }) => {
-    await navigateToTeamTab(page);
+    await goToTeamTab(page);
     await expect(page.locator('text=Household Overview')).toBeVisible();
   });
 
   test('does not show reassignment hint or gear icons', async ({ page }) => {
-    await navigateToTeamTab(page);
+    await goToTeamTab(page);
 
     await expect(page.locator('text=/click the gear icon to reassign/i')).not.toBeVisible();
     await expect(page.locator('[title="Edit assignment"]')).not.toBeVisible();
