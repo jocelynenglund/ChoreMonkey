@@ -31,3 +31,30 @@ export async function fillPinInput(page: Page, pin: string) {
     await inputs.nth(i).fill(pin[i]);
   }
 }
+
+type DashboardTab = 'chores' | 'team' | 'activity' | 'admin';
+
+/**
+ * Navigate to a dashboard tab. Chores/Team/Activity render as <button>s in
+ * HouseholdDashboard's bottom nav; Admin is a <Link>. If we're on /admin (or
+ * any sub-route), we go back to the dashboard root first since those tabs
+ * only exist there.
+ */
+export async function navigateToTab(page: Page, tab: DashboardTab) {
+  const match = page.url().match(/\/household\/([^/?#]+)/);
+  if (!match) throw new Error('navigateToTab: not on a household page');
+  const householdId = match[1];
+
+  if (!new RegExp(`/household/${householdId}/?$`).test(page.url())) {
+    await page.goto(`/household/${householdId}`);
+    await expect(page.locator('h1')).toBeVisible({ timeout: 15000 });
+  }
+
+  if (tab === 'admin') {
+    await page.getByRole('link', { name: /admin/i }).click();
+    await page.waitForURL(/\/admin/, { timeout: 10000 });
+    return;
+  }
+
+  await page.getByRole('button', { name: new RegExp(`^${tab}$`, 'i') }).click();
+}
