@@ -6,10 +6,11 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(__dirname, '../..');
 
-// Get recent commits from git
+// Pull the full project history. The /changelog page renders all of this;
+// the in-app WhatsNewDialog limits to a recent slice client-side.
 const gitLog = execSync(
-  'git log --oneline -50 --format="%H|%h|%s|%cs|%an"',
-  { cwd: repoRoot, encoding: 'utf-8' }
+  'git log --format="%H|%h|%s|%cs|%an"',
+  { cwd: repoRoot, encoding: 'utf-8', maxBuffer: 10 * 1024 * 1024 }
 );
 
 const commits = gitLog
@@ -55,9 +56,7 @@ const commits = gitLog
       type,
       displayMessage: cleanMessage
     };
-  })
-  // Take last 20 user-facing changes
-  .slice(0, 20);
+  });
 
 const changelog = {
   generated: new Date().toISOString(),
