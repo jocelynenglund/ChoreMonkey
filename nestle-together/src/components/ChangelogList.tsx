@@ -33,13 +33,15 @@ interface ChangelogListProps {
   autoLoad?: boolean;
   /** Inject pre-loaded changelog data. Wins over autoLoad. */
   changelog?: Changelog | null;
+  /** Cap the number of commits rendered. Undefined = render all. */
+  limit?: number;
 }
 
 /**
  * Renders the changelog as a date-grouped list. Used inside WhatsNewDialog
- * (modal) and on the /changelog page.
+ * (modal, with a small limit) and on the /changelog page (no limit).
  */
-export function ChangelogList({ autoLoad = true, changelog: injected }: ChangelogListProps) {
+export function ChangelogList({ autoLoad = true, changelog: injected, limit }: ChangelogListProps) {
   const [fetched, setFetched] = useState<Changelog | null>(null);
 
   useEffect(() => {
@@ -58,7 +60,8 @@ export function ChangelogList({ autoLoad = true, changelog: injected }: Changelo
     );
   }
 
-  const groupedByDate = data.commits.reduce((acc, commit) => {
+  const visible = limit !== undefined ? data.commits.slice(0, limit) : data.commits;
+  const groupedByDate = visible.reduce((acc, commit) => {
     const date = commit.date;
     if (!acc[date]) acc[date] = [];
     acc[date].push(commit);

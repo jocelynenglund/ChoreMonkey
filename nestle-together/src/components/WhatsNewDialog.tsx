@@ -97,7 +97,7 @@ export function WhatsNewDialog({ variant = 'icon', open: controlledOpen, onOpenC
           </div>
         </DialogHeader>
         <ScrollArea className="h-[60vh] pr-4">
-          <ChangelogList autoLoad={false} changelog={changelog} />
+          <ChangelogList autoLoad={false} changelog={changelog} limit={20} />
         </ScrollArea>
       </DialogContent>
     </Dialog>
