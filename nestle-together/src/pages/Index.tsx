@@ -1,8 +1,12 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Users, Sparkles, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { WhatsNewDialog } from '@/components/WhatsNewDialog';
 
 const Index = () => {
+  const [whatsNewOpen, setWhatsNewOpen] = useState(false);
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Hero Section */}
@@ -62,9 +66,19 @@ const Index = () => {
       </div>
 
       {/* Footer */}
-      <footer className="text-center py-6 text-sm text-muted-foreground">
-        Made with 🍌 for families everywhere
+      <footer className="text-center py-6 text-sm text-muted-foreground space-y-2">
+        <div>Made with 🍌 for families everywhere</div>
+        <button
+          type="button"
+          onClick={() => setWhatsNewOpen(true)}
+          className="inline-flex items-center gap-1.5 text-xs hover:text-foreground transition-colors"
+        >
+          <Sparkles className="w-3.5 h-3.5" />
+          What's New
+        </button>
       </footer>
+
+      <WhatsNewDialog variant="controlled" open={whatsNewOpen} onOpenChange={setWhatsNewOpen} />
     </div>
   );
 };
