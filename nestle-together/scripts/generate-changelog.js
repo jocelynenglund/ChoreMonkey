@@ -21,13 +21,18 @@ const commits = gitLog
     const [hash, shortHash, message, date, author] = line.split('|');
     return { hash, shortHash, message, date, author };
   })
-  // Filter for user-facing changes (skip merge commits, CI stuff)
+  // Filter for user-facing changes (skip merge commits, CI stuff, opt-outs).
+  //
+  // To keep a commit out of the public /changelog feed (e.g. security fixes
+  // before broad rollout, internal refactors that aren't user-facing), include
+  // the literal token `[skip-changelog]` anywhere in the commit subject — same
+  // pattern as `[skip ci]`.
   .filter(c => {
     const msg = c.message.toLowerCase();
-    // Skip these
     if (msg.startsWith('merge')) return false;
     if (msg.startsWith('chore:') && msg.includes('ci')) return false;
     if (msg.startsWith('docs:')) return false;
+    if (msg.includes('[skip-changelog]')) return false;
     return true;
   })
   // Categorize
