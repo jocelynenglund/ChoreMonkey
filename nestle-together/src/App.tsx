@@ -10,6 +10,7 @@ import AccessHousehold from "./pages/AccessHousehold";
 import HouseholdDashboard from "./pages/HouseholdDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import SlugResolver from "./pages/SlugResolver";
+import Changelog from "./pages/Changelog";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
           <Route path="/household/:id" element={<HouseholdDashboard />} />
           <Route path="/household/:id/admin" element={<AdminDashboard />} />
           <Route path="/h/:slug" element={<SlugResolver />} />
+          <Route path="/changelog" element={<Changelog />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
