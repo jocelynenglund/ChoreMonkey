@@ -168,7 +168,7 @@ internal class Handler(IEventStore store, ISender mediator)
                         foreach (var completion in completions)
                         {
                             var amount = bonusRate * bonusMultiplier;
-                            bonuses.Add(new PayoutBonus(choreId, chore.DisplayName, bonusRate, bonusMultiplier, amount));
+                            bonuses.Add(new PayoutBonus(choreId, chore.DisplayName, bonusRate, bonusMultiplier, amount, completion.CompletedAt));
                             bonusChoresDto.Add(new BonusChoreDto(choreId, chore.DisplayName, completion.CompletedAt, amount));
                             totalBonuses += amount;
                         }
@@ -188,7 +188,7 @@ internal class Handler(IEventStore store, ISender mediator)
                     foreach (var period in missed)
                     {
                         var amount = deductionRate * deductionMultiplier;
-                        deductions.Add(new PayoutDeduction(choreId, chore.DisplayName, deductionRate, deductionMultiplier, amount));
+                        deductions.Add(new PayoutDeduction(choreId, chore.DisplayName, deductionRate, deductionMultiplier, amount, period));
                         missedChoresDto.Add(new MissedChoreDto(choreId, chore.DisplayName, period, amount));
                         totalDeductions += amount;
                     }

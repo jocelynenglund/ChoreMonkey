@@ -23,11 +23,13 @@ public record PayoutDeduction(
     string ChoreName,
     decimal BaseRate,
     decimal Multiplier,
-    decimal Amount);
+    decimal Amount,
+    string? Period = null);
 
 public record PayoutBonus(
     Guid ChoreId,
     string ChoreName,
     decimal BaseRate,
     decimal Multiplier,
-    decimal Amount);
+    decimal Amount,
+    DateTime? CompletedAt = null);

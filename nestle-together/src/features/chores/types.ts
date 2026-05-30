@@ -46,6 +46,11 @@ export interface AddChoreRequest {
   startDate?: string;
   isRequired?: boolean;
   missedDeduction?: number;
+  // Atomic rate-set on creation. The server appends ChoreRatesSet in the
+  // same handler — prevents the silent-drop bug where a separate /rates POST
+  // could fail and leave a bonus chore paying 0.
+  deductionRate?: number;
+  bonusRate?: number;
 }
 
 export interface AssignChoreRequest {

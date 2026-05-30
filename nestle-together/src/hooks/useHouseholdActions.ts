@@ -15,10 +15,11 @@ export function useHouseholdActions({ household, chores, setChores, bumpRefreshK
 
   const handleAddChore = useCallback(async (
     displayName: string, description: string, frequency?: ChoreFrequency,
-    isOptional?: boolean, startDate?: Date, isRequired?: boolean, missedDeduction?: number
+    isOptional?: boolean, startDate?: Date, isRequired?: boolean, missedDeduction?: number,
+    deductionRate?: number, bonusRate?: number
   ) => {
     if (!household) return null;
-    const newChore = await addChore(household.id, displayName, description, frequency, isOptional, startDate, isRequired, missedDeduction);
+    const newChore = await addChore(household.id, displayName, description, frequency, isOptional, startDate, isRequired, missedDeduction, deductionRate, bonusRate);
     if (newChore) {
       setChores((prev) => [...prev, newChore]);
       bumpRefreshKey();

@@ -166,7 +166,6 @@ export default function HouseholdDashboard() {
             onAssignChore={actions.handleAssignChore}
             onDeleteChore={actions.handleDeleteChore}
             onAddChore={actions.handleAddChore}
-            onSetChoreRates={actions.handleSetChoreRates}
           />
         )}
         {activeTab === 'team' && (
