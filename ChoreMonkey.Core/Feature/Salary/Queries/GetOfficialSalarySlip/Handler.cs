@@ -13,13 +13,15 @@ public record DeductionLineDto(
     string ChoreName,
     decimal BaseRate,
     decimal Multiplier,
-    decimal Amount);
+    decimal Amount,
+    string? Period);
 
 public record BonusLineDto(
     string ChoreName,
     decimal BaseRate,
     decimal Multiplier,
-    decimal Amount);
+    decimal Amount,
+    DateTime? CompletedAt);
 
 public record OfficialSalarySlipResponse(
     Guid PeriodId,
@@ -63,12 +65,14 @@ internal class Handler(IEventStore store)
                 d.ChoreName,
                 d.BaseRate,
                 d.Multiplier,
-                d.Amount)).ToList(),
+                d.Amount,
+                d.Period)).ToList(),
             payout.Bonuses.Select(b => new BonusLineDto(
                 b.ChoreName,
                 b.BaseRate,
                 b.Multiplier,
-                b.Amount)).ToList(),
+                b.Amount,
+                b.CompletedAt)).ToList(),
             payout.GrossDeductions,
             payout.GrossBonuses,
             payout.NetPay);

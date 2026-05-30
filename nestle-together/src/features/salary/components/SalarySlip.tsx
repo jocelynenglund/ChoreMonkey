@@ -17,6 +17,21 @@ export function SalarySlip({ slip, onClose, isPreview = false }: SalarySlipProps
 
   const formatCurrency = (amount: number) => `${amount.toFixed(2)} kr`;
 
+  // Period is either an ISO date ("2024-02-13") or a week token ("2024-W06").
+  // Render ISO dates in a short localized form; pass week tokens through unchanged.
+  const formatPeriod = (period: string | null) => {
+    if (!period) return '—';
+    if (/^\d{4}-\d{2}-\d{2}$/.test(period)) {
+      return new Date(period).toLocaleDateString('sv-SE', { month: 'short', day: 'numeric' });
+    }
+    return period;
+  };
+
+  const formatCompletedAt = (iso: string | null) => {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleDateString('sv-SE', { month: 'short', day: 'numeric' });
+  };
+
   return (
     <div className="salary-slip-overlay" onClick={onClose}>
       <div className="salary-slip" onClick={(e) => e.stopPropagation()}>
@@ -41,6 +56,7 @@ export function SalarySlip({ slip, onClose, isPreview = false }: SalarySlipProps
                 <thead>
                   <tr>
                     <th>Chore</th>
+                    <th>Missed</th>
                     <th>Rate</th>
                     <th>Mult.</th>
                     <th>Amount</th>
@@ -50,6 +66,7 @@ export function SalarySlip({ slip, onClose, isPreview = false }: SalarySlipProps
                   {slip.deductions.map((d, i) => (
                     <tr key={i}>
                       <td className="chore-name">{d.choreName}</td>
+                      <td className="slip-when">{formatPeriod(d.period)}</td>
                       <td>{d.baseRate.toFixed(2)}</td>
                       <td>{d.multiplier.toFixed(1)}x</td>
                       <td>-{formatCurrency(d.amount)}</td>
@@ -69,6 +86,7 @@ export function SalarySlip({ slip, onClose, isPreview = false }: SalarySlipProps
                 <thead>
                   <tr>
                     <th>Chore</th>
+                    <th>Done</th>
                     <th>Rate</th>
                     <th>Mult.</th>
                     <th>Amount</th>
@@ -78,6 +96,7 @@ export function SalarySlip({ slip, onClose, isPreview = false }: SalarySlipProps
                   {slip.bonuses.map((b, i) => (
                     <tr key={i}>
                       <td className="chore-name">{b.choreName}</td>
+                      <td className="slip-when">{formatCompletedAt(b.completedAt)}</td>
                       <td>{b.baseRate.toFixed(2)}</td>
                       <td>{b.multiplier.toFixed(1)}x</td>
                       <td>+{formatCurrency(b.amount)}</td>

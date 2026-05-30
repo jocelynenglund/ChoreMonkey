@@ -74,6 +74,7 @@ export interface SlipDeduction {
   baseRate: number;
   multiplier: number;
   amount: number;
+  period: string | null;
 }
 
 export interface SlipBonus {
@@ -81,6 +82,7 @@ export interface SlipBonus {
   baseRate: number;
   multiplier: number;
   amount: number;
+  completedAt: string | null;
 }
 
 export interface AvailablePeriod {
