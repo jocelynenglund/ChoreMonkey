@@ -52,7 +52,7 @@ interface AppState {
   
   // Chores
   getHouseholdChores: (householdId: string) => Promise<Chore[]>;
-  addChore: (householdId: string, displayName: string, description: string, frequency?: ChoreFrequency, isOptional?: boolean, startDate?: Date, isRequired?: boolean, missedDeduction?: number) => Promise<Chore | null>;
+  addChore: (householdId: string, displayName: string, description: string, frequency?: ChoreFrequency, isOptional?: boolean, startDate?: Date, isRequired?: boolean, missedDeduction?: number, deductionRate?: number, bonusRate?: number) => Promise<Chore | null>;
   completeChore: (householdId: string, choreId: string, memberId: string, completedAt?: Date) => Promise<void>;
   assignChore: (householdId: string, choreId: string, memberIds?: string[], assignToAll?: boolean) => Promise<void>;
   deleteChore: (householdId: string, choreId: string) => Promise<boolean>;
@@ -230,7 +230,7 @@ export const useAppStore = create<AppState>()(
 
       getHouseholdChores: (householdId) => choresApi.fetchChores(householdId),
 
-      addChore: async (householdId, displayName, description, frequency, isOptional, startDate, isRequired = true, missedDeduction = 10) => {
+      addChore: async (householdId, displayName, description, frequency, isOptional, startDate, isRequired = true, missedDeduction = 10, deductionRate, bonusRate) => {
         try {
           const choreId = crypto.randomUUID();
           await choresApi.addChore(householdId, {
@@ -242,6 +242,8 @@ export const useAppStore = create<AppState>()(
             startDate: startDate?.toISOString(),
             isRequired,
             missedDeduction,
+            deductionRate,
+            bonusRate,
           });
 
           // Return a minimal chore object - full data comes from refresh

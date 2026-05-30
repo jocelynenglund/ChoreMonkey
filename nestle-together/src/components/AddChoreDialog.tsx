@@ -23,8 +23,7 @@ import { Switch } from '@/components/ui/switch';
 import type { ChoreFrequency } from '@/types/household';
 
 interface AddChoreDialogProps {
-  onAdd: (displayName: string, description: string, frequency?: ChoreFrequency, isOptional?: boolean, startDate?: Date, isRequired?: boolean, missedDeduction?: number) => Promise<{ id: string } | null | void>;
-  onSetRates?: (choreId: string, deductionRate: number, bonusRate: number) => Promise<void>;
+  onAdd: (displayName: string, description: string, frequency?: ChoreFrequency, isOptional?: boolean, startDate?: Date, isRequired?: boolean, missedDeduction?: number, deductionRate?: number, bonusRate?: number) => Promise<{ id: string } | null | void>;
 }
 
 const DAYS_OF_WEEK = [
@@ -37,7 +36,7 @@ const DAYS_OF_WEEK = [
   { value: 'sunday', label: 'Sun' },
 ];
 
-export function AddChoreDialog({ onAdd, onSetRates }: AddChoreDialogProps) {
+export function AddChoreDialog({ onAdd }: AddChoreDialogProps) {
   const [open, setOpen] = useState(false);
   const [displayName, setDisplayName] = useState('');
   const [description, setDescription] = useState('');
@@ -70,19 +69,26 @@ export function AddChoreDialog({ onAdd, onSetRates }: AddChoreDialogProps) {
     const parsedStartDate = startDate ? new Date(startDate) : undefined;
     const deduction = parseFloat(missedDeduction) || 10;
     const bonus = parseFloat(bonusRate) || 10;
-    
-    const result = await onAdd(displayName.trim(), description.trim(), frequency, isOptional, parsedStartDate, isRequired, deduction);
-    
-    // Set salary rates if we got a chore ID back
-    if (result?.id && onSetRates) {
-      // Required chores have deductions, bonus chores have bonuses (mutually exclusive)
-      if (isOptional) {
-        await onSetRates(result.id, 0, bonus);
-      } else if (isRequired) {
-        await onSetRates(result.id, deduction, 0);
-      }
-    }
-    
+
+    // Rates are mutually exclusive: required chores get a deduction rate,
+    // optional/bonus chores get a bonus rate. Pass them with the create call
+    // so the server writes ChoreCreated + ChoreRatesSet in a single request —
+    // the old two-step flow could silently drop the rate.
+    const deductionForApi = !isOptional && isRequired ? deduction : undefined;
+    const bonusForApi = isOptional ? bonus : undefined;
+
+    await onAdd(
+      displayName.trim(),
+      description.trim(),
+      frequency,
+      isOptional,
+      parsedStartDate,
+      isRequired,
+      deduction,
+      deductionForApi,
+      bonusForApi,
+    );
+
     setIsSubmitting(false);
     setDisplayName('');
     setDescription('');

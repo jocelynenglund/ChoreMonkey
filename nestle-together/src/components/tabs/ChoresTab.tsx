@@ -15,13 +15,12 @@ interface ChoresTabProps {
   onCompleteChore: (chore: Chore | string) => void;
   onAssignChore: (choreId: string, memberIds?: string[], assignToAll?: boolean) => void;
   onDeleteChore: (choreId: string) => void;
-  onAddChore: (displayName: string, description: string, frequency?: ChoreFrequency, isOptional?: boolean, startDate?: Date, isRequired?: boolean, missedDeduction?: number) => Promise<{ id: string } | null>;
-  onSetChoreRates: (choreId: string, deductionRate: number, bonusRate: number) => Promise<void>;
+  onAddChore: (displayName: string, description: string, frequency?: ChoreFrequency, isOptional?: boolean, startDate?: Date, isRequired?: boolean, missedDeduction?: number, deductionRate?: number, bonusRate?: number) => Promise<{ id: string } | null>;
 }
 
 export function ChoresTab({
   householdId, currentMemberId, members, chores, refreshKey, isAdmin,
-  onCompleteChore, onAssignChore, onDeleteChore, onAddChore, onSetChoreRates,
+  onCompleteChore, onAssignChore, onDeleteChore, onAddChore,
 }: ChoresTabProps) {
   const isAssignedToMe = (chore: Chore) =>
     chore.assignedToAll || (chore.assignedTo?.includes(currentMemberId || '') ?? false);
@@ -37,7 +36,7 @@ export function ChoresTab({
           <ClipboardList className="w-5 h-5 text-primary" />
           <h2 className="font-bold text-lg">My Chores</h2>
         </div>
-        <AddChoreDialog onAdd={onAddChore} onSetRates={onSetChoreRates} />
+        <AddChoreDialog onAdd={onAddChore} />
       </div>
 
       {currentMemberId && (
