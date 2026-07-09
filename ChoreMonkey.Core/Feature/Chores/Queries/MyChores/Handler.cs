@@ -74,7 +74,10 @@ internal class Handler(IEventStore store)
         var assignments = choreEvents.OfType<ChoreAssigned>()
             .GroupBy(e => e.ChoreId)
             .ToDictionary(g => g.Key, g => g.Last());
-        
+
+        // Active pause windows per chore — a missed instance within a window isn't overdue.
+        var chorePauses = ChorePauses.Build(choreEvents);
+
         // Get this member's completions
         var myCompletions = choreEvents.OfType<ChoreCompleted>()
             .Where(c => c.CompletedByMemberId == request.MemberId)
@@ -166,7 +169,8 @@ internal class Handler(IEventStore store)
                     yesterday,
                     currentWeekStart,
                     previousWeekStart,
-                    choreStartDate);
+                    choreStartDate,
+                    chorePauses.GetValueOrDefault(choreId));
                 
                 if (overdueResult.IsOverdue)
                 {
@@ -241,82 +245,94 @@ internal class Handler(IEventStore store)
         DateTime yesterday,
         DateTime currentWeekStart,
         DateTime previousWeekStart,
-        DateTime choreStartDate)
+        DateTime choreStartDate,
+        List<PauseWindow>? pauses)
     {
         if (frequency == null || frequency.Type.ToLower() == "once")
         {
             return new OverdueResult(false, null, null);
         }
-        
+
         return frequency.Type.ToLower() switch
         {
-            "daily" => GetDailyOverdue(completions, acknowledgedPeriods, yesterday, choreStartDate),
-            "weekly" => GetWeeklyOverdue(frequency.Days, completions, acknowledgedPeriods, currentWeekStart, previousWeekStart, choreStartDate),
-            "interval" => GetIntervalOverdue(frequency.IntervalDays ?? 1, completions, acknowledgedPeriods, today, choreStartDate),
+            "daily" => GetDailyOverdue(completions, acknowledgedPeriods, yesterday, choreStartDate, pauses),
+            "weekly" => GetWeeklyOverdue(frequency.Days, completions, acknowledgedPeriods, currentWeekStart, previousWeekStart, choreStartDate, pauses),
+            "interval" => GetIntervalOverdue(frequency.IntervalDays ?? 1, completions, acknowledgedPeriods, today, choreStartDate, pauses),
             _ => new OverdueResult(false, null, null)
         };
     }
-    
+
     private static OverdueResult GetDailyOverdue(
         List<ChoreCompleted> completions,
         HashSet<string> acknowledgedPeriods,
         DateTime yesterday,
-        DateTime choreStartDate)
+        DateTime choreStartDate,
+        List<PauseWindow>? pauses)
     {
         // Can't be overdue if chore didn't exist yesterday
         if (choreStartDate > yesterday)
             return new OverdueResult(false, null, null);
-        
+
         var periodKey = yesterday.ToString("yyyy-MM-dd");
-        
+
         // Check if acknowledged
         if (acknowledgedPeriods.Contains(periodKey))
             return new OverdueResult(false, null, null);
-        
+
         // Check if completed yesterday
         var yesterdayCompletion = completions.FirstOrDefault(c => c.CompletedAt.Date == yesterday);
         if (yesterdayCompletion != null)
             return new OverdueResult(false, null, null);
-        
+
+        // Exempt if yesterday falls within a pause window
+        if (pauses.CoversDate(yesterday))
+            return new OverdueResult(false, null, null);
+
         return new OverdueResult(true, "yesterday", periodKey);
     }
-    
+
     private static OverdueResult GetWeeklyOverdue(
         string[]? days,
         List<ChoreCompleted> completions,
         HashSet<string> acknowledgedPeriods,
         DateTime currentWeekStart,
         DateTime previousWeekStart,
-        DateTime choreStartDate)
+        DateTime choreStartDate,
+        List<PauseWindow>? pauses)
     {
         // Can't be overdue if chore didn't exist last week
         if (choreStartDate >= currentWeekStart)
             return new OverdueResult(false, null, null);
-        
+
         var periodKey = GetWeekPeriod(previousWeekStart);
-        
+
         // Check if acknowledged
         if (acknowledgedPeriods.Contains(periodKey))
             return new OverdueResult(false, null, null);
-        
+
         // Check if completed last week
-        var lastWeekCompletion = completions.FirstOrDefault(c => 
+        var lastWeekCompletion = completions.FirstOrDefault(c =>
             c.CompletedAt.Date >= previousWeekStart && c.CompletedAt.Date < currentWeekStart);
         if (lastWeekCompletion != null)
             return new OverdueResult(false, null, null);
-        
+
+        // Exempt if a pause window overlaps last week
+        if (pauses.CoversAnyInRange(previousWeekStart, currentWeekStart.AddDays(-1)))
+            return new OverdueResult(false, null, null);
+
         return new OverdueResult(true, "last week", periodKey);
     }
-    
+
     private static OverdueResult GetIntervalOverdue(
         int intervalDays,
         List<ChoreCompleted> completions,
         HashSet<string> acknowledgedPeriods,
         DateTime today,
-        DateTime choreStartDate)
+        DateTime choreStartDate,
+        List<PauseWindow>? pauses)
     {
         var lastCompletion = completions.MaxBy(c => c.CompletedAt);
-        
+
         DateTime dueDate;
         if (lastCompletion == null)
         {
@@ -326,22 +342,26 @@ internal class Handler(IEventStore store)
         {
             dueDate = lastCompletion.CompletedAt.Date.AddDays(intervalDays);
         }
-        
+
         if (today <= dueDate)
             return new OverdueResult(false, null, null);
-        
+
         var daysOverdue = (int)(today - dueDate).TotalDays;
-        
+
         // Only show if within grace period (1 interval)
         if (daysOverdue > intervalDays)
             return new OverdueResult(false, null, null);
-        
+
         var periodKey = dueDate.ToString("yyyy-MM-dd");
-        
+
         // Check if acknowledged
         if (acknowledgedPeriods.Contains(periodKey))
             return new OverdueResult(false, null, null);
-        
+
+        // Exempt if the due date falls within a pause window
+        if (pauses.CoversDate(dueDate))
+            return new OverdueResult(false, null, null);
+
         var overduePeriod = daysOverdue == 1 ? "yesterday" : $"{daysOverdue} days ago";
         return new OverdueResult(true, overduePeriod, periodKey);
     }

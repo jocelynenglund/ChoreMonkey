@@ -1,10 +1,25 @@
 import { useState, useEffect } from 'react';
-import { Trash2, Users, DollarSign, Star, Pencil } from 'lucide-react';
+import { Trash2, Users, DollarSign, Star, Pencil, CalendarClock, X } from 'lucide-react';
 import { useHouseholdStore } from '@/stores/householdStore';
 import { setChoreRates } from '../../salary/api';
-import { updateChore } from '../../chores/api';
-import type { Chore } from '../../chores/types';
+import { updateChore, pauseChore, removeChorePause } from '../../chores/api';
+import type { Chore, PauseWindow } from '../../chores/types';
 import './ChoreManagement.css';
+
+function todayIso(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function formatPauseRange(p: PauseWindow): string {
+  const opts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
+  return `${p.start.toLocaleDateString(undefined, opts)} – ${p.end.toLocaleDateString(undefined, opts)}`;
+}
+
+function isPauseActive(p: PauseWindow): boolean {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return p.start <= today && today <= p.end;
+}
 
 interface EditForm {
   displayName: string;
@@ -37,6 +52,9 @@ export function ChoreManagement() {
   });
   const [editSaving, setEditSaving] = useState(false);
   const [assigningChore, setAssigningChore] = useState<string | null>(null);
+  const [pausingChore, setPausingChore] = useState<string | null>(null);
+  const [pauseForm, setPauseForm] = useState({ start: todayIso(), end: todayIso(), reason: '' });
+  const [pauseSaving, setPauseSaving] = useState(false);
   const [ratesForm, setRatesForm] = useState({ deductionRate: '10', bonusRate: '10' });
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
   const [assignToAll, setAssignToAll] = useState(false);
@@ -143,6 +161,43 @@ export function ChoreManagement() {
     setAssigningChore(chore.id);
     setSelectedMembers(chore.assignedTo || []);
     setAssignToAll(chore.assignedToAll || false);
+  }
+
+  function startPausing(chore: Chore) {
+    setPausingChore(chore.id);
+    setPauseForm({ start: todayIso(), end: todayIso(), reason: '' });
+  }
+
+  async function savePause(chore: Chore) {
+    if (!currentHouseholdId || !currentPinCode) return;
+    if (pauseForm.end < pauseForm.start) {
+      showMessage('End date must be on or after start date');
+      return;
+    }
+    setPauseSaving(true);
+    const result = await pauseChore(currentHouseholdId, chore.id, {
+      pauseStart: pauseForm.start,
+      pauseEnd: pauseForm.end,
+      pinCode: Number(currentPinCode),
+      reason: pauseForm.reason.trim() || undefined,
+    });
+    if (result) {
+      setPausingChore(null);
+      showMessage('Chore paused');
+      loadData();
+    } else {
+      showMessage('Could not pause chore');
+    }
+    setPauseSaving(false);
+  }
+
+  async function handleRemovePause(choreId: string, pauseId: string) {
+    if (!currentHouseholdId || !currentPinCode) return;
+    const ok = await removeChorePause(currentHouseholdId, choreId, pauseId, Number(currentPinCode));
+    if (ok) {
+      showMessage('Pause removed');
+      loadData();
+    }
   }
 
   function showMessage(text: string) {
@@ -279,6 +334,29 @@ export function ChoreManagement() {
                   <button className="save-btn" onClick={() => handleSaveAssignment(chore.id)}>💾 Save</button>
                 </div>
               </div>
+            ) : pausingChore === chore.id ? (
+              <div className="edit-form">
+                <h4>Pause “{chore.displayName}”</h4>
+                <p className="pause-hint">Missed instances between these dates won't count as overdue or deduct pay.</p>
+                <label>From
+                  <input type="date" value={pauseForm.start}
+                    onChange={e => setPauseForm({ ...pauseForm, start: e.target.value })} />
+                </label>
+                <label>To
+                  <input type="date" value={pauseForm.end} min={pauseForm.start}
+                    onChange={e => setPauseForm({ ...pauseForm, end: e.target.value })} />
+                </label>
+                <label>Reason (optional)
+                  <input type="text" placeholder="e.g. Summer holiday" value={pauseForm.reason}
+                    onChange={e => setPauseForm({ ...pauseForm, reason: e.target.value })} />
+                </label>
+                <div className="form-actions">
+                  <button className="cancel-btn" onClick={() => setPausingChore(null)}>Cancel</button>
+                  <button className="save-btn" disabled={pauseSaving} onClick={() => savePause(chore)}>
+                    {pauseSaving ? 'Saving...' : '⏸ Pause'}
+                  </button>
+                </div>
+              </div>
             ) : (
               <>
                 <div className="chore-info">
@@ -288,9 +366,24 @@ export function ChoreManagement() {
                     {(chore.deductionRate ?? chore.missedDeduction) ? ` • -${chore.deductionRate ?? chore.missedDeduction} kr` : ''}
                   </span>
                   <span className="assigned">
-                    {chore.assignedToAll ? 'Everyone' : 
+                    {chore.assignedToAll ? 'Everyone' :
                       chore.assignedTo?.length ? `${chore.assignedTo.length} assigned` : 'Unassigned'}
                   </span>
+                  {chore.pauses && chore.pauses.length > 0 && (
+                    <div className="pause-badges">
+                      {chore.pauses.map(p => (
+                        <span key={p.pauseId} className={`pause-badge${isPauseActive(p) ? ' active' : ''}`}
+                          title={p.reason || undefined}>
+                          <CalendarClock className="w-3 h-3" />
+                          {isPauseActive(p) ? 'Paused' : 'Pause'} {formatPauseRange(p)}
+                          <button className="pause-remove" title="Remove pause"
+                            onClick={() => handleRemovePause(chore.id, p.pauseId)}>
+                            <X className="w-3 h-3" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div className="chore-actions">
                   <button onClick={() => startEditingDetails(chore)} title="Edit chore">
@@ -298,6 +391,9 @@ export function ChoreManagement() {
                   </button>
                   <button onClick={() => startAssigning(chore)} title="Assign">
                     <Users className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => startPausing(chore)} title="Pause chore">
+                    <CalendarClock className="w-4 h-4" />
                   </button>
                   <button onClick={() => startEditing(chore)} title="Edit rates">
                     <DollarSign className="w-4 h-4" />

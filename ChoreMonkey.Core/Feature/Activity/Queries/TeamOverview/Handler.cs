@@ -86,7 +86,10 @@ internal class Handler(IEventStore store, ISender mediator)
         var assignments = choreEvents.OfType<ChoreAssigned>()
             .GroupBy(e => e.ChoreId)
             .ToDictionary(g => g.Key, g => g.Last());
-        
+
+        // Active pause windows per chore — a missed instance within a window isn't overdue.
+        var chorePauses = ChorePauses.Build(choreEvents);
+
         // Get completions grouped by chore and member
         var completions = choreEvents.OfType<ChoreCompleted>()
             .GroupBy(e => (e.ChoreId, e.CompletedByMemberId))
@@ -119,11 +122,12 @@ internal class Handler(IEventStore store, ISender mediator)
                 
                 // Calculate status
                 var (status, overduePeriod) = CalculateStatus(
-                    chore.Frequency, 
-                    lastCompletedAt, 
-                    today, 
+                    chore.Frequency,
+                    lastCompletedAt,
+                    today,
                     choreStartDate,
-                    chore.IsOptional);
+                    chore.IsOptional,
+                    chorePauses.GetValueOrDefault(choreId));
                 
                 choreStatuses.Add(new ChoreStatusDto(
                     choreId,
@@ -158,38 +162,39 @@ internal class Handler(IEventStore store, ISender mediator)
     }
     
     private static (string Status, string? OverduePeriod) CalculateStatus(
-        ChoreFrequency? frequency, 
-        DateTime? lastCompleted, 
+        ChoreFrequency? frequency,
+        DateTime? lastCompleted,
         DateTime today,
         DateTime choreStartDate,
-        bool isOptional)
+        bool isOptional,
+        List<PauseWindow>? pauses)
     {
         if (frequency == null || frequency.Type.ToLower() == "once")
         {
             // One-time chore: completed if ever done
             return lastCompleted != null ? ("completed", null) : ("pending", null);
         }
-        
+
         // Check if completed this period
         var completedThisPeriod = IsCompletedThisPeriod(frequency, lastCompleted, today);
         if (completedThisPeriod)
         {
             return ("completed", null);
         }
-        
+
         // Optional chores can't be overdue
         if (isOptional)
         {
             return ("pending", null);
         }
-        
+
         // Check if overdue
-        var overduePeriod = CalculateOverduePeriod(frequency, lastCompleted, today, choreStartDate);
+        var overduePeriod = CalculateOverduePeriod(frequency, lastCompleted, today, choreStartDate, pauses);
         if (overduePeriod != null)
         {
             return ("overdue", overduePeriod);
         }
-        
+
         return ("pending", null);
     }
     
@@ -206,27 +211,28 @@ internal class Handler(IEventStore store, ISender mediator)
         };
     }
     
-    private static string? CalculateOverduePeriod(ChoreFrequency? frequency, DateTime? lastCompleted, DateTime today, DateTime choreCreatedAt)
+    private static string? CalculateOverduePeriod(ChoreFrequency? frequency, DateTime? lastCompleted, DateTime today, DateTime choreCreatedAt, List<PauseWindow>? pauses)
     {
         if (frequency == null) return null;
-        
+
         return frequency.Type.ToLower() switch
         {
-            "daily" => CalculateDailyOverdue(lastCompleted, today, choreCreatedAt),
-            "weekly" => CalculateWeeklyOverdue(frequency.Days, lastCompleted, today, choreCreatedAt),
-            "interval" => CalculateIntervalOverdue(frequency.IntervalDays ?? 1, lastCompleted, today, choreCreatedAt),
+            "daily" => CalculateDailyOverdue(lastCompleted, today, choreCreatedAt, pauses),
+            "weekly" => CalculateWeeklyOverdue(frequency.Days, lastCompleted, today, choreCreatedAt, pauses),
+            "interval" => CalculateIntervalOverdue(frequency.IntervalDays ?? 1, lastCompleted, today, choreCreatedAt, pauses),
             _ => null
         };
     }
-    
-    private static string? CalculateDailyOverdue(DateTime? lastCompleted, DateTime today, DateTime choreCreatedAt)
+
+    private static string? CalculateDailyOverdue(DateTime? lastCompleted, DateTime today, DateTime choreCreatedAt, List<PauseWindow>? pauses)
     {
         var yesterday = today.AddDays(-1);
-        
+
         if (choreCreatedAt > yesterday) return null;
         if (lastCompleted?.Date >= today) return null;
         if (lastCompleted?.Date >= yesterday) return null;
-        
+        if (pauses.CoversDate(yesterday)) return null;
+
         return "yesterday";
     }
     
@@ -236,41 +242,43 @@ internal class Handler(IEventStore store, ISender mediator)
         return date.AddDays(-diff).Date;
     }
 
-    private static string? CalculateWeeklyOverdue(string[]? days, DateTime? lastCompleted, DateTime today, DateTime choreCreatedAt)
+    private static string? CalculateWeeklyOverdue(string[]? days, DateTime? lastCompleted, DateTime today, DateTime choreCreatedAt, List<PauseWindow>? pauses)
     {
         var currentWeekStart = GetMondayOfWeek(today);
         var previousWeekStart = currentWeekStart.AddDays(-7);
-        
+
         if (days == null || days.Length == 0)
         {
             if (choreCreatedAt >= previousWeekStart) return null;
             if (lastCompleted?.Date >= currentWeekStart) return null;
             if (lastCompleted?.Date >= previousWeekStart) return null;
+            if (pauses.CoversAnyInRange(previousWeekStart, currentWeekStart.AddDays(-1))) return null;
             return "last week";
         }
-        
+
         var requiredDays = days
             .Select(d => Enum.Parse<DayOfWeek>(d, ignoreCase: true))
             .ToHashSet();
-        
+
         for (int i = 0; i < 7; i++)
         {
             var checkDate = previousWeekStart.AddDays(i);
-            
+
             if (!requiredDays.Contains(checkDate.DayOfWeek)) continue;
             if (choreCreatedAt > checkDate) continue;
             if (lastCompleted?.Date >= checkDate) return null;
-            
+            if (pauses.CoversDate(checkDate)) continue;
+
             return $"last {checkDate.DayOfWeek}";
         }
-        
+
         return null;
     }
-    
-    private static string? CalculateIntervalOverdue(int intervalDays, DateTime? lastCompleted, DateTime today, DateTime choreCreatedAt)
+
+    private static string? CalculateIntervalOverdue(int intervalDays, DateTime? lastCompleted, DateTime today, DateTime choreCreatedAt, List<PauseWindow>? pauses)
     {
         DateTime dueDate;
-        
+
         if (lastCompleted == null)
         {
             dueDate = choreCreatedAt.AddDays(intervalDays);
@@ -279,13 +287,14 @@ internal class Handler(IEventStore store, ISender mediator)
         {
             dueDate = lastCompleted.Value.Date.AddDays(intervalDays);
         }
-        
+
         if (today <= dueDate) return null;
-        
+        if (pauses.CoversDate(dueDate)) return null;
+
         var daysOverdue = (int)(today - dueDate).TotalDays;
-        
+
         if (daysOverdue > intervalDays) return null;
-        
+
         if (daysOverdue == 1) return "yesterday";
         return $"{daysOverdue} days ago";
     }
