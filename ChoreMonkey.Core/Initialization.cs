@@ -33,6 +33,8 @@ using ChoreMonkey.Core.Feature.Chores.Commands.CompleteChore;
 using ChoreMonkey.Core.Feature.Chores.Commands.DeleteChore;
 using ChoreMonkey.Core.Feature.Chores.Commands.UpdateChore;
 using ChoreMonkey.Core.Feature.Chores.Commands.AcknowledgeMissed;
+using ChoreMonkey.Core.Feature.Chores.Commands.PauseChore;
+using ChoreMonkey.Core.Feature.Chores.Commands.RemoveChorePause;
 using ChoreMonkey.Core.Feature.Chores.Queries.ChoreList;
 using ChoreMonkey.Core.Feature.Chores.Queries.ChoreHistory;
 using ChoreMonkey.Core.Feature.Chores.Queries.MyChores;
@@ -161,6 +163,8 @@ public static class Initialization
         services.AddScoped<Feature.Chores.Commands.DeleteChore.Handler>();
         services.AddScoped<Feature.Chores.Commands.UpdateChore.Handler>();
         services.AddScoped<Feature.Chores.Commands.AcknowledgeMissed.Handler>();
+        services.AddScoped<Feature.Chores.Commands.PauseChore.Handler>();
+        services.AddScoped<Feature.Chores.Commands.RemoveChorePause.Handler>();
         services.AddScoped<Feature.Chores.Queries.ChoreList.Handler>();
         services.AddScoped<Feature.Chores.Queries.ChoreHistory.Handler>();
         services.AddScoped<Feature.Chores.Queries.MyChores.Handler>();
@@ -226,6 +230,8 @@ public static class Initialization
         DeleteChoreEndpoint.Map(householdEndpoints);
         UpdateChoreEndpoint.Map(householdEndpoints);
         AcknowledgeMissedEndpoint.Map(householdEndpoints);
+        PauseChoreEndpoint.Map(householdEndpoints);
+        RemoveChorePauseEndpoint.Map(householdEndpoints);
         ChoreListEndpoint.Map(householdEndpoints);
         ChoreHistoryEndpoint.Map(householdEndpoints);
         MyChoresEndpoint.Map(householdEndpoints);

@@ -25,7 +25,14 @@ public record ChoreDto(
     bool IsRequired = true,
     decimal MissedDeduction = 10m,
     decimal? DeductionRate = null,
-    decimal? BonusRate = null);
+    decimal? BonusRate = null,
+    List<PauseWindowDto>? Pauses = null);
+
+public record PauseWindowDto(
+    Guid PauseId,
+    DateTime Start,
+    DateTime End,
+    string? Reason);
 
 public record MemberCompletionDto(
     Guid MemberId,
@@ -95,6 +102,9 @@ internal class Handler(IEventStore store)
             .GroupBy(e => e.ChoreId)
             .ToDictionary(g => g.Key, g => g.Last());
 
+        // Active pause windows per chore
+        var chorePauses = ChorePauses.Build(events);
+
         // Get all completions grouped by chore
         var completionsByChore = events.OfType<ChoreCompleted>()
             .GroupBy(e => e.ChoreId)
@@ -106,8 +116,13 @@ internal class Handler(IEventStore store)
                 var choreCompletions = completionsByChore.GetValueOrDefault(e.ChoreId) ?? new List<ChoreCompleted>();
                 var lastCompletion = choreCompletions.OrderByDescending(c => c.CompletedAt).FirstOrDefault();
                 var rates = choreRates.GetValueOrDefault(e.ChoreId);
-                
-                var frequency = e.Frequency != null 
+
+                var pauses = chorePauses.GetValueOrDefault(e.ChoreId)
+                    ?.OrderBy(p => p.Start)
+                    .Select(p => new PauseWindowDto(p.PauseId, p.Start, p.End, p.Reason))
+                    .ToList();
+
+                var frequency = e.Frequency != null
                     ? new FrequencyDto(e.Frequency.Type, e.Frequency.Days, e.Frequency.IntervalDays)
                     : new FrequencyDto("once");
                 
@@ -151,7 +166,8 @@ internal class Handler(IEventStore store)
                     e.IsRequired,
                     e.MissedDeduction,
                     rates?.DeductionRate,
-                    rates?.BonusRate);
+                    rates?.BonusRate,
+                    pauses);
             })
             .ToList();
 

@@ -12,6 +12,15 @@ export interface MemberCompletion {
   lastCompletedAt?: Date;
 }
 
+// A date range during which the chore's missed instances are exempt from
+// overdue status and salary deductions.
+export interface PauseWindow {
+  pauseId: string;
+  start: Date;
+  end: Date;
+  reason?: string;
+}
+
 export interface Chore {
   id: string;
   householdId: string;
@@ -30,6 +39,7 @@ export interface Chore {
   missedDeduction?: number;
   deductionRate?: number;
   bonusRate?: number;
+  pauses?: PauseWindow[];
 }
 
 export interface ChoreCompletion {

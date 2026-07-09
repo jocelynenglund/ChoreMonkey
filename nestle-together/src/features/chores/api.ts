@@ -7,6 +7,7 @@ import type {
   MemberOverdue,
   ChoreFrequency,
   MemberCompletion,
+  PauseWindow,
 } from './types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7422';
@@ -48,6 +49,14 @@ export async function fetchChores(householdId: string): Promise<Chore[]> {
       missedDeduction: c.missedDeduction as number | undefined,
       deductionRate: c.deductionRate as number | undefined,
       bonusRate: c.bonusRate as number | undefined,
+      pauses: Array.isArray(c.pauses)
+        ? (c.pauses as Record<string, unknown>[]).map((p) => ({
+            pauseId: p.pauseId as string,
+            start: new Date(p.start as string),
+            end: new Date(p.end as string),
+            reason: (p.reason ?? undefined) as string | undefined,
+          }))
+        : undefined,
     };
   });
 }
@@ -238,6 +247,59 @@ export async function updateChore(
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
+    }
+  );
+  return response.ok;
+}
+
+// ============ Pause Chore ============
+
+export interface PauseChorePayload {
+  pauseStart: string; // ISO date
+  pauseEnd: string;   // ISO date
+  pinCode: number;
+  reason?: string;
+}
+
+/** Adds a pause window to a chore. Returns the new pause window on success. */
+export async function pauseChore(
+  householdId: string,
+  choreId: string,
+  payload: PauseChorePayload
+): Promise<PauseWindow | null> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/households/${householdId}/chores/${choreId}/pause`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    }
+  );
+  if (!response.ok) {
+    return null;
+  }
+  const data = await response.json();
+  return {
+    pauseId: data.pauseId as string,
+    start: new Date(payload.pauseStart),
+    end: new Date(payload.pauseEnd),
+    reason: payload.reason,
+  };
+}
+
+/** Removes a pause window from a chore by its pauseId. */
+export async function removeChorePause(
+  householdId: string,
+  choreId: string,
+  pauseId: string,
+  pinCode: number
+): Promise<boolean> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/households/${householdId}/chores/${choreId}/pause/${pauseId}/remove`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pinCode }),
     }
   );
   return response.ok;

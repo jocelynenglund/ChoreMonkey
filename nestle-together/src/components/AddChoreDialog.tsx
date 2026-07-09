@@ -23,7 +23,7 @@ import { Switch } from '@/components/ui/switch';
 import type { ChoreFrequency } from '@/types/household';
 
 interface AddChoreDialogProps {
-  onAdd: (displayName: string, description: string, frequency?: ChoreFrequency, isOptional?: boolean, startDate?: Date, isRequired?: boolean, missedDeduction?: number) => Promise<{ id: string } | null | void>;
+  onAdd: (displayName: string, description: string, frequency?: ChoreFrequency, isOptional?: boolean, startDate?: Date, isRequired?: boolean, missedDeduction?: number) => Promise<{ id: string } | null>;
   onSetRates?: (choreId: string, deductionRate: number, bonusRate: number) => Promise<void>;
 }
 

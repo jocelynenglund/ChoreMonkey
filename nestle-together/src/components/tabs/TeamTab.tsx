@@ -3,6 +3,7 @@ import { InviteDialog } from '@/components/InviteDialog';
 import { RemoveMemberDialog } from '@/components/RemoveMemberDialog';
 import { TeamOverviewAccordion } from '@/components/TeamOverviewAccordion';
 import type { Member } from '@/features/members/types';
+import type { Invite } from '@/types/household';
 
 // Marquee for member status
 function StatusMarquee({ text }: { text: string }) {
@@ -28,7 +29,7 @@ interface TeamTabProps {
   refreshKey: number;
   hoveredMemberStatus: string | null;
   onHoverStatus: (status: string | null) => void;
-  onGenerateInvite: () => ReturnType<typeof Promise.resolve>;
+  onGenerateInvite: () => Promise<Invite | null>;
   onRemoveMember: (memberId: string, pinCode: string) => Promise<boolean>;
   onAssignmentChange: () => void;
 }
