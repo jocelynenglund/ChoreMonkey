@@ -153,7 +153,40 @@ public class ChorePauseTests(ApiFixture fixture)
         payout.MissedChores.Should().Contain(m => m.ChoreName == "Sweep Floor");
     }
 
+    [Fact]
+    public async Task PausedChore_HasNoDeductionInCurrentPeriodPreview()
+    {
+        // The live salary preview (GET /salary/current) must also honor pauses.
+        var household = await CreateHousehold("Preview Excused Family");
+        var invite = await GenerateInvite(household.HouseholdId);
+        var kid = await JoinHousehold(household.HouseholdId, invite.InviteId, "Excused Kid");
+        await SetSalary(household.HouseholdId, kid.MemberId, baseSalary: 1000);
+
+        var choreId = await CreateDailyChore(household.HouseholdId, "Sweep Floor", startDaysAgo: 40, deduction: 10);
+        await AssignChore(household.HouseholdId, choreId, kid.MemberId);
+
+        // Sanity: without a pause the preview shows deductions
+        var before = await GetCurrentPeriod(household.HouseholdId);
+        before.Members.First(m => m.MemberId == kid.MemberId).Deductions.Should().BeGreaterThan(0);
+
+        // Pause across the whole current period
+        await PauseChore(household.HouseholdId, choreId, DateTime.UtcNow.Date.AddDays(-40), DateTime.UtcNow.Date);
+
+        var after = await GetCurrentPeriod(household.HouseholdId);
+        var summary = after.Members.First(m => m.MemberId == kid.MemberId);
+        summary.Deductions.Should().Be(0);
+        summary.MissedChores.Should().NotContain(m => m.ChoreName == "Sweep Floor");
+        summary.Projected.Should().Be(1000);
+    }
+
     #region Helpers
+
+    private async Task<CurrentPeriodResponse> GetCurrentPeriod(Guid householdId)
+    {
+        var response = await _client.GetAsync($"/api/households/{householdId}/salary/current");
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<CurrentPeriodResponse>())!;
+    }
 
     private async Task<Guid> CreateDailyChore(Guid householdId, string name, int startDaysAgo, decimal deduction = 10m)
     {
@@ -257,6 +290,8 @@ public class ChorePauseTests(ApiFixture fixture)
     private record ClosePeriodResponse(Guid PeriodId, DateTime PeriodStart, DateTime PeriodEnd, List<PayoutSummaryDto> Payouts);
     private record PayoutSummaryDto(Guid MemberId, string Name, decimal BaseSalary, decimal Deductions, decimal Bonuses, decimal NetPay, List<MissedChoreDto> MissedChores);
     private record MissedChoreDto(Guid ChoreId, string ChoreName, string Period, decimal Deduction);
+    private record CurrentPeriodResponse(DateTime PeriodStart, DateTime PeriodEnd, List<MemberPeriodSummary> Members);
+    private record MemberPeriodSummary(Guid MemberId, string Name, decimal BaseSalary, decimal Deductions, decimal Bonuses, decimal Projected, List<MissedChoreDto> MissedChores);
 
     #endregion
 }
