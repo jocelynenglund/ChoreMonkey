@@ -92,6 +92,9 @@ internal class Handler(IEventStore store, ISender mediator)
             .GroupBy(e => e.ChoreId)
             .ToDictionary(g => g.Key, g => g.Last());
 
+        // Active pause windows per chore — missed instances within a window are exempt.
+        var chorePauses = ChorePauses.Build(choreEvents);
+
         // Get completions in period grouped by (chore, member)
         var completionsInPeriod = choreEvents
             .OfType<ChoreCompleted>()
@@ -155,11 +158,12 @@ internal class Handler(IEventStore store, ISender mediator)
                 {
                     // Required chores: check for missed instances (>2 days overdue)
                     var missed = CalculateMissedInstances(
-                        chore, 
-                        lastCompletion?.CompletedAt, 
-                        periodStart, 
+                        chore,
+                        lastCompletion?.CompletedAt,
+                        periodStart,
                         today,
-                        completionsInPeriod.GetValueOrDefault((choreId, memberId)));
+                        completionsInPeriod.GetValueOrDefault((choreId, memberId)),
+                        chorePauses.GetValueOrDefault(choreId));
                     
                     var deductionRate = rates?.DeductionRate ?? chore.MissedDeduction;
                     foreach (var period in missed)
@@ -208,11 +212,12 @@ internal class Handler(IEventStore store, ISender mediator)
     }
 
     private List<string> CalculateMissedInstances(
-        ChoreCreated chore, 
-        DateTime? lastCompleted, 
+        ChoreCreated chore,
+        DateTime? lastCompleted,
         DateTime periodStart,
         DateTime today,
-        List<ChoreCompleted>? completionsInPeriod)
+        List<ChoreCompleted>? completionsInPeriod,
+        List<PauseWindow>? pauses)
     {
         var missed = new List<string>();
         var frequency = chore.Frequency;
@@ -220,34 +225,34 @@ internal class Handler(IEventStore store, ISender mediator)
 
         var choreStart = chore.StartDate?.Date ?? periodStart;
         var effectiveStart = choreStart > periodStart ? choreStart : periodStart;
-        
+
         // Only count as missed if grace period has passed
         var cutoffDate = today.AddDays(-GracePeriodDays);
 
         switch (frequency.Type.ToLower())
         {
             case "daily":
-                missed = CalculateDailyMissed(effectiveStart, cutoffDate, completionsInPeriod);
+                missed = CalculateDailyMissed(effectiveStart, cutoffDate, completionsInPeriod, pauses);
                 break;
             case "weekly":
-                missed = CalculateWeeklyMissed(frequency.Days, effectiveStart, cutoffDate, completionsInPeriod);
+                missed = CalculateWeeklyMissed(frequency.Days, effectiveStart, cutoffDate, completionsInPeriod, pauses);
                 break;
             case "interval":
-                missed = CalculateIntervalMissed(frequency.IntervalDays ?? 1, effectiveStart, cutoffDate, lastCompleted, completionsInPeriod);
+                missed = CalculateIntervalMissed(frequency.IntervalDays ?? 1, effectiveStart, cutoffDate, lastCompleted, completionsInPeriod, pauses);
                 break;
         }
 
         return missed;
     }
 
-    private static List<string> CalculateDailyMissed(DateTime start, DateTime cutoff, List<ChoreCompleted>? completions)
+    private static List<string> CalculateDailyMissed(DateTime start, DateTime cutoff, List<ChoreCompleted>? completions, List<PauseWindow>? pauses)
     {
         var missed = new List<string>();
         var completedDates = completions?.Select(c => c.CompletedAt.Date).ToHashSet() ?? new HashSet<DateTime>();
-        
+
         for (var date = start; date <= cutoff; date = date.AddDays(1))
         {
-            if (!completedDates.Contains(date))
+            if (!completedDates.Contains(date) && !pauses.CoversDate(date))
             {
                 missed.Add(date.ToString("yyyy-MM-dd"));
             }
@@ -261,7 +266,7 @@ internal class Handler(IEventStore store, ISender mediator)
         return date.AddDays(-diff).Date;
     }
 
-    private static List<string> CalculateWeeklyMissed(string[]? days, DateTime start, DateTime cutoff, List<ChoreCompleted>? completions)
+    private static List<string> CalculateWeeklyMissed(string[]? days, DateTime start, DateTime cutoff, List<ChoreCompleted>? completions, List<PauseWindow>? pauses)
     {
         var missed = new List<string>();
         var completedDates = completions?.Select(c => c.CompletedAt.Date).ToHashSet() ?? new HashSet<DateTime>();
@@ -271,13 +276,15 @@ internal class Handler(IEventStore store, ISender mediator)
             // Weekly anytime - one completion per week required
             var currentWeek = GetMondayOfWeek(start);
             var cutoffWeek = GetMondayOfWeek(cutoff);
-            
+
             while (currentWeek <= cutoffWeek)
             {
                 var weekEnd = currentWeek.AddDays(6);
                 var completedThisWeek = completedDates.Any(d => d >= currentWeek && d <= weekEnd);
-                
-                if (!completedThisWeek && weekEnd <= cutoff)
+                // Exempt the week if a pause window overlaps any day of it.
+                var pausedThisWeek = pauses.CoversAnyInRange(currentWeek, weekEnd);
+
+                if (!completedThisWeek && !pausedThisWeek && weekEnd <= cutoff)
                 {
                     var weekNum = System.Globalization.CultureInfo.InvariantCulture.Calendar
                         .GetWeekOfYear(currentWeek, System.Globalization.CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
@@ -290,32 +297,32 @@ internal class Handler(IEventStore store, ISender mediator)
         {
             // Specific days required
             var requiredDays = days.Select(d => Enum.Parse<DayOfWeek>(d, ignoreCase: true)).ToHashSet();
-            
+
             for (var date = start; date <= cutoff; date = date.AddDays(1))
             {
-                if (requiredDays.Contains(date.DayOfWeek) && !completedDates.Contains(date))
+                if (requiredDays.Contains(date.DayOfWeek) && !completedDates.Contains(date) && !pauses.CoversDate(date))
                 {
                     missed.Add(date.ToString("yyyy-MM-dd"));
                 }
             }
         }
-        
+
         return missed;
     }
 
-    private static List<string> CalculateIntervalMissed(int intervalDays, DateTime start, DateTime cutoff, DateTime? lastCompleted, List<ChoreCompleted>? completions)
+    private static List<string> CalculateIntervalMissed(int intervalDays, DateTime start, DateTime cutoff, DateTime? lastCompleted, List<ChoreCompleted>? completions, List<PauseWindow>? pauses)
     {
         var missed = new List<string>();
         var completedDates = completions?.Select(c => c.CompletedAt.Date).OrderBy(d => d).ToList() ?? new List<DateTime>();
-        
+
         var lastDue = lastCompleted?.Date ?? start.AddDays(-1);
         var idx = 0;
-        
+
         while (true)
         {
             var nextDue = lastDue.AddDays(intervalDays);
             if (nextDue > cutoff) break;
-            
+
             // Check if completed on or before next due date
             while (idx < completedDates.Count && completedDates[idx] <= nextDue)
             {
@@ -324,14 +331,18 @@ internal class Handler(IEventStore store, ISender mediator)
                 nextDue = lastDue.AddDays(intervalDays);
                 if (nextDue > cutoff) break;
             }
-            
+
             if (nextDue > cutoff) break;
-            
-            // Not completed - it's missed
-            missed.Add(nextDue.ToString("yyyy-MM-dd"));
+
+            // Advance the schedule regardless, but only record a miss when the
+            // due date isn't within a pause window.
+            if (!pauses.CoversDate(nextDue))
+            {
+                missed.Add(nextDue.ToString("yyyy-MM-dd"));
+            }
             lastDue = nextDue;
         }
-        
+
         return missed;
     }
 }
