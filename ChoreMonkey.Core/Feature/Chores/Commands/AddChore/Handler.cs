@@ -19,13 +19,14 @@ public record AddChoreCommand(
     decimal MissedDeduction = 10m);
 
 public record AddChoreRequest(
-    string DisplayName, 
+    string DisplayName,
     string Description,
     FrequencyRequest? Frequency = null,
     bool IsOptional = false,
     DateTime? StartDate = null,
     bool IsRequired = true,
-    decimal MissedDeduction = 10m);
+    decimal MissedDeduction = 10m,
+    Guid? ChoreId = null);
 
 public record FrequencyRequest(
     string Type,
@@ -70,7 +71,7 @@ internal static class AddChoreEndpoint
                 ? new ChoreFrequency(dto.Frequency.Type, dto.Frequency.Days, dto.Frequency.IntervalDays)
                 : null;
                 
-            var choreId = Guid.NewGuid();
+            var choreId = dto.ChoreId ?? Guid.NewGuid();
             var command = new AddChoreCommand(
                 householdId, 
                 choreId, 
