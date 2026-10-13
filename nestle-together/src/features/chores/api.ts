@@ -4,6 +4,7 @@ import type {
   AddChoreRequest, 
   AssignChoreRequest,
   MyChoresResponse,
+  DisconnectionNotice,
   MemberOverdue,
   ChoreFrequency,
   MemberCompletion,
@@ -203,6 +204,29 @@ export async function fetchMyChores(
     completed: (data.completed || []).map((c: Record<string, unknown>) => ({
       ...c,
       completedAt: new Date(c.completedAt as string),
+    })),
+  };
+}
+
+export async function fetchDisconnectionNotice(
+  householdId: string,
+  memberId: string
+): Promise<DisconnectionNotice | null> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/households/${householdId}/disconnection-notice?memberId=${memberId}`
+  );
+
+  if (!response.ok) {
+    return null;
+  }
+
+  const data = await response.json();
+  return {
+    isDisconnected: !!data.isDisconnected,
+    windowStart: new Date(data.windowStart),
+    missedChores: (data.missedChores || []).map((c: Record<string, unknown>) => ({
+      ...c,
+      lastCompleted: c.lastCompleted ? new Date(c.lastCompleted as string) : undefined,
     })),
   };
 }

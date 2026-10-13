@@ -38,6 +38,7 @@ using ChoreMonkey.Core.Feature.Chores.Commands.RemoveChorePause;
 using ChoreMonkey.Core.Feature.Chores.Queries.ChoreList;
 using ChoreMonkey.Core.Feature.Chores.Queries.ChoreHistory;
 using ChoreMonkey.Core.Feature.Chores.Queries.MyChores;
+using ChoreMonkey.Core.Feature.Chores.Queries.DisconnectionNotice;
 using ChoreMonkey.Core.Feature.Chores.Queries.OverdueChores;
 
 // Activity module
@@ -168,6 +169,7 @@ public static class Initialization
         services.AddScoped<Feature.Chores.Queries.ChoreList.Handler>();
         services.AddScoped<Feature.Chores.Queries.ChoreHistory.Handler>();
         services.AddScoped<Feature.Chores.Queries.MyChores.Handler>();
+        services.AddScoped<Feature.Chores.Queries.DisconnectionNotice.Handler>();
         services.AddScoped<Feature.Chores.Queries.OverdueChores.Handler>();
 
         // Activity module
@@ -235,6 +237,7 @@ public static class Initialization
         ChoreListEndpoint.Map(householdEndpoints);
         ChoreHistoryEndpoint.Map(householdEndpoints);
         MyChoresEndpoint.Map(householdEndpoints);
+        DisconnectionNoticeEndpoint.Map(householdEndpoints);
         OverdueChoresEndpoint.Map(householdEndpoints);
 
         // Activity module

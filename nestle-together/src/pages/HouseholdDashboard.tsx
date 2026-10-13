@@ -12,6 +12,7 @@ import { CompleteChoreDialog } from '@/components/CompleteChoreDialog';
 import { ProfileDialog } from '@/components/ProfileDialog';
 import { AllowanceDialog } from '@/components/AllowanceDialog';
 import { WhatsNewDialog } from '@/components/WhatsNewDialog';
+import { DisconnectionNoticeDialog } from '@/components/DisconnectionNoticeDialog';
 import { SettingsDialog } from '@/components/SettingsDialog';
 import { ChoresTab } from '@/components/tabs/ChoresTab';
 import { TeamTab } from '@/components/tabs/TeamTab';
@@ -248,6 +249,13 @@ export default function HouseholdDashboard() {
       <AllowanceDialog open={allowanceOpen} onOpenChange={setAllowanceOpen} />
 
       <WhatsNewDialog variant="controlled" open={whatsNewOpen} onOpenChange={setWhatsNewOpen} />
+
+      <DisconnectionNoticeDialog
+        householdId={household.id}
+        memberId={currentMemberId}
+        refreshKey={refreshKey}
+        onCompleteChore={openCompleteDialog}
+      />
     </div>
   );
 }
