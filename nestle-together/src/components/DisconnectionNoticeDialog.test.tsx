@@ -27,7 +27,29 @@ describe("DisconnectionNoticeDialog", () => {
     expect(screen.getByText("Dishes")).toBeInTheDocument();
     expect(screen.getByText("Trash")).toBeInTheDocument();
     expect(screen.getByText("Never done")).toBeInTheDocument();
+    const month = new Date().toLocaleDateString(undefined, { month: "long" });
+    expect(screen.getByText(`disconnected in the month of ${month}`)).toBeInTheDocument();
     expect(fetchDisconnectionNotice).toHaveBeenCalledWith("h1", "m1");
+  });
+
+  it("dates the lapse from the last real completion, not the check window", async () => {
+    fetchDisconnectionNotice.mockResolvedValue(disconnected);
+    render(<DisconnectionNoticeDialog householdId="h1" memberId="m1" refreshKey={0} onCompleteChore={vi.fn()} />);
+
+    const fmt = (d: Date) => d.toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" });
+    const description = await screen.findByText(/none of your obligatory chores have been done/);
+    expect(description.textContent).toContain(`since ${fmt(new Date("2026-06-01"))}`);
+    expect(description.textContent).not.toContain(fmt(disconnected.windowStart));
+  });
+
+  it("says 'in over two months' when nothing was ever done", async () => {
+    fetchDisconnectionNotice.mockResolvedValue({
+      ...disconnected,
+      missedChores: [{ choreId: "c1", displayName: "Dishes", frequencyType: "daily" }],
+    });
+    render(<DisconnectionNoticeDialog householdId="h1" memberId="m1" refreshKey={0} onCompleteChore={vi.fn()} />);
+
+    expect(await screen.findByText(/have been done in over two months/)).toBeInTheDocument();
   });
 
   it("stays hidden when connected", async () => {

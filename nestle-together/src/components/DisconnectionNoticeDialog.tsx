@@ -22,6 +22,8 @@ interface DisconnectionNoticeDialogProps {
 const formatDate = (date: Date) =>
   date.toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' });
 
+const formatMonth = (date: Date) => date.toLocaleDateString(undefined, { month: 'long' });
+
 /**
  * Shown on load when the member hasn't done any of their obligatory chores in
  * the past two months: their internet is "disconnected" until they do one.
@@ -68,6 +70,13 @@ export function DisconnectionNoticeDialog({
 
   if (!notice?.isDisconnected) return null;
 
+  // Every counted obligatory chore is in missedChores, so the latest of their
+  // completions is the last time any obligatory chore was actually done.
+  const lastDone = notice.missedChores
+    .map((c) => c.lastCompleted)
+    .filter((d): d is Date => !!d)
+    .reduce<Date | undefined>((latest, d) => (!latest || d > latest ? d : latest), undefined);
+
   const handleDoChore = (choreId: string) => {
     setOpen(false);
     onCompleteChore(choreId);
@@ -85,9 +94,11 @@ export function DisconnectionNoticeDialog({
           </p>
           <DialogTitle className="text-center text-xl">Notice of Disconnection</DialogTitle>
           <DialogDescription className="text-center">
-            Our records show that none of your obligatory chores have been done since{' '}
-            <span className="font-medium text-foreground">{formatDate(notice.windowStart)}</span>.
-            As a result, your internet service has been <span className="font-medium text-foreground">disconnected</span>.
+            Your internet service has been{' '}
+            <span className="font-medium text-foreground">disconnected in the month of {formatMonth(new Date())}</span>.
+            {lastDone
+              ? `Our records show that none of your obligatory chores have been done since ${formatDate(lastDone)}.`
+              : 'Our records show that none of your obligatory chores have been done in over two months.'}
           </DialogDescription>
         </DialogHeader>
 
