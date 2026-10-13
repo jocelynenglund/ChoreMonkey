@@ -70,6 +70,13 @@ export function DisconnectionNoticeDialog({
 
   if (!notice?.isDisconnected) return null;
 
+  // Every counted obligatory chore is in missedChores, so the latest of their
+  // completions is the last time any obligatory chore was actually done.
+  const lastDone = notice.missedChores
+    .map((c) => c.lastCompleted)
+    .filter((d): d is Date => !!d)
+    .reduce<Date | undefined>((latest, d) => (!latest || d > latest ? d : latest), undefined);
+
   const handleDoChore = (choreId: string) => {
     setOpen(false);
     onCompleteChore(choreId);
@@ -89,8 +96,9 @@ export function DisconnectionNoticeDialog({
           <DialogDescription className="text-center">
             Your internet service has been{' '}
             <span className="font-medium text-foreground">disconnected in the month of {formatMonth(new Date())}</span>.
-            Our records show that none of your obligatory chores have been done since{' '}
-            {formatDate(notice.windowStart)}.
+            {lastDone
+              ? `Our records show that none of your obligatory chores have been done since ${formatDate(lastDone)}.`
+              : 'Our records show that none of your obligatory chores have been done in over two months.'}
           </DialogDescription>
         </DialogHeader>
 
