@@ -27,6 +27,8 @@ describe("DisconnectionNoticeDialog", () => {
     expect(screen.getByText("Dishes")).toBeInTheDocument();
     expect(screen.getByText("Trash")).toBeInTheDocument();
     expect(screen.getByText("Never done")).toBeInTheDocument();
+    const month = new Date().toLocaleDateString(undefined, { month: "long" });
+    expect(screen.getByText(`disconnected in the month of ${month}`)).toBeInTheDocument();
     expect(fetchDisconnectionNotice).toHaveBeenCalledWith("h1", "m1");
   });
 

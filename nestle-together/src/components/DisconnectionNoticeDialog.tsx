@@ -22,6 +22,8 @@ interface DisconnectionNoticeDialogProps {
 const formatDate = (date: Date) =>
   date.toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' });
 
+const formatMonth = (date: Date) => date.toLocaleDateString(undefined, { month: 'long' });
+
 /**
  * Shown on load when the member hasn't done any of their obligatory chores in
  * the past two months: their internet is "disconnected" until they do one.
@@ -85,9 +87,10 @@ export function DisconnectionNoticeDialog({
           </p>
           <DialogTitle className="text-center text-xl">Notice of Disconnection</DialogTitle>
           <DialogDescription className="text-center">
+            Your internet service has been{' '}
+            <span className="font-medium text-foreground">disconnected in the month of {formatMonth(new Date())}</span>.
             Our records show that none of your obligatory chores have been done since{' '}
-            <span className="font-medium text-foreground">{formatDate(notice.windowStart)}</span>.
-            As a result, your internet service has been <span className="font-medium text-foreground">disconnected</span>.
+            {formatDate(notice.windowStart)}.
           </DialogDescription>
         </DialogHeader>
 
