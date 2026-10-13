@@ -93,6 +93,20 @@ export interface MyChoresResponse {
   completed: MyCompletedChore[];
 }
 
+// Notice of disconnection: no obligatory chore done in the past two months
+export interface DisconnectedChore {
+  choreId: string;
+  displayName: string;
+  frequencyType?: string;
+  lastCompleted?: Date;
+}
+
+export interface DisconnectionNotice {
+  isDisconnected: boolean;
+  windowStart: Date;
+  missedChores: DisconnectedChore[];
+}
+
 // Overdue types (admin view)
 export interface OverdueChore {
   choreId: string;
