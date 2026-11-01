@@ -25,31 +25,8 @@ internal class Handler(IEventStore store)
         var householdEvents = await store.FetchEventsAsync(HouseholdAggregate.StreamId(request.HouseholdId));
         var choreEvents     = await store.FetchEventsAsync(ChoreAggregate.StreamId(request.HouseholdId));
 
-        var nicknames = new Dictionary<Guid, string>();
-        foreach (var e in householdEvents)
-        {
-            switch (e)
-            {
-                case MemberJoinedHousehold j: nicknames[j.MemberId] = j.Nickname; break;
-                case MemberNicknameChanged n: nicknames[n.MemberId] = n.NewNickname; break;
-            }
-        }
-
-        var choreNames = choreEvents.OfType<ChoreCreated>()
-            .ToDictionary(c => c.ChoreId, c => c.DisplayName);
-
-        var victories = choreEvents.OfType<ChoreCompleted>()
-            .OrderByDescending(c => c.CompletedAt)
-            .Take(request.Limit)
-            .Select(c => new VictoryDto(
-                c.ChoreId,
-                c.CompletedByMemberId,
-                nicknames.GetValueOrDefault(c.CompletedByMemberId, "Unknown"),
-                choreNames.GetValueOrDefault(c.ChoreId, "Unknown chore"),
-                c.CompletedAt))
-            .ToList();
-
-        return new GetVictoriesResponse(victories);
+        var history = householdEvents.Cast<object>().Concat(choreEvents.Cast<object>()).ToList();
+        return VictoriesView.Project(history, request.Limit);
     }
 }
 
