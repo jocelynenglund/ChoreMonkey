@@ -1,3 +1,4 @@
+using ItsyBIT.Decisions;
 using ChoreMonkey.Core.Domain;
 using ChoreMonkey.Events;
 using FileEventStore;
@@ -15,13 +16,14 @@ internal class Handler(IEventStore store)
     public async Task<GenerateInviteResponse> HandleAsync(GenerateInviteCommand request)
     {
         var inviteId = Guid.NewGuid();
-        // Link format: /join/{householdId}/{inviteId} - frontend will prepend base URL
-        var link = $"/join/{request.HouseholdId}/{inviteId}";
-
         var streamId = HouseholdAggregate.StreamId(request.HouseholdId);
-        await store.AppendToStreamAsync(streamId, new InviteGenerated(request.HouseholdId, inviteId, link), ExpectedVersion.Any);
 
-        return new GenerateInviteResponse(request.HouseholdId, inviteId, link);
+        var decision = GenerateInviteSlice.Decide(new List<object>(), request, inviteId);
+
+        var invite = decision.Events.OfType<InviteGenerated>().Single();
+        await store.AppendToStreamAsync(streamId, invite, ExpectedVersion.Any);
+
+        return new GenerateInviteResponse(request.HouseholdId, inviteId, invite.Link);
     }
 }
 
