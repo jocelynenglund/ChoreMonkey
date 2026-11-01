@@ -70,7 +70,8 @@ jobs:
           VITE_API_URL: https://itsybitsylist-api.azurewebsites.net
 
   e2e-tests:
-    runs-on: ubuntu-latest
+    # Pinned: ubuntu-latest is 26.04, where this Playwright can't install chromium.
+    runs-on: ubuntu-24.04
     needs: [test-backend, build-frontend]
     
     steps:
