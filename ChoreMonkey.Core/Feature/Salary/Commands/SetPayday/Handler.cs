@@ -1,6 +1,7 @@
 using ChoreMonkey.Core.Domain;
 using ChoreMonkey.Events;
 using FileEventStore;
+using ItsyBIT.Decisions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -17,13 +18,13 @@ internal class Handler(IEventStore store)
 {
     public async Task<SetPaydayResponse> HandleAsync(SetPaydayCommand request)
     {
-        if (request.PaydayDayOfMonth < 1 || request.PaydayDayOfMonth > 28)
-            throw new ArgumentOutOfRangeException(nameof(request.PaydayDayOfMonth), "Payday must be between 1 and 28.");
+        var decision = SetPaydaySlice.Decide([], request);
+        if (!decision.Accepted)
+            throw new ArgumentOutOfRangeException(nameof(request.PaydayDayOfMonth), decision.Error);
 
         var streamId = SalaryAggregate.StreamId(request.HouseholdId);
-
-        var paydayEvent = new PaydayConfigured(request.HouseholdId, request.PaydayDayOfMonth);
-        await store.AppendToStreamAsync(streamId, paydayEvent, ExpectedVersion.Any);
+        foreach (var e in decision.Events)
+            await store.AppendToStreamAsync(streamId, (IStoreableEvent)e, ExpectedVersion.Any);
 
         return new SetPaydayResponse(request.PaydayDayOfMonth);
     }
