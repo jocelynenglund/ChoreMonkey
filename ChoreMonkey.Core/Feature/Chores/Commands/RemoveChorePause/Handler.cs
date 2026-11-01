@@ -2,6 +2,7 @@ using ChoreMonkey.Core.Domain;
 using ChoreMonkey.Core.Security;
 using ChoreMonkey.Events;
 using FileEventStore;
+using ItsyBIT.Decisions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -19,33 +20,16 @@ internal class Handler(IEventStore store)
         var householdStreamId = HouseholdAggregate.StreamId(request.HouseholdId);
         var choreStreamId = ChoreAggregate.StreamId(request.HouseholdId);
 
-        var householdEvents = await store.FetchEventsAsync(householdStreamId);
-        var householdCreated = householdEvents.OfType<HouseholdCreated>().FirstOrDefault();
-        if (householdCreated == null)
-        {
-            return (false, false);
-        }
+        var history = (await store.FetchEventsAsync(householdStreamId)).Cast<object>()
+            .Concat((await store.FetchEventsAsync(choreStreamId)).Cast<object>())
+            .ToList();
 
-        var adminPinHash = householdEvents.OfType<AdminPinChanged>()
-            .LastOrDefault()?.NewPinHash ?? householdCreated.PinHash;
-        if (!PinHasher.VerifyPin(request.PinCode, adminPinHash))
-        {
-            return (false, false);
-        }
+        var decision = RemoveChorePauseSlice.Decide(history, request);
+        if (decision.Kind == ErrorKind.Forbidden) return (false, false);
+        if (!decision.Accepted) return (true, false);
 
-        var choreEvents = await store.FetchEventsAsync(choreStreamId);
-
-        // Idempotent: only an active (created, not-yet-removed) pause can be removed.
-        var pauses = ChorePauses.Build(choreEvents);
-        var isActive = pauses.TryGetValue(request.ChoreId, out var windows)
-            && windows.Any(w => w.PauseId == request.PauseId);
-        if (!isActive)
-        {
-            return (true, false);
-        }
-
-        var removed = new ChorePauseRemoved(request.PauseId, request.ChoreId, request.HouseholdId);
-        await store.AppendToStreamAsync(choreStreamId, removed, ExpectedVersion.Any);
+        foreach (var e in decision.Events)
+            await store.AppendToStreamAsync(choreStreamId, (IStoreableEvent)e, ExpectedVersion.Any);
 
         return (true, true);
     }

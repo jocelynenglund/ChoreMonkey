@@ -2,6 +2,7 @@ using ChoreMonkey.Core.Domain;
 using ChoreMonkey.Core.Security;
 using ChoreMonkey.Events;
 using FileEventStore;
+using ItsyBIT.Decisions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -33,50 +34,18 @@ internal class Handler(IEventStore store)
         var householdStreamId = HouseholdAggregate.StreamId(request.HouseholdId);
         var choreStreamId = ChoreAggregate.StreamId(request.HouseholdId);
 
-        var householdEvents = await store.FetchEventsAsync(householdStreamId);
-        var householdCreated = householdEvents.OfType<HouseholdCreated>().FirstOrDefault();
-        if (householdCreated == null)
-        {
-            return (false, false, "Household not found", Guid.Empty);
-        }
+        var history = (await store.FetchEventsAsync(householdStreamId)).Cast<object>()
+            .Concat((await store.FetchEventsAsync(choreStreamId)).Cast<object>())
+            .ToList();
 
-        var adminPinHash = householdEvents.OfType<AdminPinChanged>()
-            .LastOrDefault()?.NewPinHash ?? householdCreated.PinHash;
-        if (!PinHasher.VerifyPin(request.PinCode, adminPinHash))
-        {
-            return (false, false, "Admin access required", Guid.Empty);
-        }
+        var decision = PauseChoreSlice.Decide(history, request);
+        if (decision.Kind == ErrorKind.Forbidden) return (false, false, decision.Error, Guid.Empty);
+        if (!decision.Accepted) return (true, false, decision.Error, Guid.Empty);
 
-        // Normalize to whole days; pause windows are inclusive of both ends.
-        var start = request.PauseStart.Date;
-        var end = request.PauseEnd.Date;
-        if (end < start)
-        {
-            return (true, false, "Pause end date must be on or after the start date", Guid.Empty);
-        }
-
-        var choreEvents = await store.FetchEventsAsync(choreStreamId);
-        var deletedChoreIds = choreEvents.OfType<ChoreDeleted>().Select(e => e.ChoreId).ToHashSet();
-        var choreExists = choreEvents.OfType<ChoreCreated>()
-            .Any(c => c.ChoreId == request.ChoreId && !deletedChoreIds.Contains(c.ChoreId));
-        if (!choreExists)
-        {
-            return (true, false, "Chore not found", Guid.Empty);
-        }
-
-        var pauseId = request.PauseId == Guid.Empty ? Guid.NewGuid() : request.PauseId;
-
-        var paused = new ChorePaused(
-            pauseId,
-            request.ChoreId,
-            request.HouseholdId,
-            start,
-            end,
-            string.IsNullOrWhiteSpace(request.Reason) ? null : request.Reason.Trim());
-
+        var paused = decision.Events.OfType<ChorePaused>().Single();
         await store.AppendToStreamAsync(choreStreamId, paused, ExpectedVersion.Any);
 
-        return (true, true, null, pauseId);
+        return (true, true, null, paused.PauseId);
     }
 }
 

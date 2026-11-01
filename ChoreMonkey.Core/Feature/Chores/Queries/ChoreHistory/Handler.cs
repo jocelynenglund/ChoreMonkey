@@ -18,15 +18,8 @@ internal class Handler(IEventStore store)
     public async Task<ChoreHistoryResponse> HandleAsync(GetChoreHistoryQuery request)
     {
         var streamId = ChoreAggregate.StreamId(request.HouseholdId);
-        var events = await store.FetchEventsAsync(streamId);
-
-        var completions = events.OfType<ChoreCompleted>()
-            .Where(e => e.ChoreId == request.ChoreId)
-            .OrderByDescending(e => e.CompletedAt)
-            .Select(e => new CompletionDto(e.CompletedByMemberId, e.CompletedAt))
-            .ToList();
-
-        return new ChoreHistoryResponse(completions);
+        var history = (await store.FetchEventsAsync(streamId)).Cast<object>().ToList();
+        return ChoreHistoryView.Project(history, request.ChoreId);
     }
 }
 

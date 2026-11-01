@@ -1,6 +1,7 @@
 using ChoreMonkey.Core.Domain;
 using ChoreMonkey.Events;
 using FileEventStore;
+using ItsyBIT.Decisions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -15,17 +16,14 @@ internal class Handler(IEventStore store)
     public async Task<AcknowledgeMissedResponse> HandleAsync(AcknowledgeMissedCommand request)
     {
         var streamId = ChoreAggregate.StreamId(request.HouseholdId);
-        
-        var acknowledged = new ChoreMissedAcknowledged(
-            request.ChoreId,
-            request.MemberId,
-            request.Period);
-        
-        await store.AppendToStreamAsync(streamId, acknowledged, ExpectedVersion.Any);
-        
+
+        var decision = AcknowledgeMissedSlice.Decide([], request);
+        foreach (var e in decision.Events)
+            await store.AppendToStreamAsync(streamId, (IStoreableEvent)e, ExpectedVersion.Any);
+
         return new AcknowledgeMissedResponse(true);
     }
-    
+
     /// <summary>
     /// Get the period string for a date based on frequency type.
     /// Daily: "2024-02-13"

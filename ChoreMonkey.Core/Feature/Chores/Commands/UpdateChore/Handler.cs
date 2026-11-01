@@ -1,6 +1,7 @@
 using ChoreMonkey.Core.Domain;
 using ChoreMonkey.Events;
 using FileEventStore;
+using ItsyBIT.Decisions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -37,26 +38,14 @@ internal class Handler(IEventStore store)
     public async Task<IResult> HandleAsync(UpdateChoreCommand request)
     {
         var streamId = ChoreAggregate.StreamId(request.HouseholdId);
-        var events = await store.FetchEventsAsync(streamId);
+        var history = (await store.FetchEventsAsync(streamId)).Cast<object>().ToList();
 
-        // Verify chore exists and belongs to this household
-        var exists = events.OfType<ChoreCreated>().Any(e => e.ChoreId == request.ChoreId);
-        var deleted = events.OfType<ChoreDeleted>().Any(e => e.ChoreId == request.ChoreId);
-        if (!exists || deleted)
-            return Results.NotFound(new { error = "Chore not found." });
+        var decision = UpdateChoreSlice.Decide(history, request);
+        if (!decision.Accepted)
+            return Results.NotFound(new { error = decision.Error });
 
-        var updated = new ChoreUpdated(
-            request.ChoreId,
-            request.HouseholdId,
-            request.DisplayName,
-            request.Description,
-            request.Frequency,
-            request.IsOptional,
-            request.StartDate,
-            request.IsRequired,
-            request.MissedDeduction);
-
-        await store.AppendToStreamAsync(streamId, updated, ExpectedVersion.Any);
+        foreach (var e in decision.Events)
+            await store.AppendToStreamAsync(streamId, (IStoreableEvent)e, ExpectedVersion.Any);
         return Results.Ok();
     }
 }
