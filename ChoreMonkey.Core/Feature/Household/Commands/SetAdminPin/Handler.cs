@@ -1,3 +1,4 @@
+using ItsyBIT.Decisions;
 using ChoreMonkey.Core.Domain;
 using ChoreMonkey.Core.Security;
 using ChoreMonkey.Events;
@@ -16,34 +17,17 @@ internal class Handler(IEventStore store)
     public async Task<(bool IsAdmin, bool Success)> HandleAsync(SetAdminPinCommand request)
     {
         var streamId = HouseholdAggregate.StreamId(request.HouseholdId);
-        var events = await store.FetchEventsAsync(streamId);
-        
-        var householdCreated = events
-            .OfType<HouseholdCreated>()
-            .FirstOrDefault();
+        var history = (await store.FetchEventsAsync(streamId)).Cast<object>().ToList();
 
-        if (householdCreated == null)
-        {
-            return (false, false);
-        }
+        // The current PIN is verified here; the new one is only hashed once that has passed.
+        var verified = HouseholdPins.AdminPinMatches(history, request.CurrentPinCode);
+        var newPinHash = verified ? PinHasher.HashPin(request.NewPinCode) : null;
 
-        // Check for existing admin PIN changes
-        var adminPinChanged = events
-            .OfType<AdminPinChanged>()
-            .LastOrDefault();
-        var currentAdminPinHash = adminPinChanged?.NewPinHash ?? householdCreated.PinHash;
+        var decision = SetAdminPinSlice.Decide(history, request, verified, newPinHash);
+        if (!decision.Accepted) return (false, false);
 
-        // Verify current admin PIN
-        var isAdmin = PinHasher.VerifyPin(request.CurrentPinCode, currentAdminPinHash);
-        if (!isAdmin)
-        {
-            return (false, false);
-        }
-
-        // Set new admin PIN
-        var newPinHash = PinHasher.HashPin(request.NewPinCode);
-        var changeEvent = new AdminPinChanged(request.HouseholdId, newPinHash);
-        await store.AppendToStreamAsync(streamId, changeEvent, ExpectedVersion.Any);
+        foreach (var e in decision.Events)
+            await store.AppendToStreamAsync(streamId, (IStoreableEvent)e, ExpectedVersion.Any);
 
         return (true, true);
     }

@@ -1,5 +1,5 @@
-using ChoreMonkey.Core.Feature.Members.Queries.MemberLookup;
-using MediatR;
+using ChoreMonkey.Core.Domain;
+using FileEventStore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -10,17 +10,14 @@ public record ListMembersQuery(Guid HouseholdId);
 public record MemberResponseDto(Guid MemberId, string Nickname, string? Status = null);
 public record ListMembersResponse(List<MemberResponseDto> Members);
 
-internal class Handler(ISender mediator)
+internal class Handler(IEventStore store)
 {
     public async Task<ListMembersResponse> HandleAsync(ListMembersQuery request)
     {
-        var lookup = await mediator.Send(new MemberLookupQuery(request.HouseholdId));
-        
-        var members = lookup.Members.Values
-            .Select(m => new MemberResponseDto(m.Id, m.Nickname, m.Status))
-            .ToList();
-        
-        return new ListMembersResponse(members);
+        var history = (await store.FetchEventsAsync(
+            HouseholdAggregate.StreamId(request.HouseholdId))).Cast<object>().ToList();
+
+        return ListMembersView.Project(history);
     }
 }
 

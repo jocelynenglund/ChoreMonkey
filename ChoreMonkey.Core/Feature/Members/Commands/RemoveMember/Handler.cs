@@ -1,3 +1,4 @@
+using ItsyBIT.Decisions;
 using ChoreMonkey.Core.Domain;
 using ChoreMonkey.Core.Security;
 using ChoreMonkey.Events;
@@ -21,52 +22,17 @@ internal class Handler(IEventStore store)
     public async Task<(bool Success, string? Error)> HandleAsync(RemoveMemberCommand command)
     {
         var streamId = HouseholdAggregate.StreamId(command.HouseholdId);
-        var events = await store.FetchEventsAsync(streamId);
-        
-        // Verify household exists
-        var householdCreated = events.OfType<HouseholdCreated>().FirstOrDefault();
-        if (householdCreated == null)
-            return (false, "Household not found");
-        
-        // Verify admin PIN
-        var adminPinEvent = events.OfType<AdminPinChanged>().LastOrDefault();
-        var adminPinHash = adminPinEvent?.NewPinHash ?? householdCreated.PinHash;
-        
-        if (!int.TryParse(command.PinCode, out var pinInt) || !PinHasher.VerifyPin(pinInt, adminPinHash))
-            return (false, "Invalid admin PIN");
-        
-        // Find the member to remove
-        var memberJoined = events.OfType<MemberJoinedHousehold>()
-            .FirstOrDefault(m => m.MemberId == command.MemberId);
-        
-        if (memberJoined == null)
-            return (false, "Member not found");
-        
-        // Check if member was already removed
-        var alreadyRemoved = events.OfType<MemberRemoved>()
-            .Any(m => m.MemberId == command.MemberId);
-        
-        if (alreadyRemoved)
-            return (false, "Member already removed");
-        
-        // Can't remove yourself
-        if (command.MemberId == command.RemovedByMemberId)
-            return (false, "Cannot remove yourself");
-        
-        // Get the nickname (might have been changed)
-        var nicknameChange = events.OfType<MemberNicknameChanged>()
-            .Where(n => n.MemberId == command.MemberId)
-            .LastOrDefault();
-        var nickname = nicknameChange?.NewNickname ?? memberJoined.Nickname;
-        
-        var removedEvent = new MemberRemoved(
-            command.HouseholdId,
-            command.MemberId,
-            command.RemovedByMemberId,
-            nickname);
-        
-        await store.AppendToStreamAsync(streamId, removedEvent, ExpectedVersion.Any);
-        
+        var history = (await store.FetchEventsAsync(streamId)).Cast<object>().ToList();
+
+        // The admin PIN is verified here (an unparsable PIN is simply not verified).
+        var verified = int.TryParse(command.PinCode, out var pinInt) && HouseholdPins.AdminPinMatches(history, pinInt);
+
+        var decision = RemoveMemberSlice.Decide(history, command, verified);
+        if (!decision.Accepted) return (false, decision.Error);
+
+        foreach (var e in decision.Events)
+            await store.AppendToStreamAsync(streamId, (IStoreableEvent)e, ExpectedVersion.Any);
+
         return (true, null);
     }
 }
