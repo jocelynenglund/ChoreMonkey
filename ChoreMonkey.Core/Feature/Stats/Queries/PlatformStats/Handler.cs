@@ -26,17 +26,17 @@ public record PlatformStatsResponse(
 
 internal class Handler(IEventStore store, IConfiguration config)
 {
-    private string GetDataPath() => Environment.GetEnvironmentVariable("EVENTSTORE_PATH") 
+    private string GetDataPath() => Environment.GetEnvironmentVariable("EVENTSTORE_PATH")
         ?? config["EventStore:Path"]
         ?? Path.Combine(Directory.GetCurrentDirectory(), "data");
-    
+
     public async Task<PlatformStatsResponse> HandleAsync()
     {
         var dataPath = GetDataPath();
-        
+
         // Scan data directory for household stream files
         var householdStreamIds = new List<string>();
-        
+
         if (Directory.Exists(dataPath))
         {
             var files = Directory.GetFiles(dataPath, "household-*.jsonl");
@@ -44,63 +44,25 @@ internal class Handler(IEventStore store, IConfiguration config)
                 .Select(f => Path.GetFileNameWithoutExtension(f))
                 .ToList();
         }
-        
-        var households = new List<HouseholdStatsDto>();
-        var totalMembers = 0;
-        var totalChores = 0;
-        
+
+        // One history per household: its household stream, with its chore stream appended
+        // (the chores are only read for a stream that has a household created event).
+        var households = new List<IReadOnlyList<object>>();
         foreach (var streamId in householdStreamIds)
         {
-            var events = await store.FetchEventsAsync(streamId);
-            
-            // Get household created event
-            var created = events.OfType<HouseholdCreated>().FirstOrDefault();
-            if (created == null) continue;
-            
-            // Count members (joined - removed)
-            var memberJoins = events.OfType<MemberJoinedHousehold>()
-                .Select(e => e.MemberId)
-                .ToHashSet();
-            var memberRemovals = events.OfType<MemberRemoved>()
-                .Select(e => e.MemberId)
-                .ToHashSet();
-            var memberCount = memberJoins.Except(memberRemovals).Count();
-            
-            // Get chore count from chore stream
-            var choreStreamId = $"chore-{created.HouseholdId}";
-            var choreEvents = await store.FetchEventsAsync(choreStreamId);
-            
-            var choreCreations = choreEvents.OfType<ChoreCreated>()
-                .Select(e => e.ChoreId)
-                .ToHashSet();
-            var choreDeletions = choreEvents.OfType<ChoreDeleted>()
-                .Select(e => e.ChoreId)
-                .ToHashSet();
-            var choreCount = choreCreations.Except(choreDeletions).Count();
-            
-            // Parse created timestamp
-            var createdAt = DateTime.TryParse(created.TimestampUtc, out var parsed) 
-                ? parsed 
-                : DateTime.UtcNow;
-            
-            households.Add(new HouseholdStatsDto(
-                created.HouseholdId,
-                created.Name,
-                memberCount,
-                choreCount,
-                createdAt));
-            
-            totalMembers += memberCount;
-            totalChores += choreCount;
+            var history = (await store.FetchEventsAsync(streamId)).Cast<object>().ToList();
+
+            var created = history.OfType<HouseholdCreated>().FirstOrDefault();
+            if (created != null)
+            {
+                var choreEvents = await store.FetchEventsAsync($"chore-{created.HouseholdId}");
+                history.AddRange(choreEvents.Cast<object>());
+            }
+
+            households.Add(history);
         }
-        
-        return new PlatformStatsResponse(
-            households.Count,
-            totalMembers,
-            totalChores,
-            households.OrderByDescending(h => h.CreatedAt).ToList(),
-            dataPath,
-            Directory.Exists(dataPath));
+
+        return PlatformStatsView.Project(households, dataPath, Directory.Exists(dataPath), DateTime.UtcNow);
     }
 }
 
