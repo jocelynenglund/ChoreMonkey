@@ -16,12 +16,8 @@ internal class Handler(IEventStore store)
     public async Task<InviteLinkResponse?> HandleAsync(GetInviteQuery request)
     {
         var streamId = HouseholdAggregate.StreamId(request.HouseholdId);
-        var events = await store.FetchEventsAsync(streamId);
-
-        var invite = events.OfType<InviteGenerated>().LastOrDefault();
-        if (invite == null) return null;
-
-        return new InviteLinkResponse(invite.HouseholdId, invite.InviteId, invite.Link);
+        var history = (await store.FetchEventsAsync(streamId)).Cast<object>().ToList();
+        return InviteLinkView.Project(history);
     }
 }
 

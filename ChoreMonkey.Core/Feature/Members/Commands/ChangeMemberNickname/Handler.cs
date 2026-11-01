@@ -1,3 +1,4 @@
+using ItsyBIT.Decisions;
 using ChoreMonkey.Core.Domain;
 using ChoreMonkey.Events;
 using FileEventStore;
@@ -16,35 +17,15 @@ internal class Handler(IEventStore store)
     public async Task<ChangeMemberNicknameResponse?> HandleAsync(ChangeMemberNicknameCommand request)
     {
         var streamId = HouseholdAggregate.StreamId(request.HouseholdId);
-        var events = await store.FetchEventsAsync(streamId);
-        
-        // Find the member and their current nickname
-        var memberJoined = events.OfType<MemberJoinedHousehold>()
-            .FirstOrDefault(m => m.MemberId == request.MemberId);
-        
-        if (memberJoined == null)
-            return null;
-        
-        // Get current nickname (could have been changed)
-        var currentNickname = events.OfType<MemberNicknameChanged>()
-            .Where(m => m.MemberId == request.MemberId)
-            .OrderByDescending(m => m.TimestampUtc)
-            .Select(m => m.NewNickname)
-            .FirstOrDefault() ?? memberJoined.Nickname;
-        
-        // Don't create event if nickname hasn't changed
-        if (currentNickname == request.NewNickname)
-            return new ChangeMemberNicknameResponse(request.MemberId, currentNickname);
-        
-        var nicknameChangedEvent = new MemberNicknameChanged(
-            request.MemberId,
-            request.HouseholdId,
-            currentNickname,
-            request.NewNickname
-        );
-        
-        await store.AppendToStreamAsync(streamId, nicknameChangedEvent, ExpectedVersion.Any);
-        
+        var history = (await store.FetchEventsAsync(streamId)).Cast<object>().ToList();
+
+        var decision = ChangeMemberNicknameSlice.Decide(history, request);
+        if (!decision.Accepted) return null;
+
+        // Asking for the nickname the member already has records nothing and still answers with it.
+        foreach (var e in decision.Events)
+            await store.AppendToStreamAsync(streamId, (IStoreableEvent)e, ExpectedVersion.Any);
+
         return new ChangeMemberNicknameResponse(request.MemberId, request.NewNickname);
     }
 }

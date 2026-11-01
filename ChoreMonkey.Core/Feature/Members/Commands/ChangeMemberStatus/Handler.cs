@@ -1,3 +1,4 @@
+using ItsyBIT.Decisions;
 using ChoreMonkey.Core.Domain;
 using ChoreMonkey.Events;
 using FileEventStore;
@@ -16,23 +17,14 @@ internal class Handler(IEventStore store)
     public async Task<ChangeMemberStatusResponse?> HandleAsync(ChangeMemberStatusCommand request)
     {
         var streamId = HouseholdAggregate.StreamId(request.HouseholdId);
-        var events = await store.FetchEventsAsync(streamId);
-        
-        // Verify member exists
-        var memberExists = events.OfType<MemberJoinedHousehold>()
-            .Any(m => m.MemberId == request.MemberId);
-        
-        if (!memberExists)
-            return null;
-        
-        var statusChangedEvent = new MemberStatusChanged(
-            request.MemberId,
-            request.HouseholdId,
-            request.Status
-        );
-        
-        await store.AppendToStreamAsync(streamId, statusChangedEvent, ExpectedVersion.Any);
-        
+        var history = (await store.FetchEventsAsync(streamId)).Cast<object>().ToList();
+
+        var decision = ChangeMemberStatusSlice.Decide(history, request);
+        if (!decision.Accepted) return null;
+
+        foreach (var e in decision.Events)
+            await store.AppendToStreamAsync(streamId, (IStoreableEvent)e, ExpectedVersion.Any);
+
         return new ChangeMemberStatusResponse(request.MemberId, request.Status);
     }
 }

@@ -1,3 +1,4 @@
+using ItsyBIT.Decisions;
 using ChoreMonkey.Core.Domain;
 using ChoreMonkey.Core.Security;
 using ChoreMonkey.Events;
@@ -16,34 +17,17 @@ internal class Handler(IEventStore store)
     public async Task<(bool IsAdmin, bool Success)> HandleAsync(SetMemberPinCommand request)
     {
         var streamId = HouseholdAggregate.StreamId(request.HouseholdId);
-        var events = await store.FetchEventsAsync(streamId);
-        
-        var householdCreated = events
-            .OfType<HouseholdCreated>()
-            .FirstOrDefault();
+        var history = (await store.FetchEventsAsync(streamId)).Cast<object>().ToList();
 
-        if (householdCreated == null)
-        {
-            return (false, false);
-        }
+        // The admin PIN is verified here; the new member PIN is only hashed once that has passed.
+        var verified = HouseholdPins.AdminPinMatches(history, request.AdminPinCode);
+        var memberPinHash = verified ? PinHasher.HashPin(request.MemberPinCode) : null;
 
-        // Check for existing admin PIN changes
-        var adminPinChanged = events
-            .OfType<AdminPinChanged>()
-            .LastOrDefault();
-        var currentAdminPinHash = adminPinChanged?.NewPinHash ?? householdCreated.PinHash;
+        var decision = SetMemberPinSlice.Decide(history, request, verified, memberPinHash);
+        if (!decision.Accepted) return (false, false);
 
-        // Verify admin PIN
-        var isAdmin = PinHasher.VerifyPin(request.AdminPinCode, currentAdminPinHash);
-        if (!isAdmin)
-        {
-            return (false, false);
-        }
-
-        // Set new member PIN
-        var memberPinHash = PinHasher.HashPin(request.MemberPinCode);
-        var changeEvent = new MemberPinChanged(request.HouseholdId, memberPinHash);
-        await store.AppendToStreamAsync(streamId, changeEvent, ExpectedVersion.Any);
+        foreach (var e in decision.Events)
+            await store.AppendToStreamAsync(streamId, (IStoreableEvent)e, ExpectedVersion.Any);
 
         return (true, true);
     }

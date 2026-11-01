@@ -16,24 +16,16 @@ internal class Handler(IEventStore store)
     public async Task<GetHouseholdBySlugResponse?> HandleAsync(GetHouseholdBySlugQuery request)
     {
         var slugStreamId = $"household-slug-{request.Slug}";
-        var slugEvents = await store.FetchEventsAsync(slugStreamId);
+        var history = (await store.FetchEventsAsync(slugStreamId)).Cast<object>().ToList();
 
-        var claimed = slugEvents.OfType<SlugClaimed>().FirstOrDefault();
+        var claimed = history.OfType<SlugClaimed>().FirstOrDefault();
         if (claimed == null)
             return null;
 
         var householdStreamId = HouseholdAggregate.StreamId(claimed.HouseholdId);
-        var householdEvents = await store.FetchEventsAsync(householdStreamId);
+        history.AddRange((await store.FetchEventsAsync(householdStreamId)).Cast<object>());
 
-        var householdCreated = householdEvents.OfType<HouseholdCreated>().FirstOrDefault();
-        if (householdCreated == null)
-            return null;
-
-        var memberCount = householdEvents.OfType<MemberJoinedHousehold>().Select(e => e.MemberId).ToHashSet();
-        var removedMembers = householdEvents.OfType<MemberRemoved>().Select(e => e.MemberId).ToHashSet();
-        var activeMemberCount = memberCount.Except(removedMembers).Count();
-
-        return new GetHouseholdBySlugResponse(claimed.HouseholdId, householdCreated.Name, activeMemberCount);
+        return GetHouseholdBySlugView.Project(history);
     }
 }
 

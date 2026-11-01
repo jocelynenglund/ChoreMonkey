@@ -1,4 +1,4 @@
-﻿using ChoreMonkey.Core.Domain;
+using ChoreMonkey.Core.Domain;
 using FileEventStore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -17,20 +17,11 @@ internal class Handler(IEventStore store)
     public async Task<HouseholdNameResponse> HandleAsync(HouseholdNameQuery request)
     {
         var streamId  = HouseholdAggregate.StreamId(request.HouseholdId);
-
-        var events = await store.FetchEventsAsync(streamId);
-
-        var householdCreated = events
-            .OfType<ChoreMonkey.Events.HouseholdCreated>()
-            .FirstOrDefault();
-
-        var slug = events
-            .OfType<ChoreMonkey.Events.HouseholdSlugSet>()
-            .LastOrDefault()?.Slug;
-
-        return new HouseholdNameResponse(request.HouseholdId, householdCreated?.Name ?? "Unknown", slug);
+        var history = (await store.FetchEventsAsync(streamId)).Cast<object>().ToList();
+        return HouseholdNameView.Project(history, request.HouseholdId);
     }
 }
+
 internal static class HouseholdNameEndpoint
 {
 
