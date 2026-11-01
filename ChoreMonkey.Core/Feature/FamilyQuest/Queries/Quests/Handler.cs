@@ -26,59 +26,9 @@ internal class Handler(IEventStore store)
 {
     public async Task<GetQuestsResponse> HandleAsync(GetQuestsQuery request)
     {
-        var events = await store.FetchEventsAsync(ChoreAggregate.StreamId(request.HouseholdId));
-        var today  = DateTime.UtcNow.Date;
-
-        var deletedIds  = events.OfType<ChoreDeleted>().Select(e => e.ChoreId).ToHashSet();
-        var assignments = events.OfType<ChoreAssigned>()
-            .GroupBy(e => e.ChoreId)
-            .ToDictionary(g => g.Key, g => g.Last());
-        var completions = events.OfType<ChoreCompleted>()
-            .Where(c => c.CompletedAt.Date == today)
-            .GroupBy(c => c.ChoreId)
-            .ToDictionary(g => g.Key, g => g.Select(c => c.CompletedByMemberId).ToList());
-
-        var quests = events.OfType<ChoreCreated>()
-            .Where(e => !deletedIds.Contains(e.ChoreId))
-            .Select(e =>
-            {
-                var assignment    = assignments.GetValueOrDefault(e.ChoreId);
-                var todayCompletions = completions.GetValueOrDefault(e.ChoreId) ?? [];
-                var questType     = QuestType(e);
-                var xp            = XpReward(e);
-                var completedToday = todayCompletions.Count > 0;
-
-                return new QuestDto(
-                    e.ChoreId,
-                    e.DisplayName,
-                    e.Description,
-                    questType,
-                    xp,
-                    assignment?.AssignedToMemberIds,
-                    assignment?.AssignToAll ?? false,
-                    completedToday,
-                    todayCompletions);
-            })
-            .ToList();
-
-        return new GetQuestsResponse(quests);
+        var history = (await store.FetchEventsAsync(ChoreAggregate.StreamId(request.HouseholdId))).Cast<object>().ToList();
+        return QuestsView.Project(history, DateTime.UtcNow);
     }
-
-    private static string QuestType(ChoreCreated e) => e.Frequency?.Type switch
-    {
-        "daily"    => "daily",
-        "weekly"   => "weekly",
-        "interval" => "weekly",
-        _          => e.IsOptional ? "bonus" : "boss",
-    };
-
-    private static int XpReward(ChoreCreated e) => e.Frequency?.Type switch
-    {
-        "daily"    => 10,
-        "weekly"   => 25,
-        "interval" => 20,
-        _          => e.IsOptional ? 15 : 50,
-    };
 }
 
 internal static class QuestsEndpoint
