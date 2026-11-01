@@ -1,6 +1,7 @@
 using ChoreMonkey.Core.Domain;
 using ChoreMonkey.Events;
 using FileEventStore;
+using ItsyBIT.Decisions;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -40,23 +41,11 @@ internal class Handler(IEventStore store)
     public async Task<AddChoreResponse> HandleAsync(AddChoreCommand request)
     {
         var streamId = ChoreAggregate.StreamId(request.HouseholdId);
-        
-        // Default to "once" if no frequency specified
-        var frequency = request.Frequency ?? new ChoreFrequency("once");
-        
-        var choreCreated = new ChoreCreated(
-            request.ChoreId, 
-            request.HouseholdId, 
-            request.DisplayName, 
-            request.Description,
-            frequency,
-            request.IsOptional,
-            request.StartDate,
-            request.IsRequired,
-            request.MissedDeduction);
-            
-        await store.AppendToStreamAsync(streamId, choreCreated, ExpectedVersion.Any);
-        
+
+        var decision = AddChoreSlice.Decide([], request);
+        foreach (var e in decision.Events)
+            await store.AppendToStreamAsync(streamId, (IStoreableEvent)e, ExpectedVersion.Any);
+
         return new AddChoreResponse(request.ChoreId);
     }
 }

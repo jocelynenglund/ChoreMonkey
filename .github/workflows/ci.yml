@@ -5,7 +5,7 @@ on:
     branches: [main]
 
 env:
-  DOTNET_VERSION: '9.0.x'
+  DOTNET_VERSION: '10.0.x'
   NODE_VERSION: '22'
 
 jobs:
@@ -35,6 +35,16 @@ jobs:
       - name: Test
         run: dotnet test ChoreMonkey.IntegrationTests --configuration Release --no-build --verbosity normal
 
+      # Given/When/Then specs: no host, HTTP or disk store. Public repo, so PR code stays on GitHub-hosted runners;
+      # off a self-hosted runner the script only summarises the export.
+      - name: Test (Given/When/Then)
+        run: dotnet test ChoreMonkey.Gwt.Tests --configuration Release --no-build --verbosity normal
+        env:
+          GWT_EXPORT: ${{ runner.temp }}/gwt
+
+      - name: Summarise the build book
+        run: python3 -I scripts/save-gwt-export.py --app choremonkey "$RUNNER_TEMP/gwt"
+
   build-frontend:
     runs-on: ubuntu-latest
     
@@ -60,7 +70,8 @@ jobs:
           VITE_API_URL: https://itsybitsylist-api.azurewebsites.net
 
   e2e-tests:
-    runs-on: ubuntu-latest
+    # Pinned: ubuntu-latest is 26.04, where this Playwright can't install chromium.
+    runs-on: ubuntu-24.04
     needs: [test-backend, build-frontend]
     
     steps:

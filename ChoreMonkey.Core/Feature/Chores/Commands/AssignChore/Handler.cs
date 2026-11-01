@@ -1,6 +1,7 @@
 using ChoreMonkey.Core.Domain;
 using ChoreMonkey.Events;
 using FileEventStore;
+using ItsyBIT.Decisions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -23,15 +24,11 @@ internal class Handler(IEventStore store)
     public async Task<AssignChoreResponse> HandleAsync(AssignChoreCommand request)
     {
         var streamId = ChoreAggregate.StreamId(request.HouseholdId);
-        
-        var assignedEvent = new ChoreAssigned(
-            request.ChoreId, 
-            request.HouseholdId, 
-            request.MemberIds,
-            request.AssignToAll);
-            
-        await store.AppendToStreamAsync(streamId, assignedEvent, ExpectedVersion.Any);
-        
+
+        var decision = AssignChoreSlice.Decide([], request);
+        foreach (var e in decision.Events)
+            await store.AppendToStreamAsync(streamId, (IStoreableEvent)e, ExpectedVersion.Any);
+
         return new AssignChoreResponse(request.ChoreId, request.MemberIds, request.AssignToAll);
     }
 }

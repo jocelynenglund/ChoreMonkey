@@ -2,6 +2,7 @@ using ChoreMonkey.Core.Domain;
 using ChoreMonkey.Core.Security;
 using ChoreMonkey.Events;
 using FileEventStore;
+using ItsyBIT.Decisions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -18,55 +19,18 @@ internal class Handler(IEventStore store)
         var householdStreamId = HouseholdAggregate.StreamId(request.HouseholdId);
         var choreStreamId = ChoreAggregate.StreamId(request.HouseholdId);
 
-        var householdEvents = await store.FetchEventsAsync(householdStreamId);
-        var householdCreated = householdEvents
-            .OfType<HouseholdCreated>()
-            .FirstOrDefault();
+        var history = (await store.FetchEventsAsync(householdStreamId)).Cast<object>()
+            .Concat((await store.FetchEventsAsync(choreStreamId)).Cast<object>())
+            .ToList();
 
-        if (householdCreated == null)
-        {
-            return (false, false);
-        }
+        var decision = DeleteChoreSlice.Decide(history, request);
+        if (decision.Kind == ErrorKind.Forbidden) return (false, false);
+        if (!decision.Accepted) return (true, false);
 
-        // Check for admin PIN changes
-        var adminPinChanged = householdEvents
-            .OfType<AdminPinChanged>()
-            .LastOrDefault();
-        var currentAdminPinHash = adminPinChanged?.NewPinHash ?? householdCreated.PinHash;
+        foreach (var e in decision.Events)
+            await store.AppendToStreamAsync(choreStreamId, (IStoreableEvent)e, ExpectedVersion.Any);
 
-        // Verify admin access
-        var isAdmin = PinHasher.VerifyPin(request.PinCode, currentAdminPinHash);
-        if (!isAdmin)
-        {
-            return (false, false);
-        }
-
-        // Check chore exists
-        var choreEvents = await store.FetchEventsAsync(choreStreamId);
-        var choreExists = choreEvents
-            .OfType<ChoreCreated>()
-            .Any(c => c.ChoreId == request.ChoreId);
-
-        if (!choreExists)
-        {
-            return (true, false);
-        }
-
-        // Already deleted?
-        var alreadyDeleted = choreEvents
-            .OfType<ChoreDeleted>()
-            .Any(c => c.ChoreId == request.ChoreId);
-
-        if (alreadyDeleted)
-        {
-            return (true, true); // Already deleted, consider success
-        }
-
-        // Delete the chore
-        var deleteEvent = new ChoreDeleted(request.ChoreId, request.HouseholdId, Guid.Empty);
-        await store.AppendToStreamAsync(choreStreamId, deleteEvent, ExpectedVersion.Any);
-
-        return (true, true);
+        return (true, true); // also when it was deleted already
     }
 }
 
