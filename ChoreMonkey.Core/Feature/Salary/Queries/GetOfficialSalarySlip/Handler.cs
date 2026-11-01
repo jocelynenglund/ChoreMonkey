@@ -38,40 +38,8 @@ internal class Handler(IEventStore store)
     public async Task<OfficialSalarySlipResponse?> HandleAsync(GetOfficialSalarySlipQuery request)
     {
         var streamId = SalaryAggregate.StreamId(request.HouseholdId);
-        var events = await store.FetchEventsAsync(streamId);
-
-        var period = events
-            .OfType<PeriodClosed>()
-            .FirstOrDefault(e => e.PeriodId == request.PeriodId);
-
-        if (period is null)
-            return null;
-
-        var payout = period.Payouts
-            .FirstOrDefault(p => p.MemberId == request.MemberId);
-
-        if (payout is null)
-            return null;
-
-        return new OfficialSalarySlipResponse(
-            period.PeriodId,
-            period.PeriodStart,
-            period.PeriodEnd,
-            payout.Name,
-            payout.BaseSalary,
-            payout.Deductions.Select(d => new DeductionLineDto(
-                d.ChoreName,
-                d.BaseRate,
-                d.Multiplier,
-                d.Amount)).ToList(),
-            payout.Bonuses.Select(b => new BonusLineDto(
-                b.ChoreName,
-                b.BaseRate,
-                b.Multiplier,
-                b.Amount)).ToList(),
-            payout.GrossDeductions,
-            payout.GrossBonuses,
-            payout.NetPay);
+        var history = (await store.FetchEventsAsync(streamId)).Cast<object>().ToList();
+        return OfficialSalarySlipView.Project(history, request.PeriodId, request.MemberId);
     }
 }
 

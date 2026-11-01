@@ -30,25 +30,8 @@ internal class Handler(IEventStore store)
     public async Task<PayoutHistoryResponse> HandleAsync(GetPayoutHistoryQuery request)
     {
         var streamId = SalaryAggregate.StreamId(request.HouseholdId);
-        var events = await store.FetchEventsAsync(streamId);
-
-        var periods = events
-            .OfType<PeriodClosed>()
-            .OrderByDescending(e => e.PeriodEnd)
-            .Select(e => new PeriodSummaryDto(
-                e.PeriodId,
-                e.PeriodStart,
-                e.PeriodEnd,
-                e.Payouts.Select(p => new PayoutSummaryDto(
-                    p.MemberId,
-                    p.Name,
-                    p.BaseSalary,
-                    p.GrossDeductions,
-                    p.GrossBonuses,
-                    p.NetPay)).ToList()))
-            .ToList();
-
-        return new PayoutHistoryResponse(periods);
+        var history = (await store.FetchEventsAsync(streamId)).Cast<object>().ToList();
+        return PayoutHistoryView.Project(history);
     }
 }
 

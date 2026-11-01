@@ -1,6 +1,7 @@
 using ChoreMonkey.Core.Domain;
 using ChoreMonkey.Events;
 using FileEventStore;
+using ItsyBIT.Decisions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -28,14 +29,9 @@ internal class Handler(IEventStore store)
     {
         var streamId = SalaryAggregate.StreamId(request.HouseholdId);
         
-        var ratesEvent = new ChoreRatesSet(
-            request.HouseholdId,
-            request.ChoreId,
-            request.DeductionRate,
-            request.BonusRate,
-            DateTime.UtcNow);
-            
-        await store.AppendToStreamAsync(streamId, ratesEvent, ExpectedVersion.Any);
+        var decision = SetChoreRatesSlice.Decide([], request, DateTime.UtcNow);
+        foreach (var e in decision.Events)
+            await store.AppendToStreamAsync(streamId, (IStoreableEvent)e, ExpectedVersion.Any);
         
         return new SetChoreRatesResponse(
             request.ChoreId,
