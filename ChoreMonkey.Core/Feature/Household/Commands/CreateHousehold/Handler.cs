@@ -1,3 +1,4 @@
+using ItsyBIT.Decisions;
 using ChoreMonkey.Core.Domain;
 using ChoreMonkey.Core.Security;
 using ChoreMonkey.Events;
@@ -15,21 +16,19 @@ internal class Handler(IEventStore store)
 {
     public async Task<CreateHouseholdResponse> HandleAsync(CreateHouseholdCommand request)
     {
+        // Hashing is randomized and slow, so it happens here and the hashes go into Decide.
         var adminPinHash = PinHasher.HashPin(request.PinCode);
-        var memberPinHash = request.MemberPinCode.HasValue 
-            ? PinHasher.HashPin(request.MemberPinCode.Value) 
+        var memberPinHash = request.MemberPinCode.HasValue
+            ? PinHasher.HashPin(request.MemberPinCode.Value)
             : null;
         var memberId = Guid.NewGuid();
-        
-        // Create household and add owner as first member
-        // PinHash = admin PIN, MemberPinHash = optional separate member PIN
-        var householdCreated = new HouseholdCreated(request.HouseholdId, request.Name, adminPinHash, memberPinHash);
-        var memberJoined = new MemberJoinedHousehold(memberId, request.HouseholdId, Guid.Empty, request.OwnerNickname);
-        
+
+        var decision = CreateHouseholdSlice.Decide(new List<object>(), request, adminPinHash, memberPinHash, memberId);
+
         await store.StartStreamAsync(
-            HouseholdAggregate.StreamId(request.HouseholdId), 
-            new IStoreableEvent[] { householdCreated, memberJoined });
-        
+            HouseholdAggregate.StreamId(request.HouseholdId),
+            decision.Events.Cast<IStoreableEvent>().ToArray());
+
         return new CreateHouseholdResponse(request.HouseholdId, memberId, request.Name);
     }
 }

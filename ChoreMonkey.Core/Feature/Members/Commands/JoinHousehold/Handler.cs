@@ -1,3 +1,4 @@
+using ItsyBIT.Decisions;
 using ChoreMonkey.Core.Domain;
 using ChoreMonkey.Core.Security;
 using ChoreMonkey.Events;
@@ -17,26 +18,15 @@ internal class Handler(IEventStore store)
     public async Task<JoinHouseholdResponse?> HandleAsync(JoinHouseholdCommand request)
     {
         var streamId = HouseholdAggregate.StreamId(request.HouseholdId);
-        var events = await store.FetchEventsAsync(streamId);
-        
-        // Verify invite exists and belongs to this household
-        var invite = events.OfType<InviteGenerated>()
-            .FirstOrDefault(e => e.InviteId == request.InviteId);
-        
-        if (invite == null)
-            return null;
-        
-        // Create new member
+        var history = (await store.FetchEventsAsync(streamId)).Cast<object>().ToList();
+
         var memberId = Guid.NewGuid();
-        var memberJoinedEvent = new MemberJoinedHousehold(
-            memberId,
-            request.HouseholdId,
-            request.InviteId,
-            request.Nickname
-        );
-        
-        await store.AppendToStreamAsync(streamId, memberJoinedEvent, ExpectedVersion.Any);
-        
+        var decision = JoinHouseholdSlice.Decide(history, request, memberId);
+        if (!decision.Accepted) return null;
+
+        foreach (var e in decision.Events)
+            await store.AppendToStreamAsync(streamId, (IStoreableEvent)e, ExpectedVersion.Any);
+
         return new JoinHouseholdResponse(memberId, request.HouseholdId, request.Nickname);
     }
 }
