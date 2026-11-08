@@ -48,3 +48,7 @@ claude.md
 **/bin/
 **/obj/
 nuget.config
+
+# Claude Code local settings: personal, never committed
+.claude/settings.local.json
+**/.claude/settings.local.json
