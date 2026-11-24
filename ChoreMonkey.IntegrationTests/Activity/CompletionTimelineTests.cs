@@ -105,7 +105,7 @@ public class CompletionTimelineTests(ApiFixture fixture) : IClassFixture<ApiFixt
     }
 
     [Fact]
-    public async Task GetActivityTimeline_ReturnsAllCompletionsInLast30Days()
+    public async Task GetActivityTimeline_ReturnsAllCompletionsInLast60Days()
     {
         // Arrange - create household with multiple completions
         var createResponse = await _client.PostAsJsonAsync("/api/households", new

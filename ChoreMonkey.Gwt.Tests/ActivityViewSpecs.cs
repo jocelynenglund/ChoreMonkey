@@ -38,6 +38,7 @@ public class ActivityViewSpecs
 
     // Events carry their own time; the views read it from the event, so the specs set it explicitly.
     static string At(DateTime when) => when.ToString("o");
+    static readonly DateTime Jan10 = new(2026, 1, 10, 9, 0, 0, DateTimeKind.Utc);
     static readonly DateTime Feb1 = new(2026, 2, 1, 9, 0, 0, DateTimeKind.Utc);
     static readonly DateTime Mar10 = new(2026, 3, 10, 9, 0, 0, DateTimeKind.Utc);
     static readonly DateTime Mar11 = new(2026, 3, 11, 9, 0, 0, DateTimeKind.Utc);
@@ -48,7 +49,7 @@ public class ActivityViewSpecs
     static readonly DateTime Mar16 = new(2026, 3, 16, 9, 0, 0, DateTimeKind.Utc);
     static readonly DateTime Mar17 = new(2026, 3, 17, 9, 0, 0, DateTimeKind.Utc);
 
-    static readonly ChoreCreated DishesCreatedInFeb = Dishes with { TimestampUtc = At(Feb1) };
+    static readonly ChoreCreated DishesCreatedInJan = Dishes with { TimestampUtc = At(Jan10) };
     static readonly ChoreCreated LaundryCreatedMar14 = Laundry with { TimestampUtc = At(Mar14) };
     static MemberJoinedHousehold JoinedOn(DateTime when, Guid member, string nickname) =>
         new(member, Home, Guid.NewGuid(), nickname) { TimestampUtc = At(when) };
@@ -77,7 +78,7 @@ public class ActivityViewSpecs
     [Fact]
     public void A_completion_says_who_did_which_chore_newest_first() =>
         Activity.Scenario("A completion says who did which chore, newest first")
-            .Given(DishesCreatedInFeb, AnnJoinedOn(Mar10), Done(DishesId, Ann, Mar16), Done(DishesId, Ann, Mar17))
+            .Given(DishesCreatedInJan, AnnJoinedOn(Mar10), Done(DishesId, Ann, Mar16), Done(DishesId, Ann, Mar17))
             .ThenView("Completion Timeline", Timeline, new
             {
                 activities = new object[]
@@ -91,7 +92,7 @@ public class ActivityViewSpecs
     [Fact]
     public void A_chore_for_everyone_says_so() =>
         Activity.Scenario("A chore for everyone says so")
-            .Given(DishesCreatedInFeb, AssignedToAllOn(Mar16, DishesId))
+            .Given(DishesCreatedInJan, AssignedToAllOn(Mar16, DishesId))
             .ThenView("Completion Timeline", Timeline, new
             {
                 activities = new[] { new { type = "assignment", description = "Dishes assigned to everyone", choreId = DishesId } },
@@ -100,7 +101,7 @@ public class ActivityViewSpecs
     [Fact]
     public void An_assignment_names_who_it_is_for() =>
         Activity.Scenario("An assignment names who it is for")
-            .Given(DishesCreatedInFeb, AnnJoinedOn(Mar10), BobJoinedOn(Mar11), AssignedOn(Mar16, DishesId, Ann, Bob))
+            .Given(DishesCreatedInJan, AnnJoinedOn(Mar10), BobJoinedOn(Mar11), AssignedOn(Mar16, DishesId, Ann, Bob))
             .ThenView("Completion Timeline", Timeline, new
             {
                 activities = new object[]
@@ -114,7 +115,7 @@ public class ActivityViewSpecs
     [Fact]
     public void A_chore_with_nobody_on_it_says_it_is_unassigned() =>
         Activity.Scenario("A chore with nobody on it says it is unassigned")
-            .Given(DishesCreatedInFeb, new ChoreAssigned(DishesId, Home, null, false) { TimestampUtc = At(Mar16) })
+            .Given(DishesCreatedInJan, new ChoreAssigned(DishesId, Home, null, false) { TimestampUtc = At(Mar16) })
             .ThenView("Completion Timeline", Timeline, new
             {
                 activities = new[] { new { type = "assignment", description = "Dishes unassigned" } },
@@ -123,7 +124,7 @@ public class ActivityViewSpecs
     [Fact]
     public void A_name_change_shows_in_the_timeline_and_on_later_completions() =>
         Activity.Scenario("A name change shows in the timeline and on later completions")
-            .Given(DishesCreatedInFeb, AnnJoinedOn(Mar10), new MemberNicknameChanged(Ann, Home, "Ann", "Annie") { TimestampUtc = At(Mar12) }, Done(DishesId, Ann, Mar17))
+            .Given(DishesCreatedInJan, AnnJoinedOn(Mar10), new MemberNicknameChanged(Ann, Home, "Ann", "Annie") { TimestampUtc = At(Mar12) }, Done(DishesId, Ann, Mar17))
             .ThenView("Completion Timeline", Timeline, new
             {
                 activities = new object[]
@@ -171,12 +172,16 @@ public class ActivityViewSpecs
             });
 
     [Fact]
-    public void Activity_older_than_thirty_days_is_left_out() =>
-        Activity.Scenario("Activity older than thirty days is left out")
-            .Given(DishesCreatedInFeb, AnnJoinedOn(Feb1), Done(DishesId, Ann, Feb1), Done(DishesId, Ann, Mar16))
+    public void Activity_older_than_sixty_days_is_left_out() =>
+        Activity.Scenario("Activity older than sixty days is left out")
+            .Given(DishesCreatedInJan, AnnJoinedOn(Jan10), Done(DishesId, Ann, Jan10), Done(DishesId, Ann, Feb1), Done(DishesId, Ann, Mar16))
             .ThenView("Completion Timeline", Timeline, new
             {
-                activities = new[] { new { type = "completion", description = "Ann completed Dishes" } },
+                activities = new[]
+                {
+                    new { type = "completion", description = "Ann completed Dishes" },
+                    new { type = "completion", description = "Ann completed Dishes" },
+                },
             });
 
     [Fact]
@@ -191,7 +196,7 @@ public class ActivityViewSpecs
     [Fact]
     public void An_event_with_an_unreadable_time_is_left_out() =>
         Activity.Scenario("An event with an unreadable time is left out")
-            .Given(DishesCreatedInFeb, new ChoreAssigned(DishesId, Home, null, true) { TimestampUtc = "not a date" })
+            .Given(DishesCreatedInJan, new ChoreAssigned(DishesId, Home, null, true) { TimestampUtc = "not a date" })
             .ThenView("Completion Timeline", Timeline, new { activities = Array.Empty<object>() });
 
     // ── Team Overview ────────────────────────────────────────────────────────
