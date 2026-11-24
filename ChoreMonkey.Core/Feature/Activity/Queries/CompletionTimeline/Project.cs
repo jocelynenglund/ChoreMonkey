@@ -2,12 +2,12 @@ using ChoreMonkey.Events;
 
 namespace ChoreMonkey.Core.Feature.Activity.Queries.CompletionTimeline;
 
-/// <summary>The completion timeline (the last 30 days of household activity), folded from the events by the slice itself.</summary>
+/// <summary>The completion timeline (the last 60 days of household activity), folded from the events by the slice itself.</summary>
 public static class CompletionTimelineView
 {
     public static GetCompletionTimelineResponse Project(IReadOnlyList<object> history, DateTime now)
     {
-        var cutoff = now.AddDays(-30);
+        var cutoff = now.AddDays(-60);
 
         var choreNames = history
             .OfType<ChoreCreated>()

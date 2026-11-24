@@ -105,7 +105,7 @@ export function CompletionTimeline({ householdId }: CompletionTimelineProps) {
       <div className="p-4 border-b">
         <h3 className="font-semibold flex items-center gap-2">
           <Clock className="h-5 w-5 text-primary" />
-          Activity — Last 30 Days
+          Activity — Last 60 Days
         </h3>
       </div>
       <div className="divide-y max-h-80 overflow-y-auto">
