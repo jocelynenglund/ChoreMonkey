@@ -378,7 +378,7 @@ public class DisplayLinksTests(ApiFixture fixture) : IClassFixture<ApiFixture>
     }
 
     [Fact]
-    public async Task Without_a_seal_key_a_link_cant_be_made()
+    public async Task Without_a_seal_key_setting_a_key_is_made_once_in_the_vault_and_links_can_be_copied()
     {
         var dataPath = Path.Combine(Path.GetTempPath(), $"choremonkey-nokey-{Guid.NewGuid():N}");
         Directory.CreateDirectory(dataPath);
@@ -400,8 +400,15 @@ public class DisplayLinksTests(ApiFixture fixture) : IClassFixture<ApiFixture>
             var householdId = (await created.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("householdId").GetString();
 
             var response = await client.SendAsync(Admin(HttpMethod.Post, $"/api/households/{householdId}/display-links", new { label = "x" }));
-            Assert.Equal(HttpStatusCode.ServiceUnavailable, response.StatusCode);
-            Assert.Contains("Display links aren't set up here yet.", await response.Content.ReadAsStringAsync());
+            Assert.True(response.IsSuccessStatusCode, await response.Content.ReadAsStringAsync());
+            var made = (await response.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("url").GetString()!;
+            var keyFile = Path.Combine(dataPath, "display-links", "seal.key");
+            Assert.True(File.Exists(keyFile));
+            Assert.DoesNotContain(made.Split('/').Last(), await File.ReadAllTextAsync(keyFile));
+
+            // The same key next time: the link can still be copied.
+            var listed = await client.SendAsync(Admin(HttpMethod.Get, $"/api/households/{householdId}/display-links", null));
+            Assert.Contains(made, await listed.Content.ReadAsStringAsync());
         }
         finally
         {
