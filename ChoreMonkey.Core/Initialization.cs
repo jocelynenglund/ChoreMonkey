@@ -65,6 +65,15 @@ using ChoreMonkey.Core.Feature.Salary.Queries.GetPayoutHistory;
 using ChoreMonkey.Core.Feature.Salary.Queries.GetOfficialSalarySlip;
 using ChoreMonkey.Core.Feature.Salary.Queries.GetAvailablePeriods;
 
+// DisplayLinks module
+using ChoreMonkey.Core.Feature.DisplayLinks;
+using ChoreMonkey.Core.Feature.DisplayLinks.Commands.MakeDisplayLink;
+using ChoreMonkey.Core.Feature.DisplayLinks.Commands.RevokeDisplayLink;
+using ChoreMonkey.Core.Feature.DisplayLinks.Queries.DisplayLinks;
+using ChoreMonkey.Core.Feature.DisplayLinks.Queries.DisplayToday;
+using ChoreMonkey.Core.Feature.DisplayLinks.Queries.DisplayLately;
+using ChoreMonkey.Core.Feature.DisplayLinks.Public;
+
 using ChoreMonkey.Core.Infrastructure;
 using ChoreMonkey.Core.Infrastructure.SignalR;
 using ChoreMonkey.Core.Security;
@@ -197,6 +206,16 @@ public static class Initialization
         services.AddScoped<Feature.Salary.Queries.GetOfficialSalarySlip.Handler>();
         services.AddScoped<Feature.Salary.Queries.GetAvailablePeriods.Handler>();
 
+        // DisplayLinks module
+        services.AddSingleton<DisplayLinkVault>();
+        services.AddSingleton<DisplaySettings>();
+        services.AddScoped<Feature.DisplayLinks.Commands.MakeDisplayLink.Handler>();
+        services.AddScoped<Feature.DisplayLinks.Commands.RevokeDisplayLink.Handler>();
+        services.AddScoped<Feature.DisplayLinks.Queries.DisplayLinks.Handler>();
+        services.AddScoped<Feature.DisplayLinks.Queries.DisplayToday.Handler>();
+        services.AddScoped<Feature.DisplayLinks.Queries.DisplayLately.Handler>();
+        services.AddScoped<DisplayPublicEndpoints.Resolver>();
+
         return services;
     }
 
@@ -263,6 +282,14 @@ public static class Initialization
         GetPayoutHistoryEndpoint.Map(householdEndpoints);
         GetOfficialSalarySlipEndpoint.Map(householdEndpoints);
         GetAvailablePeriodsEndpoint.Map(householdEndpoints);
+
+        // DisplayLinks module
+        MakeDisplayLinkEndpoint.Map(householdEndpoints);
+        RevokeDisplayLinkEndpoint.Map(householdEndpoints);
+        DisplayLinksEndpoint.Map(householdEndpoints);
+        DisplayTodayEndpoint.Map(householdEndpoints);
+        DisplayLatelyEndpoint.Map(householdEndpoints);
+        app.MapDisplayLinks();
 
         // Auth module
         WhoAmIEndpoint.Map(householdEndpoints);

@@ -427,6 +427,18 @@ The Vite dev server proxies API requests. Configure the target URL in `vite.conf
 |---|---|---|
 | `EVENTSTORE_PATH` | Path for JSON event files | `./data` |
 | `ASPNETCORE_URLS` | Listening addresses | `http://+:8080` |
+| `Display__SealKey` | Secret that seals display-link addresses on disk (AES-GCM, HKDF). Without it, making a link answers 503 "Display links aren't set up here yet." | none |
+| `Display__StorePath` | Folder for the sealed links | `$EVENTSTORE_PATH/display-links` |
+| `Display__PublicBaseUrl` | Where `/display/{token}` lives | `https://itsybitsylist-api.azurewebsites.net` |
+| `Display__HouseholdBaseUrl` | The web app, for `householdUrl` | `https://choremonkey.itsybit.se` |
+
+### Display links ("Shared with barrio")
+An admin makes a link (`POST /api/households/{id}/display-links`, admin PIN in `X-Pin-Code`) and can copy it again any time
+(`GET`) or revoke it (`DELETE .../display-links/{linkId}`). The link, `https://<api>/display/{token}`, shows a connected
+screen such as barrio today's chores (`/today`), the last 40 days (`/lately`) and a small page (no suffix). It is
+read-only and never carries pay or money. The token is kept sealed in its own folder, never in an event; the events say
+only that a link was made or revoked. The Activity tab shows the same two views via
+`GET /api/households/{id}/display/today` and `/display/lately`.
 
 ---
 

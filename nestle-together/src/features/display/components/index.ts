@@ -1,0 +1,1 @@
+export { SharedWithBarrio } from './SharedWithBarrio';

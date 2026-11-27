@@ -1,6 +1,7 @@
 using FileEventStore;
 using FileEventStore.Session;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -24,12 +25,20 @@ public class ApiFixture : IAsyncLifetime
         Directory.CreateDirectory(_tempDataPath);
     }
 
+    /// <summary>Settings for the display links: a seal key, and a vault inside the temp data folder.</summary>
+    public static Dictionary<string, string?> DisplayConfig(string dataPath) => new()
+    {
+        ["Display:SealKey"] = "integration-tests-seal-key-not-a-secret",
+        ["Display:StorePath"] = Path.Combine(dataPath, "display-links"),
+    };
+
     public ValueTask InitializeAsync()
     {
         _factory = new WebApplicationFactory<Program>()
             .WithWebHostBuilder(builder =>
             {
                 builder.UseEnvironment("Testing");
+                builder.ConfigureAppConfiguration((_, config) => config.AddInMemoryCollection(DisplayConfig(_tempDataPath)));
                 builder.ConfigureServices(services =>
                 {
                     // Remove the existing EventStore registration
