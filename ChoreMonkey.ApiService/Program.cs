@@ -61,6 +61,18 @@ if (!builder.Environment.IsDevelopment() && !builder.Environment.IsEnvironment("
                     QueueLimit = 0
                 }));
         
+        // Display links (a connected screen reading a household): 60 requests per minute per token
+        options.AddPolicy("display", httpContext =>
+            RateLimitPartition.GetFixedWindowLimiter(
+                partitionKey: httpContext.Request.RouteValues["token"]?.ToString()
+                    ?? httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                factory: _ => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = 60,
+                    Window = TimeSpan.FromMinutes(1),
+                    QueueLimit = 0
+                }));
+
         // General API: 100 requests per minute per IP
         options.AddPolicy("api", httpContext =>
             RateLimitPartition.GetFixedWindowLimiter(

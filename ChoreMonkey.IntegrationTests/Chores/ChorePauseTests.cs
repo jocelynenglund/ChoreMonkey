@@ -165,9 +165,12 @@ public class ChorePauseTests(ApiFixture fixture)
         var choreId = await CreateDailyChore(household.HouseholdId, "Sweep Floor", startDaysAgo: 40, deduction: 10);
         await AssignChore(household.HouseholdId, choreId, kid.MemberId);
 
-        // Sanity: without a pause the preview shows deductions
+        // Sanity: without a pause the preview shows deductions, once the current period has full past days to miss.
+        // Early in a period there is nothing missed yet, so the check failed on those dates only (seen 2026-11-27); the
+        // test's point is the pause below, which holds on every date.
         var before = await GetCurrentPeriod(household.HouseholdId);
-        before.Members.First(m => m.MemberId == kid.MemberId).Deductions.Should().BeGreaterThan(0);
+        if (before.PeriodStart.Date <= DateTime.UtcNow.Date.AddDays(-2))
+            before.Members.First(m => m.MemberId == kid.MemberId).Deductions.Should().BeGreaterThan(0);
 
         // Pause across the whole current period
         await PauseChore(household.HouseholdId, choreId, DateTime.UtcNow.Date.AddDays(-40), DateTime.UtcNow.Date);

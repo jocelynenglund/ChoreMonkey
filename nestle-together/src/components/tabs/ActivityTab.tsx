@@ -1,4 +1,6 @@
 import { CompletionTimeline } from '@/components/CompletionTimeline';
+import { SharedWithBarrio } from '@/features/display';
+import { useHouseholdStore } from '@/stores/householdStore';
 
 interface ActivityTabProps {
   householdId: string;
@@ -6,5 +8,12 @@ interface ActivityTabProps {
 }
 
 export function ActivityTab({ householdId, refreshKey }: ActivityTabProps) {
-  return <CompletionTimeline key={refreshKey} householdId={householdId} />;
+  const { isAdmin, currentPinCode } = useHouseholdStore();
+
+  return (
+    <div className="space-y-6">
+      <SharedWithBarrio householdId={householdId} refreshKey={refreshKey} isAdmin={isAdmin} adminPin={currentPinCode} />
+      <CompletionTimeline key={refreshKey} householdId={householdId} />
+    </div>
+  );
 }
