@@ -11,8 +11,8 @@ public record DisplayTodayResponse(string HouseholdName, string Day, string Hous
 /// <summary>
 /// The Display Today view: what the household's own screens put on today's list, for a connected screen. It is each
 /// active member's "my chores" (what is still to do this period is open; what was done today is done), merged by
-/// chore: a chore for several people is listed once, done when anyone did it today. A chore nobody has, or that was
-/// deleted, is not listed. "Now" is the household's local time (Stockholm). No pay or money is ever in it.
+/// chore: a chore for several people is listed once, done when anyone did it today. Only required chores (required and
+/// not optional; owner, 2026-11-28). A chore nobody has, or that was deleted, is not listed. "Now" is the household's local time (Stockholm). No pay or money is ever in it.
 /// </summary>
 public static class DisplayTodayView
 {
@@ -24,15 +24,25 @@ public static class DisplayTodayView
         var members = DisplayMembers.Active(history);
         var byChore = new Dictionary<Guid, DisplayChore>();
 
+        // Owner, 2026-11-28: "maybe the today should just have required chores". A chore's flags as they stand now:
+        // required and not optional, else it stays off the list.
+        var required = new Dictionary<Guid, bool>();
+        foreach (var e in history)
+        {
+            if (e is ChoreCreated c) required[c.ChoreId] = c.IsRequired && !c.IsOptional;
+            else if (e is ChoreUpdated u) required[u.ChoreId] = u.IsRequired && !u.IsOptional;
+        }
+        bool IsRequired(Guid choreId) => required.TryGetValue(choreId, out var r) && r;
+
         foreach (var (memberId, nickname) in members)
         {
             var mine = MyChoresView.Project(history, memberId, now);
             if (mine == null) continue;
 
-            foreach (var open in mine.Pending)
+            foreach (var open in mine.Pending.Where(p => IsRequired(p.ChoreId)))
                 byChore.TryAdd(open.ChoreId, new DisplayChore(open.ChoreId, open.DisplayName, "open", null));
 
-            foreach (var done in mine.Completed.Where(c => DisplayClock.LocalDay(c.CompletedAt) == now.Date))
+            foreach (var done in mine.Completed.Where(c => IsRequired(c.ChoreId) && DisplayClock.LocalDay(c.CompletedAt) == now.Date))
                 byChore[done.ChoreId] = new DisplayChore(done.ChoreId, done.DisplayName, "done", done.CompletedByName ?? nickname);
         }
 
