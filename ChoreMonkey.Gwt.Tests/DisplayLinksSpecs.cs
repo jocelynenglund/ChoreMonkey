@@ -191,6 +191,29 @@ public class DisplayLinksSpecs
             .Given(Created, Joined(Ann, "Ann"), Dishes, AssignedTo(DishesId, Ann), new ChoreDeleted(DishesId, Home, Ann))
             .ThenView("Display Today", Today, new { chores = Array.Empty<object>() });
 
+    // Owner, 2026-11-28: "maybe the today should just have required chores". Optional and not-required chores stay off it.
+    static readonly ChoreCreated BinsOptional = new(BinsId, Home, "Bins", "Take out the bins", new ChoreFrequency("daily"), IsOptional: true, StartDate: new DateTime(2026, 3, 1));
+    static readonly ChoreCreated BinsNotRequired = new(BinsId, Home, "Bins", "Take out the bins", new ChoreFrequency("daily"), StartDate: new DateTime(2026, 3, 1), IsRequired: false);
+
+    [Fact]
+    public void An_optional_chore_is_not_on_the_list() =>
+        Display.Scenario("An optional chore is not on the list")
+            .Given(Created, Joined(Ann, "Ann"), Dishes, AssignedTo(DishesId, Ann), BinsOptional, AssignedTo(BinsId, Ann))
+            .ThenView("Display Today", Today, new { chores = new object[] { new { choreId = DishesId, title = "Dishes", state = "open" } } });
+
+    [Fact]
+    public void A_chore_that_is_not_required_is_not_on_the_list() =>
+        Display.Scenario("A chore that is not required is not on the list")
+            .Given(Created, Joined(Ann, "Ann"), Dishes, AssignedTo(DishesId, Ann), BinsNotRequired, AssignedTo(BinsId, Ann))
+            .ThenView("Display Today", Today, new { chores = new object[] { new { choreId = DishesId, title = "Dishes", state = "open" } } });
+
+    [Fact]
+    public void A_chore_made_optional_later_leaves_the_list() =>
+        Display.Scenario("A chore made optional later leaves the list")
+            .Given(Created, Joined(Ann, "Ann"), Dishes, AssignedTo(DishesId, Ann),
+                new ChoreUpdated(DishesId, Home, "Dishes", "Wash up", new ChoreFrequency("daily"), true, new DateTime(2026, 3, 1), true, 10m))
+            .ThenView("Display Today", Today, new { chores = Array.Empty<object>() });
+
     // ── Display Lately ───────────────────────────────────────────────────────
 
     // A flat summary of the 40 days: the first and last day, and per person the total, today's count and day count.
